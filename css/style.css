@@ -2011,102 +2011,98 @@ body {
 }
 
 /* --------------------------------------------------------
-   2. FİZİKSEL DEĞİŞİM: KIRILMA, ÇATLAMA & KRİSTAL DAĞILMA
+   2. FİZİKSEL DEĞİŞİM: FAZ DEĞİŞİMİ, BUZUL KRİSTALLENME & MOLEKÜLER AKIŞ
    -------------------------------------------------------- */
-.phy-shatter-layer {
+.phy-phase-layer {
   position: absolute;
   inset: 0;
   pointer-events: none;
   overflow: hidden;
   z-index: 1;
+  border-radius: inherit;
 }
 
-/* Çatlak Çizgileri SVG */
-.crack-svg-wrap {
+/* Faz Geçiş Dalgası (Melting & Freezing Fluid/Frost Wave) */
+.phase-wave {
+  position: absolute;
+  top: -50%;
+  left: -100%;
+  width: 250%;
+  height: 200%;
+  background: radial-gradient(ellipse at center, rgba(186, 230, 253, 0.45) 0%, rgba(56, 189, 248, 0.22) 40%, transparent 70%);
+  transform: rotate(-25deg);
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.8s ease;
+}
+
+/* Buz Parıltı Kaplaması */
+.frost-glaze {
   position: absolute;
   inset: 0;
-  pointer-events: none;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(125, 211, 252, 0.1) 50%, transparent 100%);
   opacity: 0;
-  transition: opacity 0.2s;
-}
-.crack-svg {
-  width: 100%;
-  height: 100%;
-}
-.crack-path {
-  fill: none;
-  stroke: #7ed0ff;
-  stroke-width: 2.2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  filter: drop-shadow(0 0 5px #38bdf8);
-  stroke-dasharray: 240;
-  stroke-dashoffset: 240;
-  transition: stroke-dashoffset 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.3s ease;
 }
 
-/* Kristal / Buz Parçacıkları (Shards) - Dağılma (Dispersion) */
-.phy-shard {
+/* Moleküler Faz Düğümleri (Kimliği değişmeden hareket eden molekül temsilleri) */
+.phase-node {
   position: absolute;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.75) 0%, rgba(126, 208, 255, 0.4) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 0 8px rgba(126, 208, 255, 0.6);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffffff 20%, #38bdf8 80%);
+  box-shadow: 0 0 8px #7dd3fc, inset 0 0 2px #fff;
   opacity: 0;
-  pointer-events: none;
-  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.25s;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
 }
-.shard-1 {
-  top: 6px;
-  left: 8px;
-  width: 18px;
-  height: 18px;
-  clip-path: polygon(0% 0%, 100% 20%, 65% 100%, 0% 70%);
-}
-.shard-2 {
-  top: 6px;
-  right: 8px;
-  width: 20px;
-  height: 16px;
-  clip-path: polygon(30% 0%, 100% 0%, 100% 80%, 0% 100%);
-}
-.shard-3 {
-  bottom: 8px;
-  left: 10px;
-  width: 16px;
-  height: 20px;
-  clip-path: polygon(0% 20%, 80% 0%, 100% 100%, 20% 85%);
-}
-.shard-4 {
-  bottom: 8px;
-  right: 10px;
-  width: 22px;
-  height: 18px;
-  clip-path: polygon(25% 10%, 100% 30%, 80% 100%, 0% 90%);
-}
+.pn-1 { top: 18%; left: 16%; }
+.pn-2 { top: 22%; right: 18%; width: 6px; height: 6px; }
+.pn-3 { bottom: 20%; left: 24%; width: 7px; height: 7px; }
+.pn-4 { bottom: 24%; right: 22%; }
 
-/* HOVER: Üzerine gelindiğinde çatlama yayılır, kristal parçalar dışa doğru dağılır */
+/* Kristal / Kırağı Parıltıları */
+.phase-spark {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: radial-gradient(circle, #ffffff 10%, rgba(56, 189, 248, 0.8) 50%, transparent 70%);
+  clip-path: polygon(50% 0%, 65% 35%, 100% 50%, 65% 65%, 50% 100%, 35% 65%, 0% 50%, 35% 35%);
+  opacity: 0;
+  transition: all 0.4s ease;
+}
+.psp-1 { top: 12px; right: 34px; }
+.psp-2 { bottom: 12px; left: 32px; transform: scale(0.8); }
+
+/* HOVER: Dalgayla süzülen buzul kristal akışı */
 .btn-type-phy:hover {
   border-color: #38bdf8;
-  background: rgba(56, 189, 248, 0.12);
-  box-shadow: 0 6px 20px rgba(56, 189, 248, 0.35);
+  background: rgba(14, 165, 233, 0.14);
+  box-shadow: 0 8px 24px rgba(56, 189, 248, 0.35);
   transform: translateY(-2px);
 }
-.btn-type-phy:hover .crack-svg-wrap {
+.btn-type-phy:hover .phase-wave {
+  opacity: 1;
+  transform: rotate(-25deg) translateX(45%);
+}
+.btn-type-phy:hover .frost-glaze {
   opacity: 1;
 }
-.btn-type-phy:hover .crack-path {
-  stroke-dashoffset: 0;
-}
-.btn-type-phy:hover .phy-shard {
+.btn-type-phy:hover .phase-node {
   opacity: 0.9;
 }
-.btn-type-phy:hover .shard-1 { transform: translate(-6px, -5px) rotate(-14deg); }
-.btn-type-phy:hover .shard-2 { transform: translate(7px, -4px) rotate(16deg); }
-.btn-type-phy:hover .shard-3 { transform: translate(-5px, 6px) rotate(-12deg); }
-.btn-type-phy:hover .shard-4 { transform: translate(6px, 6px) rotate(15deg); }
-.btn-type-phy:hover .phy-emoji { animation: phyIceTremor 0.4s infinite ease-in-out; }
+.btn-type-phy:hover .pn-1 { transform: translate(-4px, -3px) scale(1.15); }
+.btn-type-phy:hover .pn-2 { transform: translate(5px, -4px) scale(1.2); }
+.btn-type-phy:hover .pn-3 { transform: translate(-3px, 4px) scale(1.1); }
+.btn-type-phy:hover .pn-4 { transform: translate(4px, 4px) scale(1.25); }
+.btn-type-phy:hover .phase-spark {
+  opacity: 0.85;
+  animation: phySparkGleam 1.2s infinite ease-in-out;
+}
+.btn-type-phy:hover .phy-emoji {
+  animation: phyIceFloat 1.6s infinite ease-in-out;
+}
 
-/* TIKLANDIĞINDA / AKTİF DURUMDA: Kristal kırılma şoku, donma nabzı */
+/* AKTİF / SEÇİLİ: Kristallenmiş faz görünümü */
 .btn-type-phy.active-phy, .btn-type-phy.phy-clicked {
   background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
   border-color: #bae6fd !important;
@@ -2115,31 +2111,45 @@ body {
   box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.55), 0 8px 26px rgba(2, 132, 199, 0.55) !important;
   animation: phyCrystalPulse 2.4s infinite ease-in-out;
 }
-.btn-type-phy.active-phy .type-sub-desc {
-  color: #e0f2fe;
+.btn-type-phy.active-phy .phase-wave {
+  opacity: 0.7;
+  transform: rotate(-25deg) translateX(60%);
+  animation: phyWaveLoop 3s infinite linear;
 }
-.btn-type-phy.active-phy .crack-svg-wrap {
-  opacity: 0.85;
+.btn-type-phy.active-phy .frost-glaze {
+  opacity: 1;
 }
-.btn-type-phy.active-phy .crack-path {
-  stroke-dashoffset: 0;
-  stroke: #ffffff;
-  filter: drop-shadow(0 0 6px #7ed0ff);
+.btn-type-phy.active-phy .phase-node {
+  opacity: 1;
+  animation: phyNodeOrbit 2.8s infinite ease-in-out;
 }
-.btn-type-phy.active-phy .phy-shard {
-  opacity: 0.85;
+.btn-type-phy.active-phy .phase-spark {
+  opacity: 1;
+  animation: phySparkGleam 0.9s infinite ease-in-out;
 }
-.btn-type-phy.active-phy .shard-1 { transform: translate(-8px, -6px) rotate(-18deg); }
-.btn-type-phy.active-phy .shard-2 { transform: translate(9px, -5px) rotate(20deg); }
-.btn-type-phy.active-phy .shard-3 { transform: translate(-7px, 7px) rotate(-15deg); }
-.btn-type-phy.active-phy .shard-4 { transform: translate(8px, 8px) rotate(18deg); }
-.btn-type-phy.active-phy .phy-emoji { animation: phyIceFreeze 2.2s infinite ease-in-out; }
+.btn-type-phy.active-phy .phy-emoji {
+  animation: phyIceFreeze 2.2s infinite ease-in-out;
+}
 
-@keyframes phyIceTremor {
-  0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  25% { transform: translate(-1.5px, 1px) rotate(-3deg); }
-  50% { transform: translate(1.5px, -1px) rotate(3deg); }
-  75% { transform: translate(-1px, -1.5px) rotate(-2deg); }
+@keyframes phyIceFloat {
+  0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 4px rgba(56,189,248,0.7)); }
+  50% { transform: translateY(-3px) scale(1.1); filter: drop-shadow(0 0 8px rgba(186,230,253,1)); }
+}
+
+@keyframes phySparkGleam {
+  0%, 100% { transform: scale(0.8) rotate(0deg); opacity: 0.4; }
+  50% { transform: scale(1.25) rotate(45deg); opacity: 1; filter: drop-shadow(0 0 6px #fff); }
+}
+
+@keyframes phyWaveLoop {
+  0% { transform: rotate(-25deg) translateX(10%); }
+  50% { transform: rotate(-25deg) translateX(70%); }
+  100% { transform: rotate(-25deg) translateX(10%); }
+}
+
+@keyframes phyNodeOrbit {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(3px, -3px) scale(1.15); filter: drop-shadow(0 0 6px #fff); }
 }
 
 @keyframes phyCrystalPulse {
@@ -2157,6 +2167,102 @@ body {
   0%, 100% { transform: rotate(0deg) scale(1); filter: drop-shadow(0 0 2px rgba(255,255,255,0.6)); }
   25% { transform: rotate(-6deg) scale(1.08); filter: drop-shadow(0 0 6px rgba(126,208,255,0.9)); }
   75% { transform: rotate(6deg) scale(1.08); filter: drop-shadow(0 0 6px rgba(126,208,255,0.9)); }
+}
+
+/* Genel Pedagojik İpucu Kutusu */
+.pedagogical-hint-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  background: var(--md-sys-color-surface-container);
+  border: 1px dashed var(--md-sys-color-outline-variant);
+  border-radius: 12px;
+  padding: 0.55rem 0.85rem;
+  margin-top: 0.5rem;
+}
+.hint-bullet {
+  font-size: 0.95rem;
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+.hint-text {
+  font-size: 0.73rem;
+  color: var(--md-sys-color-on-surface-variant);
+  line-height: 1.45;
+}
+.hint-text strong {
+  color: var(--md-sys-color-primary);
+}
+
+/* Belirgin Tespit Kartları (Madde 3: Kontrol Et Sonuç Panelleri) */
+.verdict-banner-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 0.85rem 1.15rem;
+  border-radius: 16px;
+  border: 1.5px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.verdict-row-success {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.45);
+}
+.verdict-row-danger {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.45);
+}
+.verdict-row-warning {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.45);
+}
+
+.verdict-row-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+.verdict-row-success .verdict-row-icon {
+  background: var(--md-sys-color-success);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+}
+.verdict-row-danger .verdict-row-icon {
+  background: var(--md-sys-color-error);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+}
+.verdict-row-warning .verdict-row-icon {
+  background: #f59e0b;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+}
+
+.verdict-row-info {
+  flex: 1;
+  min-width: 0;
+}
+.verdict-row-title {
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.2rem;
+}
+.verdict-row-success .verdict-row-title { color: #10b981; }
+.verdict-row-danger .verdict-row-title { color: #ef4444; }
+.verdict-row-warning .verdict-row-title { color: #f59e0b; }
+
+.verdict-row-text {
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--md-sys-color-on-surface);
 }
 
 /* Submit Action Button */

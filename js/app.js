@@ -12,6 +12,8 @@
   var state = {
     cases: window.CASES_DATA || [],
     records: loadRecords(),
+    draftObservations: {},
+    draftReasonings: {},
     activeCase: null,
     selectedClueIds: [],
     selectedType: null,
@@ -31,7 +33,6 @@
         return true;
       }
     })(),
-    modalActiveTab: 'feedback', // 'feedback' or 'molecular'
     studentName: 'Öğrenci Dedektif',
     studentClass: 'Lise Kimya'
   };
@@ -77,6 +78,8 @@
     try {
       localStorage.removeItem(STORAGE_KEY);
       state.records = {};
+      state.draftObservations = {};
+      state.draftReasonings = {};
       state.activeCase = null;
       render();
     } catch (e) {
@@ -126,9 +129,13 @@
     if (!isTypeCorrect) {
       return {
         status: 'incorrect',
-        title: 'Gözlemini ve Kararını Yeniden Değerlendir',
+        title: 'Değişim Türü Hatalı',
         message: cItem.feedbacks.incorrect,
-        score: 25
+        score: 25,
+        isTypeCorrect: false,
+        hasObs: hasObs,
+        hasRea: hasRea,
+        isShallowOrTrap: false
       };
     }
 
@@ -199,9 +206,13 @@
     if (!isWellFormed) {
       return {
         status: 'incomplete',
-        title: 'Kararın Doğru Yönde, Gerekçeni Tamamla',
+        title: 'Kararın Doğru, Gerekçeni Tamamla',
         message: cItem.feedbacks.incomplete,
-        score: 65
+        score: 65,
+        isTypeCorrect: true,
+        hasObs: hasObs,
+        hasRea: hasRea,
+        isShallowOrTrap: isShallowOrTrap
       };
     }
 
@@ -209,7 +220,11 @@
       status: 'correct',
       title: 'Doğru Karar ve Eksiksiz Gözlem',
       message: cItem.feedbacks.correct,
-      score: 100
+      score: 100,
+      isTypeCorrect: true,
+      hasObs: hasObs,
+      hasRea: hasRea,
+      isShallowOrTrap: isShallowOrTrap
     };
   }
 
@@ -389,28 +404,21 @@
     bindEvents();
 
     // 3D Simülasyon Yönetimi
-    // 1. Bilgi Kartı Modalı içinde Tab 2 açıksa:
-    if (state.showFeedbackModal && state.modalActiveTab === 'molecular' && state.activeCase) {
-      var modalThreeEl = document.getElementById('threeModalContainer');
-      if (modalThreeEl && window.ThreeMolecularSimulator) {
-        window.ThreeMolecularSimulator.init(modalThreeEl, state.activeCase);
-      }
-    }
-    // 2. Video Modalı içinde Mikro Moleküller 3D açıksa:
-    else if (state.showVideoModal && state.videoModalTab === 'micro' && state.activeCase) {
+    // 1. Video Modalı içinde Mikro Moleküller 3D açıksa:
+    if (state.showVideoModal && state.videoModalTab === 'micro' && state.activeCase) {
       var vModalThreeEl = document.getElementById('videoModalThreeStage');
       if (vModalThreeEl && window.ThreeMolecularSimulator) {
         window.ThreeMolecularSimulator.init(vModalThreeEl, state.activeCase);
       }
     }
-    // 3. Vaka detayında Mikro Moleküller modu açıksa:
+    // 2. Vaka detayında Mikro Moleküller modu açıksa:
     else if (state.activeCase && state.viewMode === 'micro' && !state.showFeedbackModal && !state.showVideoModal) {
       var molEl = document.getElementById('molecularStage');
       if (molEl && window.ThreeMolecularSimulator) {
         window.ThreeMolecularSimulator.init(molEl, state.activeCase);
       }
     } else {
-      if (window.ThreeMolecularSimulator && !state.showFeedbackModal && (!state.showVideoModal || state.videoModalTab !== 'micro')) {
+      if (window.ThreeMolecularSimulator && (!state.showVideoModal || state.videoModalTab !== 'micro')) {
         window.ThreeMolecularSimulator.stop();
       }
     }
@@ -630,27 +638,35 @@
     // Form Alanı
     h += '<div class="interactive-form-grid">';
     
-    // 1. Gözlemim
+    // 1. Gözlemim (Madde 1: Taslak Metin Koruması & Madde 4: Genel Pedagojik İpucu)
+    var curObs = (state.draftObservations && state.draftObservations[c.id] !== undefined)
+      ? state.draftObservations[c.id]
+      : (rec ? rec.observation : '');
+    var curRea = (state.draftReasonings && state.draftReasonings[c.id] !== undefined)
+      ? state.draftReasonings[c.id]
+      : (rec ? rec.reasoning : '');
+
     h += '  <div class="form-box">';
     h += '    <div class="form-box-header">';
     h += '      <span class="step-num-pill">1</span>';
     h += '      <div>';
     h += '        <h3 class="form-box-title">Gözlemini Yaz</h3>';
-    h += '        <p class="form-box-desc">Olayda doğrudan gözlemlediğin değişimleri kendi cümlelerinle yaz (renk değişimi, duman, gaz, çökelti, hâl değişimi vb.).</p>';
+    h += '        <p class="form-box-desc">Olayda doğrudan gözlemlediğin somut değişimleri kendi cümlelerinle yaz.</p>';
     h += '      </div>';
     h += '    </div>';
-    var obsPlaceholder = (c.acceptedObservations && c.acceptedObservations.length > 0)
-      ? 'Gözlemlerini buraya yaz... (Örn: ' + c.acceptedObservations[0] + ')'
-      : 'Gözlemlerini buraya yaz... (Örn: Rengi değişti, pas tabakası oluştu, alev ve duman çıktı vb.)';
-    h += '    <textarea id="obsInput" class="form-textarea" rows="3" placeholder="' + obsPlaceholder + '">' + (rec ? rec.observation : '') + '</textarea>';
+    h += '    <textarea id="obsInput" class="form-textarea" rows="3" placeholder="Gözlemlerini buraya yaz... (Örn: Olayı izlerken videoda doğrudan gözlemlediğin tüm değişiklikleri açıkla...)">' + curObs + '</textarea>';
+    h += '    <div class="pedagogical-hint-box">';
+    h += '      <span class="hint-bullet">💡</span>';
+    h += '      <span class="hint-text"><strong>Gözlem İpucu:</strong> Olayı incelerken duyularınla doğrudan fark edebildiğin değişikliklere odaklan: Renk değişimi, duman, alev, gaz kabarcığı çıkışı, çökelti oluşumu var mı? Yoksa yalnızca maddenin biçimi veya fiziksel hâli mi (erime, donma, buharlaşma vb.) değişti?</span>';
+    h += '    </div>';
     h += '  </div>';
 
-    // 2. Kararını Yaz ve Gerekçelendir
+    // 2. Kararını Ver (Madde 5: Başlık "Kararını Ver" yapıldı, Madde 2: Faz Değişimi & Kristal Katman)
     h += '  <div class="form-box">';
     h += '    <div class="form-box-header">';
     h += '      <span class="step-num-pill">2</span>';
     h += '      <div>';
-    h += '        <h3 class="form-box-title">Kararını Yaz ve Gerekçelendir</h3>';
+    h += '        <h3 class="form-box-title">Kararını Ver</h3>';
     h += '        <p class="form-box-desc">Bu değişim fiziksel mi yoksa kimyasal mı? Kararını seçip gerekçeni yaz.</p>';
     h += '      </div>';
     h += '    </div>';
@@ -660,14 +676,15 @@
     h += '    <div>';
     h += '      <div class="type-buttons-row">';
     h += '        <button type="button" class="btn-type-toggle btn-type-phy' + (curType === 'physical' ? ' active-phy' : '') + '" id="btnPickPhysical">';
-    h += '          <div class="phy-shatter-layer" aria-hidden="true">';
-    h += '            <span class="crack-svg-wrap">';
-    h += '              <svg viewBox="0 0 120 70" preserveAspectRatio="none" class="crack-svg"><path d="M 0,25 Q 30,35 55,24 T 90,42 T 120,32 M 55,24 L 68,4 M 55,24 L 48,65 M 90,42 L 102,68" class="crack-path" /></svg>';
-    h += '            </span>';
-    h += '            <span class="phy-shard shard-1"></span>';
-    h += '            <span class="phy-shard shard-2"></span>';
-    h += '            <span class="phy-shard shard-3"></span>';
-    h += '            <span class="phy-shard shard-4"></span>';
+    h += '          <div class="phy-phase-layer" aria-hidden="true">';
+    h += '            <span class="phase-wave"></span>';
+    h += '            <span class="frost-glaze"></span>';
+    h += '            <span class="phase-node pn-1"></span>';
+    h += '            <span class="phase-node pn-2"></span>';
+    h += '            <span class="phase-node pn-3"></span>';
+    h += '            <span class="phase-node pn-4"></span>';
+    h += '            <span class="phase-spark psp-1"></span>';
+    h += '            <span class="phase-spark psp-2"></span>';
     h += '          </div>';
     h += '          <div class="type-btn-top">';
     h += '            <span class="type-emoji phy-emoji">🧊</span>';
@@ -694,10 +711,11 @@
     h += '          <span class="type-sub-desc">Yeni özellikte madde oluşur</span>';
     h += '        </button>';
     h += '      </div>';
-    var reaPlaceholder = (c.acceptedDecisions && c.acceptedDecisions.length > 0)
-      ? 'Kararının gerekçesini buraya yaz... (Örn: ' + (c.acceptedDecisions[1] || c.acceptedDecisions[0]) + ')'
-      : 'Kararının gerekçesini buraya yaz... (Örn: Çünkü yeni bir madde oluştu / sadece hâl değişti, madde aynı kaldı)';
-    h += '      <textarea id="reaInput" class="form-textarea" rows="2" placeholder="' + reaPlaceholder + '">' + (rec ? rec.reasoning : '') + '</textarea>';
+    h += '      <textarea id="reaInput" class="form-textarea" rows="2" placeholder="Kararının gerekçesini buraya yaz... (Örn: Maddenin iç yapısında ve kimliğinde bir değişiklik olup olmadığını belirterek açıkla...)">' + curRea + '</textarea>';
+    h += '      <div class="pedagogical-hint-box">';
+    h += '        <span class="hint-bullet">💡</span>';
+    h += '        <span class="hint-text"><strong>Gerekçe İpucu:</strong> Kararını açıklarken şu temel kimya sorusuna cevap ver: Maddenin yalnızca dış görünüşü veya hâli mi değişti (kimliği korundu mu), yoksa başlangıçtakinden farklı kimyasal özelliklere sahip yeni bir madde mi meydana geldi?</span>';
+    h += '      </div>';
     h += '    </div>';
     h += '  </div>';
 
@@ -753,23 +771,28 @@
     return h;
   }
 
-  // Madde 5, 6, 7, 8: Genişletilmiş Yatay Dikdörtgen Bilgi Kartı Modalı (2 Sekmeli, 3D Moleküler, Oval Köşeli Bağlantılı)
+  // Madde 3: Kontrol Et Modalı (Daha Belirgin Doğru/Yanlış Tespitler, 3D Sekmesi Kaldırılmış, Net Dönüt Kartları)
   function renderFeedbackModal(c, rec) {
     if (!rec || !rec.evaluation) return '';
     var ev = rec.evaluation;
     var statusClass = ev.status === 'correct' ? 'feedback-correct' : (ev.status === 'incomplete' ? 'feedback-incomplete' : 'feedback-incorrect');
+    var isTypeCorrect = rec.decisionType === c.correctType;
+    var obsText = (rec.observation || '').trim();
+    var reaText = (rec.reasoning || '').trim();
+    var hasGoodObs = obsText.length >= 4;
+    var hasGoodRea = reaText.length >= 4 && !ev.isShallowOrTrap;
+
     var iconSvg = ev.status === 'correct'
       ? '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>'
       : (ev.status === 'incomplete'
         ? '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
         : '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>');
 
-    var badgeText = ev.status === 'correct' ? 'BAŞARILI TEŞHİS' : (ev.status === 'incomplete' ? 'EKSİK GÖZLEM / GEREKÇE' : 'HATALI KARAR');
-    var activeTab = state.modalActiveTab || 'feedback';
+    var badgeText = ev.status === 'correct' ? 'TAM BAŞARILI TEŞHİS' : (ev.status === 'incomplete' ? 'EKSİK GÖZLEM / GEREKÇE' : 'HATALI TEŞHİS');
 
     var h = '';
     h += '<div class="modal-backdrop eval-modal-backdrop" id="evalModalBackdrop">';
-    h += '  <div class="eval-modal-card eval-modal-wide ' + statusClass + '">';
+    h += '  <div class="modal-window modal-window-wide eval-modal-card ' + statusClass + '">';
     
     // Header
     h += '    <div class="eval-modal-header">';
@@ -786,69 +809,74 @@
     h += '      </div>';
     h += '    </div>';
 
-    // Madde 6: 2 Sekmeli Menü Çubuğu (Sekme 1: Vaka Değerlendirmesi | Sekme 2: 3D Moleküler Görünüm)
-    h += '    <div class="eval-tabs-nav">';
-    h += '      <button type="button" class="eval-tab-pill' + (activeTab === 'feedback' ? ' active' : '') + '" id="btnModalTabFeedback">';
-    h += '        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="m9 15 2 2 4-4"/></svg>';
-    h += '        <span>Vaka Değerlendirmesi</span>';
-    h += '      </button>';
-    h += '      <button type="button" class="eval-tab-pill' + (activeTab === 'molecular' ? ' active' : '') + '" id="btnModalTabMolecular">';
-    h += '        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
-    h += '        <span>3D Moleküler Görünüm</span>';
-    h += '        <span class="tab-3d-tag">3D</span>';
-    h += '      </button>';
-    h += '    </div>';
+    // Body (Tek, Odaklanmış ve Belirgin Tespit Kartları Listesi - 3D Sekmesi Kaldırıldı)
+    h += '    <div class="eval-modal-body" style="padding: 1.25rem 1.5rem; display:flex; flex-direction:column; gap:0.9rem;">';
 
-    // Body
-    h += '    <div class="eval-modal-body">';
-
-    // SEKME 1: Vaka Değerlendirmesi
-    h += '      <div class="eval-pane' + (activeTab === 'feedback' ? ' active' : '') + '" id="evalPaneFeedback"' + (activeTab !== 'feedback' ? ' style="display:none;"' : '') + '>';
-    h += '        <div class="eval-feedback-card">';
-    h += '          <div class="eval-feedback-title-row">';
-    h += '            <span class="eval-icon-dot"></span>';
-    h += '            <span class="eval-feedback-heading">' + ev.title + '</span>';
-    h += '          </div>';
-    h += '          <p class="eval-feedback-desc">' + ev.message + '</p>';
-    h += '        </div>';
-
-    // Karşılaştırma Şeridi
-    h += '        <div class="eval-verdict-grid">';
-    h += '          <div class="verdict-cell">';
-    h += '            <span class="verdict-label">Doğru Değişim Türü</span>';
-    h += '            <span class="verdict-val ' + (c.correctType === 'chemical' ? 'chm' : 'phy') + '">' + (c.correctType === 'chemical' ? '🧪 Kimyasal Değişim' : '🧊 Fiziksel Değişim') + '</span>';
-    h += '          </div>';
-    h += '          <div class="verdict-cell">';
-    h += '            <span class="verdict-label">Senin Kararın</span>';
-    h += '            <span class="verdict-val">' + (rec.decisionType === 'chemical' ? '🧪 Kimyasal Değişim' : (rec.decisionType === 'physical' ? '🧊 Fiziksel Değişim' : '—')) + '</span>';
-    h += '          </div>';
-    h += '          <div class="verdict-cell">';
-    h += '            <span class="verdict-label">Gözlem & Gerekçe</span>';
-    h += '            <span class="verdict-val">' + (ev.status === 'correct' ? '✓ Eksiksiz' : '⚠️ Güçlendirilmeli') + '</span>';
-    h += '          </div>';
-    h += '        </div>';
-
-    // Madde 8: Estetik oval köşeli dikdörtgenler şeklinde butonlar (Dijital Deney Defteri & Vaka Raporu)
-    h += '        <div class="eval-quick-links-row">';
-    h += '          <button type="button" class="eval-oval-pill" id="btnModalGoNotebook">';
-    h += '            <div class="oval-pill-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>';
-    h += '            <span>Dijital Deney Defteri</span>';
-    h += '          </button>';
-    h += '          <button type="button" class="eval-oval-pill" id="btnModalGoReport">';
-    h += '            <div class="oval-pill-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>';
-    h += '            <span>Resmi Vaka Raporu</span>';
-    h += '          </button>';
+    // Tespit 1: Değişim Türü
+    h += '      <div class="verdict-banner-row ' + (isTypeCorrect ? 'verdict-row-success' : 'verdict-row-danger') + '">';
+    h += '        <div class="verdict-row-icon">' + (isTypeCorrect ? '✓' : '✕') + '</div>';
+    h += '        <div class="verdict-row-info">';
+    h += '          <div class="verdict-row-title">1. DEĞİŞİM TÜRÜ TESPİTİ: ' + (isTypeCorrect ? 'DOĞRU' : 'HATALI') + '</div>';
+    if (isTypeCorrect) {
+      h += '          <div class="verdict-row-text">Bu olay bir <strong style="color:var(--md-sys-color-primary);">' + (c.correctType === 'chemical' ? 'Kimyasal Değişim' : 'Fiziksel Değişim') + '</strong> örneğidir. Kararın tam isabetli!</div>';
+    } else {
+      var selName = rec.decisionType === 'chemical' ? 'Kimyasal Değişim' : (rec.decisionType === 'physical' ? 'Fiziksel Değişim' : 'Belirtilmedi');
+      var corName = c.correctType === 'chemical' ? 'Kimyasal Değişim' : 'Fiziksel Değişim';
+      h += '          <div class="verdict-row-text">Senin Kararın: <strong style="text-decoration:line-through; opacity:0.85;">' + selName + '</strong> ➔ Doğru Tespit: <strong style="color:var(--md-sys-color-primary);">' + corName + '</strong>.</div>';
+    }
     h += '        </div>';
     h += '      </div>';
 
-    // Madde 7: SEKME 2: 3 Boyutlu Moleküler Görünüm (Minimal Açıklama & Fareyle 360° Döndürme)
-    h += '      <div class="eval-pane' + (activeTab === 'molecular' ? ' active' : '') + '" id="evalPaneMolecular"' + (activeTab !== 'molecular' ? ' style="display:none;"' : '') + '>';
-    h += '        <div id="threeModalContainer" class="three-modal-stage"></div>';
+    // Tespit 2: Gözlem Kaydı
+    h += '      <div class="verdict-banner-row ' + (hasGoodObs ? 'verdict-row-success' : 'verdict-row-warning') + '">';
+    h += '        <div class="verdict-row-icon">' + (hasGoodObs ? '✓' : '⚠️') + '</div>';
+    h += '        <div class="verdict-row-info">';
+    h += '          <div class="verdict-row-title">2. GÖZLEM RAPORU: ' + (hasGoodObs ? 'KAYDEDİLDİ' : 'EKSİK / GELİŞTİRİLMELİ') + '</div>';
+    if (hasGoodObs) {
+      h += '          <div class="verdict-row-text">Gözlem Notun: <em>"' + obsText + '"</em></div>';
+    } else {
+      h += '          <div class="verdict-row-text">Olayda fark ettiğin somut değişimleri (renk, duman, gaz kabarcığı, çökelti, sıcaklık veya hâl değişimi) gözlem kutusuna daha detaylı yazmalısın.</div>';
+    }
+    h += '        </div>';
     h += '      </div>';
 
-    h += '    </div>';
+    // Tespit 3: Bilimsel Gerekçe & Mantık
+    h += '      <div class="verdict-banner-row ' + (hasGoodRea && isTypeCorrect ? 'verdict-row-success' : (isTypeCorrect ? 'verdict-row-warning' : 'verdict-row-danger')) + '">';
+    h += '        <div class="verdict-row-icon">' + (hasGoodRea && isTypeCorrect ? '✓' : '⚠️') + '</div>';
+    h += '        <div class="verdict-row-info">';
+    h += '          <div class="verdict-row-title">3. BİLİMSEL GEREKÇE: ' + (hasGoodRea && isTypeCorrect ? 'GÜÇLÜ VE GEÇERLİ' : (isTypeCorrect ? 'TAMAMLANMALI' : 'YENİDEN DEĞERLENDİRİLMELİ')) + '</div>';
+    if (reaText) {
+      h += '          <div class="verdict-row-text">Gerekçen: <em>"' + reaText + '"</em></div>';
+    } else {
+      h += '          <div class="verdict-row-text">Kararını verirken maddenin kimliğinin değişip değişmediğini veya yeni özellikte madde oluşup oluşmadığını belirtmelisin.</div>';
+    }
+    h += '        </div>';
+    h += '      </div>';
 
-    // Footer: Madde 8 estetik oval köşeli dikdörtgen butonlar
+    // Öğretmen Bilimsel Vaka Raporu / Detaylı Dönüt
+    h += '      <div class="eval-feedback-card" style="margin-top:0.25rem;">';
+    h += '        <div class="eval-feedback-title-row">';
+    h += '          <span class="eval-icon-dot"></span>';
+    h += '          <span class="eval-feedback-heading">🔬 Kimya Öğretmeni Değerlendirmesi</span>';
+    h += '        </div>';
+    h += '        <p class="eval-feedback-desc" style="font-size:0.86rem; line-height:1.55; margin-top:0.4rem;">' + ev.message + '</p>';
+    h += '      </div>';
+
+    // Hızlı Bağlantı Butonları
+    h += '      <div class="eval-quick-links-row" style="margin-top:0.35rem;">';
+    h += '        <button type="button" class="eval-oval-pill" id="btnModalGoNotebook">';
+    h += '          <div class="oval-pill-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>';
+    h += '          <span>Dijital Deney Defteri</span>';
+    h += '        </button>';
+    h += '        <button type="button" class="eval-oval-pill" id="btnModalGoReport">';
+    h += '          <div class="oval-pill-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>';
+    h += '          <span>Resmi Vaka Raporu</span>';
+    h += '        </button>';
+    h += '      </div>';
+
+    h += '    </div>'; // End eval-modal-body
+
+    // Footer
     h += '    <div class="eval-modal-footer">';
     if (ev.status === 'correct') {
       h += '      <button class="eval-oval-btn btn-secondary-oval" id="btnCloseEvalModalReview">Notları İncele</button>';
@@ -1322,16 +1350,41 @@
       };
     }
 
-    // Type toggles (Madde 1: Tıklanıldığında ve Üzerine Gelindiğinde Canlı Animasyon)
+    // Gözlem ve Karar Girişi Taslak Metin Koruması (Madde 1)
+    var obsInputElem = document.getElementById('obsInput');
+    if (obsInputElem) {
+      obsInputElem.oninput = function () {
+        if (state.activeCase) state.draftObservations[state.activeCase.id] = obsInputElem.value;
+      };
+    }
+    var reaInputElem = document.getElementById('reaInput');
+    if (reaInputElem) {
+      reaInputElem.oninput = function () {
+        if (state.activeCase) state.draftReasonings[state.activeCase.id] = reaInputElem.value;
+      };
+    }
+
+    // Type toggles (Madde 1: Yazılar kaybolmadan anında seçim & Madde 2: Canlı Animasyon)
     var btnPickPhy = document.getElementById('btnPickPhysical');
     if (btnPickPhy) {
       btnPickPhy.onclick = function () {
         if (state.soundEnabled) window.SoundManager.playClick();
         state.selectedType = 'physical';
-        btnPickPhy.classList.add('phy-clicked');
+
+        // Mevcut yazılan metinleri kaydet
+        var obsEl = document.getElementById('obsInput');
+        var reaEl = document.getElementById('reaInput');
+        if (obsEl && state.activeCase) state.draftObservations[state.activeCase.id] = obsEl.value;
+        if (reaEl && state.activeCase) state.draftReasonings[state.activeCase.id] = reaEl.value;
+
+        // Sayfayı yeniden render etmeden görsel sınıfları güncelle (Metin ve video kaybolmaz)
+        btnPickPhy.classList.add('active-phy', 'phy-clicked');
+        var btnPickChm = document.getElementById('btnPickChemical');
+        if (btnPickChm) btnPickChm.classList.remove('active-chm', 'chm-clicked');
+
         setTimeout(function () {
-          render();
-        }, 150);
+          btnPickPhy.classList.remove('phy-clicked');
+        }, 600);
       };
     }
 
@@ -1340,10 +1393,21 @@
       btnPickChm.onclick = function () {
         if (state.soundEnabled) window.SoundManager.playClick();
         state.selectedType = 'chemical';
-        btnPickChm.classList.add('chm-clicked');
+
+        // Mevcut yazılan metinleri kaydet
+        var obsEl = document.getElementById('obsInput');
+        var reaEl = document.getElementById('reaInput');
+        if (obsEl && state.activeCase) state.draftObservations[state.activeCase.id] = obsEl.value;
+        if (reaEl && state.activeCase) state.draftReasonings[state.activeCase.id] = reaEl.value;
+
+        // Sayfayı yeniden render etmeden görsel sınıfları güncelle (Metin ve video kaybolmaz)
+        btnPickChm.classList.add('active-chm', 'chm-clicked');
+        var btnPickPhy = document.getElementById('btnPickPhysical');
+        if (btnPickPhy) btnPickPhy.classList.remove('active-phy', 'phy-clicked');
+
         setTimeout(function () {
-          render();
-        }, 150);
+          btnPickChm.classList.remove('chm-clicked');
+        }, 600);
       };
     }
 
@@ -1353,6 +1417,11 @@
       btnCheck.onclick = function () {
         var obs = (document.getElementById('obsInput') || {}).value || '';
         var rea = (document.getElementById('reaInput') || {}).value || '';
+
+        if (state.activeCase) {
+          state.draftObservations[state.activeCase.id] = obs;
+          state.draftReasonings[state.activeCase.id] = rea;
+        }
 
         var ev = evaluateAnswer(state.activeCase, obs, state.selectedType, rea);
 
@@ -1370,9 +1439,8 @@
 
         saveRecord(rec);
 
-        // Ekran üzerinde açılan bilgi kartı gösterimi (Madde 5)
+        // Ekran üzerinde açılan belirgin bilgi kartı gösterimi (Madde 3)
         state.showFeedbackModal = true;
-        state.modalActiveTab = 'feedback';
 
         if (state.soundEnabled) {
           if (ev.status === 'correct') {
@@ -1386,39 +1454,6 @@
         }
 
         render();
-      };
-    }
-
-    // Madde 6: Bilgi Kartı Sekme Değişimi (Tab 1: Vaka Değerlendirmesi, Tab 2: 3D Moleküler Görünüm)
-    var btnTabFb = document.getElementById('btnModalTabFeedback');
-    var btnTabMol = document.getElementById('btnModalTabMolecular');
-    var paneFb = document.getElementById('evalPaneFeedback');
-    var paneMol = document.getElementById('evalPaneMolecular');
-
-    if (btnTabFb && btnTabMol) {
-      btnTabFb.onclick = function () {
-        if (state.soundEnabled) window.SoundManager.playClick();
-        state.modalActiveTab = 'feedback';
-        btnTabFb.classList.add('active');
-        btnTabMol.classList.remove('active');
-        if (paneFb) paneFb.style.display = 'block';
-        if (paneMol) paneMol.style.display = 'none';
-        if (window.ThreeMolecularSimulator) window.ThreeMolecularSimulator.stop();
-      };
-
-      btnTabMol.onclick = function () {
-        if (state.soundEnabled) window.SoundManager.playClick();
-        state.modalActiveTab = 'molecular';
-        btnTabMol.classList.add('active');
-        btnTabFb.classList.remove('active');
-        if (paneFb) paneFb.style.display = 'none';
-        if (paneMol) paneMol.style.display = 'block';
-
-        // 3D Three.js Motorunu Başlat
-        var threeCont = document.getElementById('threeModalContainer');
-        if (threeCont && window.ThreeMolecularSimulator) {
-          window.ThreeMolecularSimulator.init(threeCont, state.activeCase);
-        }
       };
     }
 
