@@ -24,6 +24,13 @@
     showMolecular: false,
     showVideoModal: false,
     showFeedbackModal: false,
+    showGuideModal: (function () {
+      try {
+        return localStorage.getItem('olay_yeri_guide_seen_v1') !== 'true';
+      } catch (e) {
+        return true;
+      }
+    })(),
     modalActiveTab: 'feedback', // 'feedback' or 'molecular'
     studentName: 'Öğrenci Dedektif',
     studentClass: 'Lise Kimya'
@@ -309,20 +316,24 @@
       ? '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--md-sys-color-primary)" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>'
       : '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--md-sys-color-outline)" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
     html += '      </button>';
-
+    html += '';
+    html += '      <button class="btn-icon" id="btnOpenGuide" title="Laboratuvar Görev Rehberi">';
+    html += '        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>';
+    html += '      </button>';
+    html += '';
     html += '      <button class="btn-notebook" id="btnOpenNotebook">';
     html += '        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>';
     html += '        <span>Dijital Deney Defteri</span>';
     if (solvedCount > 0) {
-      html += '      <span class="badge-count">' + solvedCount + '</span>';
+      html += '        <span class="badge-count">' + solvedCount + '</span>';
     }
     html += '      </button>';
-
+    html += '';
     html += '      <button class="btn-report" id="btnOpenReport">';
     html += '        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
     html += '        <span>Vaka Raporu</span>';
     html += '      </button>';
-
+    html += '';
     html += '      <button class="btn-icon" id="btnResetData" title="Tüm İlerlemeyi Sıfırla">';
     html += '        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>';
     html += '      </button>';
@@ -340,6 +351,9 @@
     html += '</main>';
 
     // Modals
+    if (state.showGuideModal) {
+      html += renderGuideModal();
+    }
     if (state.showNotebook) {
       html += renderNotebookModal(solvedCount);
     }
@@ -410,9 +424,15 @@
     // Hero Banner (Kompakt ve Sadeleştirilmiş)
     h += '<div class="hero-banner">';
     h += '  <div>';
-    h += '    <div class="hero-pill">';
-    h += '      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>';
-    h += '      <span>CSI Olay Yeri</span>';
+    h += '    <div style="display:flex; align-items:center; gap:0.6rem; flex-wrap:wrap; margin-bottom:0.35rem;">';
+    h += '      <div class="hero-pill">';
+    h += '        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>';
+    h += '        <span>CSI Olay Yeri</span>';
+    h += '      </div>';
+    h += '      <button type="button" class="btn-hero-guide-pill" id="btnHeroOpenGuide" title="Rehberi Aç">';
+    h += '        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>';
+    h += '        <span>Laboratuvar Görev Rehberi</span>';
+    h += '      </button>';
     h += '    </div>';
     h += '    <h1 class="hero-title">İncelenecek Olayı Seç</h1>';
     h += '    <p class="hero-desc">';
@@ -435,7 +455,7 @@
     h += '  </div>';
     h += '</div>';
 
-    // Madde 9: Resimsiz, İkon Tabanlı, Dar Yükseklikte ve Hover Animasyonlu 12 Kart
+    // 12 Vaka Kartı (3 Sütunlu Grid, Tam Metin Görünümü)
     h += '<div class="cases-compact-grid">';
     state.cases.forEach(function (c) {
       var rec = state.records[c.id];
@@ -462,56 +482,72 @@
     });
     h += '</div>';
 
-    // Madde 4: Laboratuvar Görev Rehberi - Genişletilmiş Yatay Dikdörtgen Kartı
-    h += '<div class="lab-guide-card-wide">';
-    h += '  <div class="lab-guide-header">';
-    h += '    <div class="lab-guide-title-box">';
-    h += '      <div class="lab-guide-icon-badge">';
-    h += '        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>';
+    return h;
+  }
+
+  // Laboratuvar Görev Rehberi Bilgi Kartı Modalı (Yatay Oval Dikdörtgen Format)
+  function renderGuideModal() {
+    var h = '';
+    h += '<div class="modal-backdrop" id="guideModalBackdrop">';
+    h += '  <div class="modal-window modal-window-wide modal-guide-window">';
+    h += '    <div class="modal-header">';
+    h += '      <div style="display:flex; align-items:center; gap:0.75rem;">';
+    h += '        <div class="lab-guide-icon-badge" style="width:36px; height:36px;">';
+    h += '          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>';
+    h += '        </div>';
+    h += '        <div>';
+    h += '          <h2 class="modal-title">Laboratuvar Görev Rehberi</h2>';
+    h += '          <p class="modal-subtitle">Kimyasal Olay Yeri İnceleme Metodolojisi & Adli Araştırma Süreci</p>';
+    h += '        </div>';
     h += '      </div>';
-    h += '      <div>';
-    h += '        <h2 class="lab-guide-title">Laboratuvar Görev Rehberi</h2>';
-    h += '        <p class="lab-guide-sub">Olay Yeri İnceleme Metodolojisi ve Adli Kanıt Süreci</p>';
+    h += '      <button class="btn-icon" id="btnCloseGuideModal" title="Kapat">✕</button>';
+    h += '    </div>';
+    h += '';
+    h += '    <div class="modal-content" style="gap: 1.1rem; padding: 1.25rem 1.5rem;">';
+    h += '      <div class="guide-modal-intro" style="font-size:0.86rem; color:var(--md-sys-color-on-surface); line-height:1.55; background:var(--md-sys-color-surface-container); padding:0.85rem 1.1rem; border-radius:14px; border:1px solid var(--md-sys-color-outline-variant);">';
+    h += '        Hoş geldin Genç Dedektif! Adli Kimya Laboratuvarı\'nda 12 farklı olay incelemeni bekliyor. Her olayda makro gözlemlerini yap, kanıtları değerlendirerek fiziksel ya da kimyasal değişimi belirle ve CPK renk standartlı 3D atom-molekül modelleriyle mikroskobik düzeyde keşfet.';
+    h += '      </div>';
+    h += '';
+    h += '      <div class="lab-guide-steps-row">';
+    h += '        <div class="lab-guide-step-card">';
+    h += '          <span class="guide-step-num">1</span>';
+    h += '          <div class="guide-step-content">';
+    h += '            <div class="guide-step-title">Olayı Gözlemle</div>';
+    h += '            <div class="guide-step-desc">Renk, gaz kabarcığı, çökelti, ısı veya hâl değişimlerini videoda dikkatlice incele.</div>';
+    h += '          </div>';
+    h += '        </div>';
+    h += '';
+    h += '        <div class="lab-guide-step-card">';
+    h += '          <span class="guide-step-num">2</span>';
+    h += '          <div class="guide-step-content">';
+    h += '            <div class="guide-step-title">Değişimi Belirle</div>';
+    h += '            <div class="guide-step-desc">Olayın Fiziksel Değişim mi yoksa Kimyasal Değişim mi olduğuna karar ver.</div>';
+    h += '          </div>';
+    h += '        </div>';
+    h += '';
+    h += '        <div class="lab-guide-step-card">';
+    h += '          <span class="guide-step-num">3</span>';
+    h += '          <div class="guide-step-content">';
+    h += '            <div class="guide-step-title">Gerekçeni Açıkla</div>';
+    h += '            <div class="guide-step-desc">Maddenin kimliği korundu mu yoksa yeni özellikte madde mi oluştu? Kendi cümlelerinle gerekçelendir.</div>';
+    h += '          </div>';
+    h += '        </div>';
+    h += '';
+    h += '        <div class="lab-guide-step-card">';
+    h += '          <span class="guide-step-num">4</span>';
+    h += '          <div class="guide-step-content">';
+    h += '            <div class="guide-step-title">3D Moleküler Doğrula</div>';
+    h += '            <div class="guide-step-desc">CPK renk standardındaki atom ve molekül modellerini 3 boyutlu fareyle çevirerek incele.</div>';
+    h += '          </div>';
+    h += '        </div>';
     h += '      </div>';
     h += '    </div>';
-    h += '    <span class="lab-guide-tag">CSI KİMYA</span>';
-    h += '  </div>';
-
-    h += '  <div class="lab-guide-steps-row">';
-    h += '    <div class="lab-guide-step-card">';
-    h += '      <span class="guide-step-num">1</span>';
-    h += '      <div class="guide-step-content">';
-    h += '        <div class="guide-step-title">Olayı Gözlemle</div>';
-    h += '        <div class="guide-step-desc">Renk, gaz kabarcığı, çökelti, ısı veya hâl değişimlerini incele.</div>';
-    h += '      </div>';
-    h += '    </div>';
-
-    h += '    <div class="lab-guide-step-card">';
-    h += '      <span class="guide-step-num">2</span>';
-    h += '      <div class="guide-step-content">';
-    h += '        <div class="guide-step-title">Değişimi Belirle</div>';
-    h += '        <div class="guide-step-desc">Olayın Fiziksel Değişim mi, Kimyasal Değişim mi olduğuna karar ver.</div>';
-    h += '      </div>';
-    h += '    </div>';
-
-    h += '    <div class="lab-guide-step-card">';
-    h += '      <span class="guide-step-num">3</span>';
-    h += '      <div class="guide-step-content">';
-    h += '        <div class="guide-step-title">Gerekçeni Açıkla</div>';
-    h += '        <div class="guide-step-desc">Maddenin kimliği korundu mu yoksa yeni özellikte madde mi oluştu?</div>';
-    h += '      </div>';
-    h += '    </div>';
-
-    h += '    <div class="lab-guide-step-card">';
-    h += '      <span class="guide-step-num">4</span>';
-    h += '      <div class="guide-step-content">';
-    h += '        <div class="guide-step-title">3D Moleküler Doğrula</div>';
-    h += '        <div class="guide-step-desc">Atom ve molekül modellerini 3 boyutlu fareyle çevirerek incele.</div>';
-    h += '      </div>';
+    h += '';
+    h += '    <div class="modal-footer eval-modal-footer">';
+    h += '      <button class="eval-oval-btn btn-primary-oval" id="btnCloseGuideModalBottom">Laboratuvara Başla →</button>';
     h += '    </div>';
     h += '  </div>';
     h += '</div>';
-
     return h;
   }
 
@@ -607,14 +643,6 @@
       ? 'Gözlemlerini buraya yaz... (Örn: ' + c.acceptedObservations[0] + ')'
       : 'Gözlemlerini buraya yaz... (Örn: Rengi değişti, pas tabakası oluştu, alev ve duman çıktı vb.)';
     h += '    <textarea id="obsInput" class="form-textarea" rows="3" placeholder="' + obsPlaceholder + '">' + (rec ? rec.observation : '') + '</textarea>';
-    if (c.acceptedObservations && c.acceptedObservations.length > 0) {
-      h += '    <div class="form-examples-row">';
-      h += '      <span class="examples-tag">Kabul Edilebilir Gözlem Örnekleri:</span>';
-      c.acceptedObservations.forEach(function (obs) {
-        h += '      <button type="button" class="chip-suggestion" data-fill="obs" data-text="' + obs.replace(/"/g, '&quot;') + '" title="Metin kutusuna aktarmak için tıkla">' + obs + '</button>';
-      });
-      h += '    </div>';
-    }
     h += '  </div>';
 
     // 2. Kararını Yaz ve Gerekçelendir
@@ -670,14 +698,6 @@
       ? 'Kararının gerekçesini buraya yaz... (Örn: ' + (c.acceptedDecisions[1] || c.acceptedDecisions[0]) + ')'
       : 'Kararının gerekçesini buraya yaz... (Örn: Çünkü yeni bir madde oluştu / sadece hâl değişti, madde aynı kaldı)';
     h += '      <textarea id="reaInput" class="form-textarea" rows="2" placeholder="' + reaPlaceholder + '">' + (rec ? rec.reasoning : '') + '</textarea>';
-    if (c.acceptedDecisions && c.acceptedDecisions.length > 0) {
-      h += '    <div class="form-examples-row">';
-      h += '      <span class="examples-tag">Kabul Edilebilir Karar ve Gerekçe Örnekleri:</span>';
-      c.acceptedDecisions.forEach(function (dec) {
-        h += '      <button type="button" class="chip-suggestion" data-fill="rea" data-text="' + dec.replace(/"/g, '&quot;') + '" title="Metin kutusuna aktarmak için tıkla">' + dec + '</button>';
-      });
-      h += '    </div>';
-    }
     h += '    </div>';
     h += '  </div>';
 
@@ -863,7 +883,7 @@
 
       h += '<div class="notebook-case-card">';
       h += '  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.4rem;">';
-      h += '    <div style="font-weight:700; color:var(--text-title); font-size:0.85rem;">VAKA #' + c.id + ': ' + c.title + ' <span style="font-size:0.75rem; color:var(--md-sys-color-on-surface-variant); font-weight:normal;">(' + (c.correctType === 'chemical' ? 'Kimyasal' : 'Fiziksel') + ')</span></div>';
+      h += '    <div style="font-weight:700; color:var(--text-title); font-size:0.85rem;">VAKA #' + c.id + ': ' + c.title + (isSolved ? ' <span style="font-size:0.75rem; color:var(--md-sys-color-on-surface-variant); font-weight:normal;">(' + (c.correctType === 'chemical' ? 'Kimyasal' : 'Fiziksel') + ')</span>' : '') + '</div>';
       if (isSolved) {
         h += '    <span style="color:var(--md-sys-color-success); font-weight:700; font-size:0.75rem; white-space:nowrap;">✓ Çözüldü (%' + rec.score + ')</span>';
       } else {
@@ -891,26 +911,20 @@
     return h;
   }
 
-  // Resmi Vaka Raporu Modalı (Madde 3: Lise Kimya Seviyesi, Yazdır Butonu Kaldırılmış, Kompakt Yatay Dikdörtgen Format)
+  // Vaka ve Başarı Raporu Modalı (Sadeleştirilmiş Başlık & Dijital Deney Defteri ile Birebir Aynı Boyut)
   function renderReportModal(solvedCount, rank) {
     var h = '';
     h += '<div class="modal-backdrop" id="reportBackdrop">';
     h += '  <div class="modal-window modal-window-wide modal-report-window">';
     h += '    <div class="modal-header">';
     h += '      <div>';
-    h += '        <h2 class="modal-title">Resmi Vaka ve Başarı Raporu</h2>';
-    h += '        <p class="modal-subtitle">Lise Kimya Dersi Olay Yeri İnceleme ve Tanı Belgesi</p>';
+    h += '        <h2 class="modal-title">Vaka ve Başarı Raporu</h2>';
+    h += '        <p class="modal-subtitle">Fiziksel ve Kimyasal Değişimler Teşhis ve İlerleme Belgesi</p>';
     h += '      </div>';
     h += '      <button class="btn-icon" id="btnCloseReport" title="Kapat">✕</button>';
     h += '    </div>';
 
     h += '    <div class="modal-content print-area report-content-compact">';
-    h += '      <div class="report-header-banner">';
-    h += '        <div class="report-banner-sub">T.C. ADLİ KİMYA LABORATUVARI • LİSE KİMYA</div>';
-    h += '        <h1 class="report-banner-title">KİMYASAL OLAY YERİ UZMANI SONUÇ BELGESİ</h1>';
-    h += '        <p class="report-banner-desc">Fiziksel ve Kimyasal Değişimler Teşhis ve Vaka Raporu</p>';
-    h += '      </div>';
-
     h += '      <div class="report-meta-grid">';
     h += '        <div class="report-meta-item"><strong>Öğrenci:</strong> <input type="text" id="reportStudentName" value="' + state.studentName + '" class="report-input-field" /></div>';
     h += '        <div class="report-meta-item"><strong>Rütbe:</strong> <span style="color:var(--md-sys-color-tertiary); font-weight:700;">' + rank.title + '</span></div>';
@@ -930,7 +944,7 @@
       h += '        <tr>';
       h += '          <td style="font-family:\'Roboto Mono\', monospace; font-weight:700;">#' + c.id + '</td>';
       h += '          <td><strong>' + c.title + '</strong></td>';
-      h += '          <td>' + (c.correctType === 'chemical' ? '🧪 Kimyasal' : '🧊 Fiziksel') + '</td>';
+      h += '          <td>' + (isSolved ? (c.correctType === 'chemical' ? '🧪 Kimyasal' : '🧊 Fiziksel') : '<span style="color:var(--md-sys-color-outline); font-style:italic;">🔒 Keşfedilmedi</span>') + '</td>';
       h += '          <td>' + (rec ? (rec.decisionType === 'chemical' ? '🧪 Kimyasal' : '🧊 Fiziksel') : '—') + '</td>';
       h += '          <td>' + (isSolved ? '<span style="color:var(--md-sys-color-success); font-weight:700;">✓ Doğru</span>' : (rec ? '<span style="color:var(--md-sys-color-warning); font-weight:700;">⚠️ Eksik</span>' : '<span style="color:var(--md-sys-color-outline);">—</span>')) + '</td>';
       h += '          <td style="text-align:right; font-family:\'Roboto Mono\', monospace; font-weight:700;">' + (rec ? '%' + rec.score : '0') + '</td>';
@@ -1019,6 +1033,46 @@
       };
     }
 
+    // Guide Modal Handlers
+    function closeGuideModal() {
+      state.showGuideModal = false;
+      try {
+        localStorage.setItem('olay_yeri_guide_seen_v1', 'true');
+      } catch (e) {}
+      render();
+    }
+
+    var btnCloseGuide = document.getElementById('btnCloseGuideModal');
+    if (btnCloseGuide) {
+      btnCloseGuide.onclick = closeGuideModal;
+    }
+    var btnCloseGuideBot = document.getElementById('btnCloseGuideModalBottom');
+    if (btnCloseGuideBot) {
+      btnCloseGuideBot.onclick = closeGuideModal;
+    }
+    var guideBackdrop = document.getElementById('guideModalBackdrop');
+    if (guideBackdrop) {
+      guideBackdrop.onclick = function (e) {
+        if (e.target === guideBackdrop) closeGuideModal();
+      };
+    }
+    var btnOpenGuide = document.getElementById('btnOpenGuide');
+    if (btnOpenGuide) {
+      btnOpenGuide.onclick = function () {
+        if (state.soundEnabled) window.SoundManager.playClick();
+        state.showGuideModal = true;
+        render();
+      };
+    }
+    var btnHeroOpenGuide = document.getElementById('btnHeroOpenGuide');
+    if (btnHeroOpenGuide) {
+      btnHeroOpenGuide.onclick = function () {
+        if (state.soundEnabled) window.SoundManager.playClick();
+        state.showGuideModal = true;
+        render();
+      };
+    }
+
     // Close Notebook
     var btnCloseNb = document.getElementById('btnCloseNotebook');
     if (btnCloseNb) {
@@ -1032,6 +1086,15 @@
       btnCloseNbBot.onclick = function () {
         state.showNotebook = false;
         render();
+      };
+    }
+    var nbBackdrop = document.getElementById('notebookBackdrop');
+    if (nbBackdrop) {
+      nbBackdrop.onclick = function (e) {
+        if (e.target === nbBackdrop) {
+          state.showNotebook = false;
+          render();
+        }
       };
     }
 
@@ -1058,6 +1121,29 @@
       btnCloseRepBot.onclick = function () {
         state.showReport = false;
         render();
+      };
+    }
+    var repBackdrop = document.getElementById('reportBackdrop');
+    if (repBackdrop) {
+      repBackdrop.onclick = function (e) {
+        if (e.target === repBackdrop) {
+          state.showReport = false;
+          render();
+        }
+      };
+    }
+
+    // Report Student Inputs
+    var inpRepName = document.getElementById('reportStudentName');
+    if (inpRepName) {
+      inpRepName.oninput = function () {
+        state.studentName = inpRepName.value;
+      };
+    }
+    var inpRepClass = document.getElementById('reportStudentClass');
+    if (inpRepClass) {
+      inpRepClass.oninput = function () {
+        state.studentClass = inpRepClass.value;
       };
     }
 
@@ -1235,42 +1321,6 @@
         }
       };
     }
-
-    // Kabul Edilebilir Örnek İfade Çipleri Tıklama Olayları
-    var chipSuggestions = document.querySelectorAll('.chip-suggestion');
-    chipSuggestions.forEach(function (btn) {
-      btn.onclick = function () {
-        if (state.soundEnabled) window.SoundManager.playClick();
-        var target = btn.getAttribute('data-fill');
-        var text = btn.getAttribute('data-text');
-        if (target === 'obs') {
-          var obsEl = document.getElementById('obsInput');
-          if (obsEl) {
-            obsEl.value = text;
-            obsEl.focus();
-          }
-        } else if (target === 'rea') {
-          var reaEl = document.getElementById('reaInput');
-          if (reaEl) {
-            reaEl.value = text;
-            reaEl.focus();
-          }
-          if (text.indexOf('Fiziksel') !== -1) {
-            state.selectedType = 'physical';
-            var phyBtn = document.getElementById('btnPickPhysical');
-            var chmBtn = document.getElementById('btnPickChemical');
-            if (phyBtn) phyBtn.classList.add('active-phy');
-            if (chmBtn) chmBtn.classList.remove('active-chm');
-          } else if (text.indexOf('Kimyasal') !== -1) {
-            state.selectedType = 'chemical';
-            var phyBtn = document.getElementById('btnPickPhysical');
-            var chmBtn = document.getElementById('btnPickChemical');
-            if (chmBtn) chmBtn.classList.add('active-chm');
-            if (phyBtn) phyBtn.classList.remove('active-phy');
-          }
-        }
-      };
-    });
 
     // Type toggles (Madde 1: Tıklanıldığında ve Üzerine Gelindiğinde Canlı Animasyon)
     var btnPickPhy = document.getElementById('btnPickPhysical');
