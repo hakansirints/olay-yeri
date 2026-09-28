@@ -1542,6 +1542,51 @@ body {
   align-items: center;
 }
 
+.video-modal-stage.three-modal-stage {
+  min-height: 480px;
+  height: 60vh;
+  max-height: 640px;
+  background: #030712;
+  overflow: hidden;
+  border-radius: 0;
+}
+
+/* Gözlem ve Karar Örnek İfade Çipleri */
+.form-examples-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.45rem;
+}
+.examples-tag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--md-sys-color-on-surface-variant);
+  opacity: 0.85;
+  margin-right: 0.2rem;
+}
+.chip-suggestion {
+  display: inline-flex;
+  align-items: center;
+  background: var(--md-sys-color-surface-container);
+  border: 1px dashed var(--md-sys-color-outline-variant);
+  color: var(--md-sys-color-on-surface);
+  border-radius: 999px;
+  font-size: 0.72rem;
+  padding: 0.25rem 0.65rem;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  line-height: 1.3;
+}
+.chip-suggestion:hover {
+  border-style: solid;
+  border-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-primary);
+  background: rgba(56, 189, 248, 0.1);
+  transform: translateY(-1px);
+}
+
 /* ========================================================
    GÖZLEMLENEBİLEN KANITLAR (VURGULU İPUCU ÇİPLERİ)
    ======================================================== */
@@ -1750,12 +1795,12 @@ body {
 }
 
 .btn-type-chm {
-  color: var(--md-sys-color-tertiary);
-  border-color: rgba(245, 190, 126, 0.4);
+  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.45);
 }
 .btn-type-chm:hover {
-  border-color: var(--md-sys-color-tertiary);
-  background: rgba(245, 190, 126, 0.08);
+  border-color: #34d399;
+  background: rgba(16, 185, 129, 0.12);
 }
 
 .type-btn-top {
@@ -1837,11 +1882,11 @@ body {
 .cs-1 { left: 18%; bottom: 18px; }
 .cs-2 { right: 22%; bottom: 22px; }
 
-/* HOVER: Butonun üzerine gelindiğinde ışıldayan renkli baloncuklar çıkması */
+/* HOVER: Butonun üzerine gelindiğinde ışıldayan renkli baloncuklar çıkması (Kimya Yeşili) */
 .btn-type-chm:hover {
-  border-color: #f5be7e;
-  background: rgba(245, 158, 11, 0.12);
-  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);
+  border-color: #34d399;
+  background: rgba(16, 185, 129, 0.14);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.38);
   transform: translateY(-2px);
 }
 .btn-type-chm:hover .cb-1 { animation: bubbleFloatUp 1.4s infinite ease-in 0.05s; }
@@ -1854,17 +1899,17 @@ body {
 .btn-type-chm:hover .chm-spark { animation: sparkTwinkle 1.2s infinite ease-in-out; }
 .btn-type-chm:hover .chm-emoji { animation: chmFlaskTilt 0.8s infinite ease-in-out; }
 
-/* TIKLANDIĞINDA / AKTİF DURUMDA: Şiddetli reaksiyon alevi, baloncuk fışkırması */
+/* TIKLANDIĞINDA / AKTİF DURUMDA: Kimya yeşili reaksiyon parlaması, baloncuk fışkırması */
 .btn-type-chm.active-chm, .btn-type-chm.chm-clicked {
-  background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important;
-  border-color: #fde68a !important;
+  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+  border-color: #6ee7b7 !important;
   color: #ffffff !important;
   transform: scale(1.02);
-  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.55), 0 8px 26px rgba(217, 119, 6, 0.55) !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.55), 0 8px 26px rgba(5, 150, 105, 0.55) !important;
   animation: chmReactionFlare 2s infinite ease-in-out;
 }
 .btn-type-chm.active-chm .type-sub-desc {
-  color: #fef3c7;
+  color: #ecfdf5;
 }
 .btn-type-chm.active-chm .cb-1 { animation: bubbleFloatUp 1.1s infinite ease-in 0s; }
 .btn-type-chm.active-chm .cb-2 { animation: bubbleFloatUp 1.3s infinite ease-in 0.2s; }
@@ -1911,20 +1956,20 @@ body {
 
 @keyframes chmReactionFlare {
   0%, 100% {
-    box-shadow: 0 0 0 3px rgba(245, 190, 126, 0.5), 0 8px 22px rgba(217, 119, 6, 0.4);
-    border-color: #f5be7e;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.5), 0 8px 22px rgba(5, 150, 105, 0.4);
+    border-color: #34d399;
   }
   50% {
-    box-shadow: 0 0 0 5px rgba(245, 158, 11, 0.85), 0 12px 32px rgba(239, 68, 68, 0.6);
-    border-color: #fde68a;
+    box-shadow: 0 0 0 5px rgba(52, 211, 153, 0.85), 0 12px 32px rgba(16, 185, 129, 0.6);
+    border-color: #6ee7b7;
   }
 }
 
 @keyframes chmFlaskBubble {
-  0%, 100% { transform: translateY(0) rotate(0deg) scale(1); filter: drop-shadow(0 0 2px rgba(255,200,50,0.6)); }
-  25% { transform: translateY(-2px) rotate(-8deg) scale(1.1); filter: drop-shadow(0 0 7px rgba(245,158,11,0.9)); }
-  50% { transform: translateY(1px) rotate(4deg) scale(1.05); filter: drop-shadow(0 0 5px rgba(239,68,68,0.8)); }
-  75% { transform: translateY(-3px) rotate(-4deg) scale(1.12); filter: drop-shadow(0 0 8px rgba(245,158,11,1)); }
+  0%, 100% { transform: translateY(0) rotate(0deg) scale(1); filter: drop-shadow(0 0 3px rgba(16, 185, 129, 0.7)); }
+  25% { transform: translateY(-2px) rotate(-8deg) scale(1.1); filter: drop-shadow(0 0 8px rgba(52, 211, 153, 0.95)); }
+  50% { transform: translateY(1px) rotate(4deg) scale(1.05); filter: drop-shadow(0 0 6px rgba(5, 150, 105, 0.8)); }
+  75% { transform: translateY(-3px) rotate(-4deg) scale(1.12); filter: drop-shadow(0 0 9px rgba(16, 185, 129, 1)); }
 }
 
 /* --------------------------------------------------------
@@ -2311,7 +2356,7 @@ body {
   color: var(--text-title);
 }
 .verdict-val.chm {
-  color: var(--md-sys-color-tertiary);
+  color: #10b981;
 }
 .verdict-val.phy {
   color: var(--md-sys-color-primary);

@@ -112,33 +112,87 @@
     }
 
     var isTypeCorrect = decType === cItem.correctType;
-    var obsLower = (obsText || '').toLowerCase();
-    var reaLower = (decReason || '').toLowerCase();
+    var obsLower = (obsText || '').toLowerCase().trim();
+    var reaLower = (decReason || '').toLowerCase().trim();
     var fullText = obsLower + ' ' + reaLower;
-
-    var matchedObs = cItem.observationKeywords.filter(function (k) {
-      return fullText.indexOf(k.toLowerCase()) !== -1;
-    });
-    var matchedDec = cItem.decisionKeywords.filter(function (k) {
-      return reaLower.indexOf(k.toLowerCase()) !== -1;
-    });
-
-    var hasObs = obsLower.trim().length > 4 || matchedObs.length > 0;
-    var hasRea = reaLower.trim().length > 4 || matchedDec.length > 0;
 
     if (!isTypeCorrect) {
       return {
         status: 'incorrect',
-        title: 'Kararını Yeniden Düşün',
+        title: 'Gözlemini ve Kararını Yeniden Değerlendir',
         message: cItem.feedbacks.incorrect,
         score: 25
       };
     }
 
-    if (!hasObs || !hasRea) {
+    // Doğru seçim yapıldı; gerekçe ve gözlemin yeterliliği denetleniyor
+    var hasObs = obsLower.length >= 4;
+    var hasRea = reaLower.length >= 4;
+
+    // Kabul edilebilir yanıt listesiyle esnek eşleşme kontrolü
+    var matchedAcceptedObs = false;
+    if (cItem.acceptedObservations && cItem.acceptedObservations.length > 0) {
+      matchedAcceptedObs = cItem.acceptedObservations.some(function (p) {
+        var cleanP = p.toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, '');
+        var words = cleanP.split(/\s+/).filter(function (w) { return w.length > 3; });
+        return words.some(function (w) { return fullText.indexOf(w) !== -1; });
+      });
+    }
+
+    var matchedAcceptedDec = false;
+    if (cItem.acceptedDecisions && cItem.acceptedDecisions.length > 0) {
+      matchedAcceptedDec = cItem.acceptedDecisions.some(function (p) {
+        var cleanP = p.toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, '');
+        var words = cleanP.split(/\s+/).filter(function (w) { return w.length > 3; });
+        return words.filter(function (w) { return reaLower.indexOf(w) !== -1 || fullText.indexOf(w) !== -1; }).length >= 1;
+      });
+    }
+
+    var matchedObsKey = cItem.observationKeywords.filter(function (k) {
+      return fullText.indexOf(k.toLowerCase()) !== -1;
+    });
+    var matchedDecKey = cItem.decisionKeywords.filter(function (k) {
+      return reaLower.indexOf(k.toLowerCase()) !== -1;
+    });
+
+    // Kavram tuzakları ve eksik gerekçe pedagojik tespiti:
+    var isShallowOrTrap = false;
+    // 1. Vaka (Demir): Yalnızca renk değişti deyip pas veya yeni maddeyi belirtmeme
+    if (cItem.id === 1) {
+      var mentionsNewSubstance = fullText.indexOf('pas') !== -1 || fullText.indexOf('yeni madde') !== -1 || fullText.indexOf('tabaka') !== -1 || fullText.indexOf('bileşik') !== -1 || fullText.indexOf('oksit') !== -1;
+      if (!mentionsNewSubstance && (fullText.indexOf('renk') !== -1 || reaLower.length < 15)) {
+        isShallowOrTrap = true;
+      }
+    }
+    // 7. Vaka (Beton): Yalnızca dondu veya katılaştı deyip kimyasal tepkimeyi belirtmeme
+    if (cItem.id === 7) {
+      var mentionsReaction = fullText.indexOf('tepkime') !== -1 || fullText.indexOf('reaksiyon') !== -1 || fullText.indexOf('çimento') !== -1 || fullText.indexOf('yeni') !== -1 || fullText.indexOf('hidrat') !== -1;
+      if (!mentionsReaction) {
+        isShallowOrTrap = true;
+      }
+    }
+    // 10. Vaka (Mum): Yalnızca eridi deyip yanma veya alev/yeni maddeyi belirtmeme
+    if (cItem.id === 10) {
+      var mentionsCombustion = fullText.indexOf('yan') !== -1 || fullText.indexOf('alev') !== -1 || fullText.indexOf('ışık') !== -1 || fullText.indexOf('ısı') !== -1 || fullText.indexOf('gaz') !== -1 || fullText.indexOf('duman') !== -1 || fullText.indexOf('fitil') !== -1;
+      if (!mentionsCombustion && (fullText.indexOf('eri') !== -1 || reaLower.length < 15)) {
+        isShallowOrTrap = true;
+      }
+    }
+    // 11. Vaka (Şeker): "Yok oldu" yanılgısı
+    if (cItem.id === 11) {
+      if (fullText.indexOf('yok oldu') !== -1 && fullText.indexOf('çözün') === -1) {
+        isShallowOrTrap = true;
+      }
+    }
+
+    var isWellFormed = (hasObs || matchedAcceptedObs || matchedObsKey.length > 0) &&
+                       (hasRea || matchedAcceptedDec || matchedDecKey.length > 0) &&
+                       !isShallowOrTrap;
+
+    if (!isWellFormed) {
       return {
         status: 'incomplete',
-        title: 'Gözlemini ve Gerekçeni Güçlendir',
+        title: 'Kararın Doğru Yönde, Gerekçeni Tamamla',
         message: cItem.feedbacks.incomplete,
         score: 65
       };
@@ -151,6 +205,8 @@
       score: 100
     };
   }
+
+  window.evaluateAnswer = evaluateAnswer;
 
   // Basit Parçacık / Konfeti Efekti
   function launchConfetti() {
@@ -326,14 +382,21 @@
         window.ThreeMolecularSimulator.init(modalThreeEl, state.activeCase);
       }
     }
-    // 2. Vaka detayında Mikro Moleküller modu açıksa:
-    else if (state.activeCase && state.viewMode === 'micro' && !state.showFeedbackModal) {
+    // 2. Video Modalı içinde Mikro Moleküller 3D açıksa:
+    else if (state.showVideoModal && state.videoModalTab === 'micro' && state.activeCase) {
+      var vModalThreeEl = document.getElementById('videoModalThreeStage');
+      if (vModalThreeEl && window.ThreeMolecularSimulator) {
+        window.ThreeMolecularSimulator.init(vModalThreeEl, state.activeCase);
+      }
+    }
+    // 3. Vaka detayında Mikro Moleküller modu açıksa:
+    else if (state.activeCase && state.viewMode === 'micro' && !state.showFeedbackModal && !state.showVideoModal) {
       var molEl = document.getElementById('molecularStage');
       if (molEl && window.ThreeMolecularSimulator) {
         window.ThreeMolecularSimulator.init(molEl, state.activeCase);
       }
     } else {
-      if (window.ThreeMolecularSimulator && !state.showFeedbackModal) {
+      if (window.ThreeMolecularSimulator && !state.showFeedbackModal && (!state.showVideoModal || state.videoModalTab !== 'micro')) {
         window.ThreeMolecularSimulator.stop();
       }
     }
@@ -540,15 +603,26 @@
     h += '        <p class="form-box-desc">Olayda doğrudan gözlemlediğin değişimleri kendi cümlelerinle yaz (renk değişimi, duman, gaz, çökelti, hâl değişimi vb.).</p>';
     h += '      </div>';
     h += '    </div>';
-    h += '    <textarea id="obsInput" class="form-textarea" rows="3" placeholder="Gözlemlerini buraya yaz... (Örn: Rengi değişti, pas tabakası oluştu, alev ve duman çıktı vb.)">' + (rec ? rec.observation : '') + '</textarea>';
+    var obsPlaceholder = (c.acceptedObservations && c.acceptedObservations.length > 0)
+      ? 'Gözlemlerini buraya yaz... (Örn: ' + c.acceptedObservations[0] + ')'
+      : 'Gözlemlerini buraya yaz... (Örn: Rengi değişti, pas tabakası oluştu, alev ve duman çıktı vb.)';
+    h += '    <textarea id="obsInput" class="form-textarea" rows="3" placeholder="' + obsPlaceholder + '">' + (rec ? rec.observation : '') + '</textarea>';
+    if (c.acceptedObservations && c.acceptedObservations.length > 0) {
+      h += '    <div class="form-examples-row">';
+      h += '      <span class="examples-tag">Kabul Edilebilir Gözlem Örnekleri:</span>';
+      c.acceptedObservations.forEach(function (obs) {
+        h += '      <button type="button" class="chip-suggestion" data-fill="obs" data-text="' + obs.replace(/"/g, '&quot;') + '" title="Metin kutusuna aktarmak için tıkla">' + obs + '</button>';
+      });
+      h += '    </div>';
+    }
     h += '  </div>';
 
-    // 2. Kararını Ver ve Gerekçelendir
+    // 2. Kararını Yaz ve Gerekçelendir
     h += '  <div class="form-box">';
     h += '    <div class="form-box-header">';
     h += '      <span class="step-num-pill">2</span>';
     h += '      <div>';
-    h += '        <h3 class="form-box-title">Kararını Ver ve Gerekçelendir</h3>';
+    h += '        <h3 class="form-box-title">Kararını Yaz ve Gerekçelendir</h3>';
     h += '        <p class="form-box-desc">Bu değişim fiziksel mi yoksa kimyasal mı? Kararını seçip gerekçeni yaz.</p>';
     h += '      </div>';
     h += '    </div>';
@@ -592,7 +666,18 @@
     h += '          <span class="type-sub-desc">Yeni özellikte madde oluşur</span>';
     h += '        </button>';
     h += '      </div>';
-    h += '      <textarea id="reaInput" class="form-textarea" rows="2" placeholder="Kararının gerekçesini buraya yaz... (Örn: Çünkü yeni bir madde oluştu / sadece hâl değişti, madde aynı kaldı)">' + (rec ? rec.reasoning : '') + '</textarea>';
+    var reaPlaceholder = (c.acceptedDecisions && c.acceptedDecisions.length > 0)
+      ? 'Kararının gerekçesini buraya yaz... (Örn: ' + (c.acceptedDecisions[1] || c.acceptedDecisions[0]) + ')'
+      : 'Kararının gerekçesini buraya yaz... (Örn: Çünkü yeni bir madde oluştu / sadece hâl değişti, madde aynı kaldı)';
+    h += '      <textarea id="reaInput" class="form-textarea" rows="2" placeholder="' + reaPlaceholder + '">' + (rec ? rec.reasoning : '') + '</textarea>';
+    if (c.acceptedDecisions && c.acceptedDecisions.length > 0) {
+      h += '    <div class="form-examples-row">';
+      h += '      <span class="examples-tag">Kabul Edilebilir Karar ve Gerekçe Örnekleri:</span>';
+      c.acceptedDecisions.forEach(function (dec) {
+        h += '      <button type="button" class="chip-suggestion" data-fill="rea" data-text="' + dec.replace(/"/g, '&quot;') + '" title="Metin kutusuna aktarmak için tıkla">' + dec + '</button>';
+      });
+      h += '    </div>';
+    }
     h += '    </div>';
     h += '  </div>';
 
@@ -611,8 +696,9 @@
     return h;
   }
 
-  // Büyük Video İnceleme Modalı (Lightbox / Sinema Kartı)
+  // Büyük Video İnceleme Modalı (Lightbox / Sinema Kartı & 3D Mikro Moleküler Sekmeli)
   function renderVideoModal(c) {
+    var activeTab = state.videoModalTab || 'macro';
     var h = '';
     h += '<div class="modal-backdrop video-modal-backdrop" id="videoModalBackdrop">';
     h += '  <div class="video-modal-card">';
@@ -623,12 +709,24 @@
     h += '      </div>';
     h += '      <button class="btn-icon" id="btnCloseVideoModal" title="Kapat">✕</button>';
     h += '    </div>';
-    h += '    <div class="video-modal-stage">';
-    h += '      <video id="modalVideoElem" class="video-modal-elem" poster="' + c.thumbnailUrl + '" controls autoplay playsinline src="' + c.videoUrl + '"></video>';
+    h += '    <div class="eval-tabs-nav video-modal-tabs-nav">';
+    h += '      <button type="button" class="eval-tab-pill' + (activeTab === 'macro' ? ' active' : '') + '" id="btnVideoModalTabMacro">';
+    h += '        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>';
+    h += '        <span>📹 Makro Video</span>';
+    h += '      </button>';
+    h += '      <button type="button" class="eval-tab-pill' + (activeTab === 'micro' ? ' active' : '') + '" id="btnVideoModalTabMicro">';
+    h += '        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
+    h += '        <span>⚛ Mikro Moleküller 3D</span>';
+    h += '        <span class="tab-3d-tag">3D</span>';
+    h += '      </button>';
     h += '    </div>';
+    h += '    <div class="video-modal-stage" id="videoModalMacroStage"' + (activeTab !== 'macro' ? ' style="display:none;"' : '') + '>';
+    h += '      <video id="modalVideoElem" class="video-modal-elem" poster="' + c.thumbnailUrl + '" controls ' + (activeTab === 'macro' ? 'autoplay' : '') + ' playsinline src="' + c.videoUrl + '"></video>';
+    h += '    </div>';
+    h += '    <div class="video-modal-stage three-modal-stage" id="videoModalThreeStage"' + (activeTab !== 'micro' ? ' style="display:none;"' : '') + '></div>';
     h += '    <div class="video-modal-footer">';
-    h += '      <div class="video-modal-hint"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" style="display:inline;vertical-align:-2px;margin-right:4px;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>Olayı yakından inceleyin: Renk, duman, gaz çıkışı, çökelti ve hal değişimlerini tam ekranda gözlemleyin.</div>';
-    h += '      <button class="btn-primary-action" id="btnCloseVideoModalBottom">Gözlem Formuna Dön</button>';
+    h += '      <div class="video-modal-hint"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" style="display:inline;vertical-align:-2px;margin-right:4px;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>Olayı yakından inceleyin: Makro video veya CPK standartlı 3D atom-molekül simülasyonunu tam ekranda döndürerek inceleyin.</div>';
+    h += '      <button class="eval-oval-btn btn-primary-oval" id="btnCloseVideoModalBottom">Gözlem Formuna Dön</button>';
     h += '    </div>';
     h += '  </div>';
     h += '</div>';
@@ -1065,6 +1163,7 @@
       btnExpVid.onclick = function () {
         if (state.soundEnabled) window.SoundManager.playClick();
         state.showVideoModal = true;
+        state.videoModalTab = 'macro';
         render();
       };
     }
@@ -1073,32 +1172,105 @@
       btnOpenLarge.onclick = function () {
         if (state.soundEnabled) window.SoundManager.playClick();
         state.showVideoModal = true;
+        state.videoModalTab = 'macro';
         render();
       };
     }
+
+    function closeVideoModal() {
+      var modalVid = document.getElementById('modalVideoElem');
+      if (modalVid) modalVid.pause();
+      if (window.ThreeMolecularSimulator) window.ThreeMolecularSimulator.stop();
+      state.showVideoModal = false;
+      state.videoModalTab = 'macro';
+      render();
+    }
+
     var btnCloseVid = document.getElementById('btnCloseVideoModal');
     if (btnCloseVid) {
-      btnCloseVid.onclick = function () {
-        state.showVideoModal = false;
-        render();
-      };
+      btnCloseVid.onclick = closeVideoModal;
     }
     var btnCloseVidBot = document.getElementById('btnCloseVideoModalBottom');
     if (btnCloseVidBot) {
-      btnCloseVidBot.onclick = function () {
-        state.showVideoModal = false;
-        render();
-      };
+      btnCloseVidBot.onclick = closeVideoModal;
     }
     var vidBackdrop = document.getElementById('videoModalBackdrop');
     if (vidBackdrop) {
       vidBackdrop.onclick = function (e) {
-        if (e.target === vidBackdrop) {
-          state.showVideoModal = false;
-          render();
+        if (e.target === vidBackdrop) closeVideoModal();
+      };
+    }
+
+    // Video Modal Sekmeleri (Makro Video vs 3D Mikro Moleküller)
+    var btnVidTabMacro = document.getElementById('btnVideoModalTabMacro');
+    var btnVidTabMicro = document.getElementById('btnVideoModalTabMicro');
+    var macroStage = document.getElementById('videoModalMacroStage');
+    var microStage = document.getElementById('videoModalThreeStage');
+    var modalVidElem = document.getElementById('modalVideoElem');
+
+    if (btnVidTabMacro && btnVidTabMicro) {
+      btnVidTabMacro.onclick = function () {
+        if (state.soundEnabled) window.SoundManager.playClick();
+        state.videoModalTab = 'macro';
+        btnVidTabMacro.classList.add('active');
+        btnVidTabMicro.classList.remove('active');
+        if (macroStage) macroStage.style.display = 'flex';
+        if (microStage) microStage.style.display = 'none';
+        if (window.ThreeMolecularSimulator) window.ThreeMolecularSimulator.stop();
+        if (modalVidElem) modalVidElem.play().catch(function () {});
+      };
+
+      btnVidTabMicro.onclick = function () {
+        if (state.soundEnabled) window.SoundManager.playClick();
+        state.videoModalTab = 'micro';
+        btnVidTabMicro.classList.add('active');
+        btnVidTabMacro.classList.remove('active');
+        if (modalVidElem) modalVidElem.pause();
+        if (macroStage) macroStage.style.display = 'none';
+        if (microStage) {
+          microStage.style.display = 'block';
+          if (window.ThreeMolecularSimulator) {
+            window.ThreeMolecularSimulator.init(microStage, state.activeCase);
+          }
         }
       };
     }
+
+    // Kabul Edilebilir Örnek İfade Çipleri Tıklama Olayları
+    var chipSuggestions = document.querySelectorAll('.chip-suggestion');
+    chipSuggestions.forEach(function (btn) {
+      btn.onclick = function () {
+        if (state.soundEnabled) window.SoundManager.playClick();
+        var target = btn.getAttribute('data-fill');
+        var text = btn.getAttribute('data-text');
+        if (target === 'obs') {
+          var obsEl = document.getElementById('obsInput');
+          if (obsEl) {
+            obsEl.value = text;
+            obsEl.focus();
+          }
+        } else if (target === 'rea') {
+          var reaEl = document.getElementById('reaInput');
+          if (reaEl) {
+            reaEl.value = text;
+            reaEl.focus();
+          }
+          if (text.indexOf('Fiziksel') !== -1) {
+            state.selectedType = 'physical';
+            var phyBtn = document.getElementById('btnPickPhysical');
+            var chmBtn = document.getElementById('btnPickChemical');
+            if (phyBtn) phyBtn.classList.add('active-phy');
+            if (chmBtn) chmBtn.classList.remove('active-chm');
+          } else if (text.indexOf('Kimyasal') !== -1) {
+            state.selectedType = 'chemical';
+            var phyBtn = document.getElementById('btnPickPhysical');
+            var chmBtn = document.getElementById('btnPickChemical');
+            if (chmBtn) chmBtn.classList.add('active-chm');
+            if (phyBtn) phyBtn.classList.remove('active-phy');
+          }
+        }
+      };
+    });
 
     // Type toggles (Madde 1: Tıklanıldığında ve Üzerine Gelindiğinde Canlı Animasyon)
     var btnPickPhy = document.getElementById('btnPickPhysical');
