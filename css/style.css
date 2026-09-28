@@ -4,66 +4,72 @@
    LIGHT & DARK TEMALARI + MOBİL YATAY (LANDSCAPE) MODU
    ======================================================== */
 
-/* --- DARK TEMA (VARSAYILAN) --- */
+/* --- DARK TEMA (ÖNERİ 1: SİBER CSI KİMYA LAB - DERİN OBSİDİYEN #0b0f17 & BELİRGİN BENZEN / MOLEKÜL KAFESİ) --- */
 :root,
 [data-theme="dark"] {
-  --md-sys-color-surface: #0e141b;
-  --md-sys-color-surface-dim: #090e14;
-  --md-sys-color-surface-bright: #343a44;
-  --md-sys-color-surface-container-lowest: #070b10;
-  --md-sys-color-surface-container-low: #121822;
-  --md-sys-color-surface-container: #161e2b;
-  --md-sys-color-surface-container-high: #1c2534;
-  --md-sys-color-surface-container-highest: #222d3d;
+  --md-sys-color-surface: #0b0f17;
+  --md-sys-color-surface-dim: #070a10;
+  --md-sys-color-surface-bright: #1f2937;
+  --md-sys-color-surface-container-lowest: #05080e;
+  --md-sys-color-surface-container-low: rgba(17, 24, 39, 0.78);
+  --md-sys-color-surface-container: rgba(21, 30, 48, 0.85);
+  --md-sys-color-surface-container-high: rgba(27, 38, 59, 0.90);
+  --md-sys-color-surface-container-highest: rgba(36, 50, 75, 0.94);
 
-  --md-sys-color-on-surface: #e1e7f0;
-  --md-sys-color-on-surface-variant: #9aa8b8;
-  --md-sys-color-outline: #384657;
-  --md-sys-color-outline-variant: #222d3a;
+  --md-sys-color-on-surface: #f1f5f9;
+  --md-sys-color-on-surface-variant: #94a3b8;
+  --md-sys-color-outline: rgba(56, 189, 248, 0.38);
+  --md-sys-color-outline-variant: rgba(56, 189, 248, 0.20);
 
-  /* Primary Accent: Cyan / Cobalt Tonal System */
-  --md-sys-color-primary: #7ed0ff;
-  --md-sys-color-on-primary: #00344b;
-  --md-sys-color-primary-container: #004c6c;
-  --md-sys-color-on-primary-container: #c6e7ff;
+  /* Primary Accent: Siber Neon Cyan / Cobalt Tonal System */
+  --md-sys-color-primary: #38bdf8;
+  --md-sys-color-on-primary: #041019;
+  --md-sys-color-primary-container: rgba(56, 189, 248, 0.18);
+  --md-sys-color-on-primary-container: #bae6fd;
 
-  /* Secondary: Teal Evidence Palette */
-  --md-sys-color-secondary: #adcdd8;
-  --md-sys-color-on-secondary: #17343e;
-  --md-sys-color-secondary-container: #2e4a55;
-  --md-sys-color-on-secondary-container: #c9e8f4;
+  /* Secondary: Teal Forensic Evidence Palette */
+  --md-sys-color-secondary: #2dd4bf;
+  --md-sys-color-on-secondary: #042f2e;
+  --md-sys-color-secondary-container: rgba(45, 212, 191, 0.18);
+  --md-sys-color-on-secondary-container: #ccfbf1;
 
   /* Tertiary: Amber / Crime Alert Tonal System */
-  --md-sys-color-tertiary: #f5be7e;
-  --md-sys-color-on-tertiary: #452b00;
-  --md-sys-color-tertiary-container: #633f00;
-  --md-sys-color-on-tertiary-container: #ffddb6;
+  --md-sys-color-tertiary: #fbbf24;
+  --md-sys-color-on-tertiary: #451a03;
+  --md-sys-color-tertiary-container: rgba(251, 191, 36, 0.18);
+  --md-sys-color-on-tertiary-container: #fef3c7;
 
-  /* Semantic Feedback Tones */
-  --md-sys-color-success: #75d99c;
-  --md-sys-color-on-success: #00391d;
-  --md-sys-color-success-container: #00522c;
-  --md-sys-color-on-success-container: #93f6b7;
+  /* Semantic Feedback Tones: Kimya Yeşili & Reaksiyon Tonal Sistemi */
+  --md-sys-color-success: #10b981;
+  --md-sys-color-on-success: #022c22;
+  --md-sys-color-success-container: rgba(16, 185, 129, 0.22);
+  --md-sys-color-on-success-container: #a7f3d0;
 
   --md-sys-color-warning: #facc15;
   --md-sys-color-on-warning: #422006;
-  --md-sys-color-warning-container: #713f12;
+  --md-sys-color-warning-container: rgba(250, 204, 21, 0.2);
   --md-sys-color-on-warning-container: #fef08a;
 
-  --md-sys-color-error: #ffb4ab;
-  --md-sys-color-on-error: #690005;
-  --md-sys-color-error-container: #93000a;
-  --md-sys-color-on-error-container: #ffdad6;
+  --md-sys-color-error: #f87171;
+  --md-sys-color-on-error: #450a0a;
+  --md-sys-color-error-container: rgba(248, 113, 113, 0.2);
+  --md-sys-color-on-error-container: #fecaca;
 
-  --app-bg-gradient: radial-gradient(circle at 50% -10%, rgba(126, 208, 255, 0.09) 0%, transparent 60%),
-                     linear-gradient(to bottom, #0e141b, #090e14);
-  --header-bg: rgba(18, 24, 34, 0.88);
-  --tape-dark: #171f2b;
+  /* Belirgin Altıgen Benzen Halkaları ve Molekül Kafesi SVG Deseni (Dark Mode) */
+  --app-bg-pattern: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2790%27%20height%3D%27103.92%27%20viewBox%3D%270%200%2090%20103.92%27%3E%20%3C%21--%20Covalent%20Bonds%20%28Lattice%20Edges%29%20--%3E%20%3Cg%20stroke%3D%27rgba%2856%2C189%2C248%2C0.24%29%27%20stroke-width%3D%271.3%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%20fill%3D%27none%27%3E%20%3Cpath%20d%3D%27M15%2025.98%20L30%200%20L60%200%20L75%2025.98%20L60%2051.96%20L30%2051.96%20Z%27/%3E%20%3Cpath%20d%3D%27M15%2077.94%20L30%2051.96%20L60%2051.96%20L75%2077.94%20L60%20103.92%20L30%20103.92%20Z%27/%3E%20%3Cpath%20d%3D%27M0%2025.98%20L15%2025.98%20M75%2025.98%20L90%2025.98%27/%3E%20%3Cpath%20d%3D%27M0%2077.94%20L15%2077.94%20M75%2077.94%20L90%2077.94%27/%3E%20%3C/g%3E%20%3C%21--%20Benzene%20Resonance%20Rings%20--%3E%20%3Cg%20fill%3D%27none%27%20stroke%3D%27rgba%2856%2C189%2C248%2C0.20%29%27%20stroke-width%3D%271.2%27%20stroke-dasharray%3D%274%2C3%27%3E%20%3Ccircle%20cx%3D%2745%27%20cy%3D%2725.98%27%20r%3D%2714%27/%3E%20%3Cpath%20d%3D%27M0%2037.96%20A14%2014%200%200%201%200%2065.96%27/%3E%20%3Cpath%20d%3D%27M90%2037.96%20A14%2014%200%200%200%2090%2065.96%27/%3E%20%3C/g%3E%20%3C%21--%20Molecular%20Atoms%20%28Carbon%20Nodes%29%20--%3E%20%3Cg%20fill%3D%27rgba%2856%2C189%2C248%2C0.65%29%27%3E%20%3Ccircle%20cx%3D%2730%27%20cy%3D%270%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2760%27%20cy%3D%270%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2715%27%20cy%3D%2725.98%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2775%27%20cy%3D%2725.98%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2730%27%20cy%3D%2751.96%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2760%27%20cy%3D%2751.96%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2715%27%20cy%3D%2777.94%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2775%27%20cy%3D%2777.94%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2730%27%20cy%3D%27103.92%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2760%27%20cy%3D%27103.92%27%20r%3D%272.2%27/%3E%20%3C/g%3E%20%3C/svg%3E");
+
+  --app-bg-gradient: radial-gradient(circle at 18% 15%, rgba(56, 189, 248, 0.16) 0%, transparent 45%),
+                     radial-gradient(circle at 82% 85%, rgba(16, 185, 129, 0.12) 0%, transparent 45%),
+                     radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.05) 0%, transparent 60%),
+                     var(--app-bg-pattern),
+                     linear-gradient(to bottom, #0b0f17, #06090e);
+  --header-bg: rgba(11, 15, 23, 0.86);
+  --tape-dark: #0b0f17;
   --text-title: #ffffff;
   --feedback-text: #ffffff;
-  --feedback-box-bg: rgba(14, 20, 27, 0.45);
-  --overlay-bg: rgba(9, 14, 20, 0.85);
-  --video-overlay: rgba(14, 20, 27, 0.75);
+  --feedback-box-bg: rgba(17, 24, 39, 0.8);
+  --overlay-bg: rgba(7, 10, 16, 0.88);
+  --video-overlay: rgba(11, 15, 23, 0.78);
 
   /* M3 Shape System */
   --md-shape-corner-small: 8px;
@@ -72,78 +78,84 @@
   --md-shape-corner-extra-large: 24px;
   --md-shape-corner-full: 9999px;
 
-  /* M3 Elevations */
-  --md-elevation-1: 0 1px 3px 1px rgba(0, 0, 0, 0.2), 0 1px 2px 0 rgba(0, 0, 0, 0.15);
-  --md-elevation-2: 0 2px 6px 2px rgba(0, 0, 0, 0.25), 0 1px 2px 0 rgba(0, 0, 0, 0.15);
-  --md-elevation-3: 0 4px 12px 3px rgba(0, 0, 0, 0.3), 0 1px 3px 0 rgba(0, 0, 0, 0.2);
-  --md-elevation-4: 0 8px 24px 4px rgba(0, 0, 0, 0.35), 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+  /* M3 Elevations (Cyber Glow Tonal) */
+  --md-elevation-1: 0 1px 3px 1px rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  --md-elevation-2: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 6px rgba(56, 189, 248, 0.1);
+  --md-elevation-3: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 12px rgba(56, 189, 248, 0.16);
+  --md-elevation-4: 0 16px 36px 4px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.22);
 }
 
-/* --- LIGHT TEMA --- */
+/* --- LIGHT TEMA (ÖNERİ 1 LIGHT: MODERN SİBER ADLİ KİMYA TEMİZ ODA LAB #f4f6fa & AYDINLIK MOLEKÜL KAFESİ) --- */
 [data-theme="light"] {
-  --md-sys-color-surface: #f7f9fe;
-  --md-sys-color-surface-dim: #d8dde6;
+  --md-sys-color-surface: #f4f6fa;
+  --md-sys-color-surface-dim: #e2e8f0;
   --md-sys-color-surface-bright: #ffffff;
   --md-sys-color-surface-container-lowest: #ffffff;
-  --md-sys-color-surface-container-low: #f0f4fb;
-  --md-sys-color-surface-container: #e7ecf5;
-  --md-sys-color-surface-container-high: #e0e6ef;
-  --md-sys-color-surface-container-highest: #d9e0ea;
+  --md-sys-color-surface-container-low: #ffffff;
+  --md-sys-color-surface-container: #ffffff;
+  --md-sys-color-surface-container-high: #f8fafc;
+  --md-sys-color-surface-container-highest: #f1f5f9;
 
-  --md-sys-color-on-surface: #151b22;
-  --md-sys-color-on-surface-variant: #4b5563;
-  --md-sys-color-outline: #6b7684;
-  --md-sys-color-outline-variant: #cbd5e1;
+  --md-sys-color-on-surface: #0f172a;
+  --md-sys-color-on-surface-variant: #475569;
+  --md-sys-color-outline: rgba(14, 165, 233, 0.38);
+  --md-sys-color-outline-variant: #e2e8f0;
 
-  /* Primary Accent: Deep Cyan / Cobalt */
-  --md-sys-color-primary: #00668b;
+  /* Primary Accent: Deep Modern Lab Cyan / Cobalt */
+  --md-sys-color-primary: #0284c7;
   --md-sys-color-on-primary: #ffffff;
-  --md-sys-color-primary-container: #c3e8ff;
-  --md-sys-color-on-primary-container: #001e2c;
+  --md-sys-color-primary-container: #e0f2fe;
+  --md-sys-color-on-primary-container: #0369a1;
 
   /* Secondary: Soft Slate Cyan */
-  --md-sys-color-secondary: #4a626c;
+  --md-sys-color-secondary: #0d9488;
   --md-sys-color-on-secondary: #ffffff;
-  --md-sys-color-secondary-container: #cde6f2;
-  --md-sys-color-on-secondary-container: #061e27;
+  --md-sys-color-secondary-container: #ccfbf1;
+  --md-sys-color-on-secondary-container: #115e59;
 
-  /* Tertiary: Deep Amber */
-  --md-sys-color-tertiary: #7d5700;
+  /* Tertiary: Deep Amber Alert */
+  --md-sys-color-tertiary: #b45309;
   --md-sys-color-on-tertiary: #ffffff;
-  --md-sys-color-tertiary-container: #ffdea2;
-  --md-sys-color-on-tertiary-container: #261900;
+  --md-sys-color-tertiary-container: #fef3c7;
+  --md-sys-color-on-tertiary-container: #78350f;
 
-  /* Semantic Feedback Tones */
-  --md-sys-color-success: #0b8043;
+  /* Semantic Feedback Tones: Kimya Yeşili */
+  --md-sys-color-success: #059669;
   --md-sys-color-on-success: #ffffff;
-  --md-sys-color-success-container: #b4f7cf;
-  --md-sys-color-on-success-container: #00210f;
+  --md-sys-color-success-container: #d1fae5;
+  --md-sys-color-on-success-container: #065f46;
 
-  --md-sys-color-warning: #855300;
+  --md-sys-color-warning: #d97706;
   --md-sys-color-on-warning: #ffffff;
-  --md-sys-color-warning-container: #ffe088;
-  --md-sys-color-on-warning-container: #2a1700;
+  --md-sys-color-warning-container: #fef3c7;
+  --md-sys-color-on-warning-container: #92400e;
 
-  --md-sys-color-error: #ba1a1a;
+  --md-sys-color-error: #dc2626;
   --md-sys-color-on-error: #ffffff;
-  --md-sys-color-error-container: #ffdad6;
-  --md-sys-color-on-error-container: #410002;
+  --md-sys-color-error-container: #fee2e2;
+  --md-sys-color-on-error-container: #991b1b;
 
-  --app-bg-gradient: radial-gradient(circle at 50% -10%, rgba(0, 102, 139, 0.08) 0%, transparent 60%),
-                     linear-gradient(to bottom, #f7f9fe, #edf2f9);
-  --header-bg: rgba(240, 244, 251, 0.9);
-  --tape-dark: #d8dde6;
-  --text-title: #10161f;
-  --feedback-text: #151b22;
-  --feedback-box-bg: rgba(255, 255, 255, 0.7);
-  --overlay-bg: rgba(240, 244, 250, 0.88);
-  --video-overlay: rgba(21, 27, 34, 0.7);
+  /* Belirgin Altıgen Benzen Halkaları ve Molekül Kafesi SVG Deseni (Light Mode) */
+  --app-bg-pattern: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2790%27%20height%3D%27103.92%27%20viewBox%3D%270%200%2090%20103.92%27%3E%20%3C%21--%20Covalent%20Bonds%20%28Lattice%20Edges%29%20--%3E%20%3Cg%20stroke%3D%27rgba%2814%2C165%2C233%2C0.22%29%27%20stroke-width%3D%271.3%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%20fill%3D%27none%27%3E%20%3Cpath%20d%3D%27M15%2025.98%20L30%200%20L60%200%20L75%2025.98%20L60%2051.96%20L30%2051.96%20Z%27/%3E%20%3Cpath%20d%3D%27M15%2077.94%20L30%2051.96%20L60%2051.96%20L75%2077.94%20L60%20103.92%20L30%20103.92%20Z%27/%3E%20%3Cpath%20d%3D%27M0%2025.98%20L15%2025.98%20M75%2025.98%20L90%2025.98%27/%3E%20%3Cpath%20d%3D%27M0%2077.94%20L15%2077.94%20M75%2077.94%20L90%2077.94%27/%3E%20%3C/g%3E%20%3C%21--%20Benzene%20Resonance%20Rings%20--%3E%20%3Cg%20fill%3D%27none%27%20stroke%3D%27rgba%2814%2C165%2C233%2C0.18%29%27%20stroke-width%3D%271.2%27%20stroke-dasharray%3D%274%2C3%27%3E%20%3Ccircle%20cx%3D%2745%27%20cy%3D%2725.98%27%20r%3D%2714%27/%3E%20%3Cpath%20d%3D%27M0%2037.96%20A14%2014%200%200%201%200%2065.96%27/%3E%20%3Cpath%20d%3D%27M90%2037.96%20A14%2014%200%200%200%2090%2065.96%27/%3E%20%3C/g%3E%20%3C%21--%20Molecular%20Atoms%20%28Carbon%20Nodes%29%20--%3E%20%3Cg%20fill%3D%27rgba%2814%2C165%2C233%2C0.55%29%27%3E%20%3Ccircle%20cx%3D%2730%27%20cy%3D%270%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2760%27%20cy%3D%270%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2715%27%20cy%3D%2725.98%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2775%27%20cy%3D%2725.98%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2730%27%20cy%3D%2751.96%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2760%27%20cy%3D%2751.96%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2715%27%20cy%3D%2777.94%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2775%27%20cy%3D%2777.94%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2730%27%20cy%3D%27103.92%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2760%27%20cy%3D%27103.92%27%20r%3D%272.2%27/%3E%20%3C/g%3E%20%3C/svg%3E");
+
+  --app-bg-gradient: radial-gradient(circle at 18% 15%, rgba(14, 165, 233, 0.09) 0%, transparent 45%),
+                     radial-gradient(circle at 82% 85%, rgba(16, 185, 129, 0.07) 0%, transparent 45%),
+                     radial-gradient(circle at 50% 50%, rgba(2, 132, 199, 0.04) 0%, transparent 60%),
+                     var(--app-bg-pattern),
+                     linear-gradient(to bottom, #f4f6fa, #edf2f9);
+  --header-bg: rgba(255, 255, 255, 0.92);
+  --tape-dark: #e2e8f0;
+  --text-title: #0f172a;
+  --feedback-text: #0f172a;
+  --feedback-box-bg: rgba(255, 255, 255, 0.85);
+  --overlay-bg: rgba(244, 246, 250, 0.90);
+  --video-overlay: rgba(15, 23, 42, 0.72);
 
   /* M3 Light Elevations */
-  --md-elevation-1: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  --md-elevation-2: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --md-elevation-3: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --md-elevation-4: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --md-elevation-1: 0 1px 3px 0 rgba(15, 23, 42, 0.08), 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+  --md-elevation-2: 0 4px 8px -1px rgba(15, 23, 42, 0.08), 0 2px 4px -1px rgba(15, 23, 42, 0.04);
+  --md-elevation-3: 0 10px 18px -3px rgba(15, 23, 42, 0.09), 0 4px 6px -2px rgba(15, 23, 42, 0.04);
+  --md-elevation-4: 0 20px 28px -5px rgba(15, 23, 42, 0.12), 0 10px 10px -5px rgba(15, 23, 42, 0.04);
 }
 
 * {
@@ -163,7 +175,10 @@ body {
   flex-direction: column;
   -webkit-font-smoothing: antialiased;
   background-image: var(--app-bg-gradient);
-  background-attachment: fixed;
+  background-size: auto, auto, auto, 90px 103.92px, 100% 100%;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat, no-repeat;
+  background-position: 0 0, 0 0, 0 0, 0 0, 0 0;
+  background-attachment: fixed, fixed, fixed, fixed, fixed;
   transition: background-color 0.25s ease, color 0.25s ease;
 }
 
@@ -178,7 +193,7 @@ body {
     var(--tape-dark) 10px,
     var(--tape-dark) 20px
   );
-  opacity: 0.85;
+  opacity: 0.9;
 }
 
 /* ========================================================
@@ -389,8 +404,10 @@ body {
 .hero-banner {
   border-radius: var(--md-shape-corner-extra-large);
   background: var(--md-sys-color-surface-container-high);
-  border: 1px solid var(--md-sys-color-outline-variant);
-  padding: 0.9rem 1.35rem;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1.5px solid var(--md-sys-color-outline-variant);
+  padding: 0.95rem 1.45rem;
   box-shadow: var(--md-elevation-1);
   display: flex;
   flex-direction: column;
@@ -536,10 +553,12 @@ body {
 
 .case-card-compact {
   background: var(--md-sys-color-surface-container-low);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border: 1.5px solid var(--md-sys-color-outline-variant);
-  border-radius: 16px;
-  padding: 0.8rem 1rem;
-  min-height: 72px;
+  border-radius: 18px;
+  padding: 0.85rem 1.05rem;
+  min-height: 74px;
   height: auto;
   display: flex;
   align-items: center;
@@ -555,8 +574,14 @@ body {
 .case-card-compact:hover {
   background: var(--md-sys-color-surface-container);
   border-color: var(--md-sys-color-primary);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 10px 28px rgba(56, 189, 248, 0.24), 0 0 12px rgba(56, 189, 248, 0.16);
   transform: translateY(-2px);
+}
+
+[data-theme="light"] .case-card-compact:hover {
+  background: #f8fafc;
+  border-color: #0284c7;
+  box-shadow: 0 10px 26px rgba(2, 132, 199, 0.16);
 }
 
 .case-card-compact:active {
@@ -565,7 +590,7 @@ body {
 
 .case-card-compact.solved {
   background: var(--md-sys-color-surface-container);
-  border-color: rgba(117, 217, 156, 0.55);
+  border-color: rgba(16, 185, 129, 0.55);
 }
 
 .compact-left-group {
@@ -581,7 +606,7 @@ body {
   font-size: 0.7rem;
   font-weight: 800;
   color: var(--md-sys-color-primary);
-  background: var(--md-sys-color-surface-container-highest);
+  background: var(--md-sys-color-primary-container);
   padding: 2px 7px;
   border-radius: 6px;
   flex-shrink: 0;
@@ -589,10 +614,10 @@ body {
 }
 
 .compact-icon-box {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: 12px;
-  background: var(--md-sys-color-surface-container-high);
+  background: var(--md-sys-color-primary-container);
   color: var(--md-sys-color-primary);
   display: flex;
   align-items: center;
@@ -819,7 +844,9 @@ body {
   width: 100%;
   border-radius: 20px;
   background: var(--md-sys-color-surface-container-low);
-  border: 1px solid var(--md-sys-color-outline-variant);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1.5px solid var(--md-sys-color-outline-variant);
   padding: 1.15rem 1.35rem;
   box-shadow: var(--md-elevation-1);
   display: flex;
@@ -1525,7 +1552,9 @@ body {
   width: 100%;
   max-width: 960px;
   background: var(--md-sys-color-surface-container-high);
-  border: 1px solid var(--md-sys-color-outline-variant);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1.5px solid var(--md-sys-color-outline);
   border-radius: 24px;
   box-shadow: var(--md-elevation-4);
   display: flex;
@@ -1728,7 +1757,9 @@ body {
 
 .form-box {
   background: var(--md-sys-color-surface-container-low);
-  border: 1px solid var(--md-sys-color-outline-variant);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1.5px solid var(--md-sys-color-outline-variant);
   border-radius: 20px;
   padding: 1.15rem;
   display: flex;
@@ -2306,7 +2337,9 @@ body {
   width: 100%;
   max-width: 620px;
   background: var(--md-sys-color-surface-container-high);
-  border: 2px solid var(--md-sys-color-outline-variant);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1.5px solid var(--md-sys-color-outline);
   border-radius: 28px;
   box-shadow: var(--md-elevation-4);
   display: flex;
@@ -2626,7 +2659,9 @@ body {
   max-width: 860px;
   max-height: 90vh;
   background: var(--md-sys-color-surface-container-high);
-  border: 1px solid var(--md-sys-color-outline-variant);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1.5px solid var(--md-sys-color-outline);
   border-radius: 28px;
   box-shadow: var(--md-elevation-4);
   display: flex;
