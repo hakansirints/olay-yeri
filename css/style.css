@@ -55,14 +55,14 @@
   --md-sys-color-error-container: rgba(248, 113, 113, 0.2);
   --md-sys-color-on-error-container: #fecaca;
 
-  /* Belirgin Altıgen Benzen Halkaları ve Molekül Kafesi SVG Deseni (Dark Mode) */
-  --app-bg-pattern: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2790%27%20height%3D%27103.92%27%20viewBox%3D%270%200%2090%20103.92%27%3E%20%3C%21--%20Covalent%20Bonds%20%28Lattice%20Edges%29%20--%3E%20%3Cg%20stroke%3D%27rgba%2856%2C189%2C248%2C0.24%29%27%20stroke-width%3D%271.3%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%20fill%3D%27none%27%3E%20%3Cpath%20d%3D%27M15%2025.98%20L30%200%20L60%200%20L75%2025.98%20L60%2051.96%20L30%2051.96%20Z%27/%3E%20%3Cpath%20d%3D%27M15%2077.94%20L30%2051.96%20L60%2051.96%20L75%2077.94%20L60%20103.92%20L30%20103.92%20Z%27/%3E%20%3Cpath%20d%3D%27M0%2025.98%20L15%2025.98%20M75%2025.98%20L90%2025.98%27/%3E%20%3Cpath%20d%3D%27M0%2077.94%20L15%2077.94%20M75%2077.94%20L90%2077.94%27/%3E%20%3C/g%3E%20%3C%21--%20Benzene%20Resonance%20Rings%20--%3E%20%3Cg%20fill%3D%27none%27%20stroke%3D%27rgba%2856%2C189%2C248%2C0.20%29%27%20stroke-width%3D%271.2%27%20stroke-dasharray%3D%274%2C3%27%3E%20%3Ccircle%20cx%3D%2745%27%20cy%3D%2725.98%27%20r%3D%2714%27/%3E%20%3Cpath%20d%3D%27M0%2037.96%20A14%2014%200%200%201%200%2065.96%27/%3E%20%3Cpath%20d%3D%27M90%2037.96%20A14%2014%200%200%200%2090%2065.96%27/%3E%20%3C/g%3E%20%3C%21--%20Molecular%20Atoms%20%28Carbon%20Nodes%29%20--%3E%20%3Cg%20fill%3D%27rgba%2856%2C189%2C248%2C0.65%29%27%3E%20%3Ccircle%20cx%3D%2730%27%20cy%3D%270%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2760%27%20cy%3D%270%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2715%27%20cy%3D%2725.98%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2775%27%20cy%3D%2725.98%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2730%27%20cy%3D%2751.96%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2760%27%20cy%3D%2751.96%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2715%27%20cy%3D%2777.94%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2775%27%20cy%3D%2777.94%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2730%27%20cy%3D%27103.92%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2760%27%20cy%3D%27103.92%27%20r%3D%272.2%27/%3E%20%3C/g%3E%20%3C/svg%3E");
-
-  --app-bg-gradient: radial-gradient(circle at 18% 15%, rgba(56, 189, 248, 0.16) 0%, transparent 45%),
-                     radial-gradient(circle at 82% 85%, rgba(16, 185, 129, 0.12) 0%, transparent 45%),
-                     radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.05) 0%, transparent 60%),
-                     var(--app-bg-pattern),
-                     linear-gradient(to bottom, #0b0f17, #06090e);
+  /* Orijinal Öneri 1: Siber CSI Kimya Laboratuvarı Arkaplanı (Hafif Altıgen Kafes & Derin Obsidiyen) */
+  --app-bg-gradient: radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.12) 0%, transparent 40%),
+                     radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.10) 0%, transparent 45%),
+                     repeating-linear-gradient(60deg, rgba(56, 189, 248, 0.035) 0, rgba(56, 189, 248, 0.035) 1px, transparent 0, transparent 35px),
+                     repeating-linear-gradient(-60deg, rgba(56, 189, 248, 0.035) 0, rgba(56, 189, 248, 0.035) 1px, transparent 0, transparent 35px),
+                     linear-gradient(to bottom, #0b0f17, #070a10);
+  --app-bg-size: auto;
+  --app-bg-repeat: repeat;
   --header-bg: rgba(11, 15, 23, 0.86);
   --tape-dark: #0b0f17;
   --text-title: #ffffff;
@@ -135,14 +135,14 @@
   --md-sys-color-error-container: #fee2e2;
   --md-sys-color-on-error-container: #991b1b;
 
-  /* Belirgin Altıgen Benzen Halkaları ve Molekül Kafesi SVG Deseni (Light Mode) */
-  --app-bg-pattern: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2790%27%20height%3D%27103.92%27%20viewBox%3D%270%200%2090%20103.92%27%3E%20%3C%21--%20Covalent%20Bonds%20%28Lattice%20Edges%29%20--%3E%20%3Cg%20stroke%3D%27rgba%2814%2C165%2C233%2C0.22%29%27%20stroke-width%3D%271.3%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%20fill%3D%27none%27%3E%20%3Cpath%20d%3D%27M15%2025.98%20L30%200%20L60%200%20L75%2025.98%20L60%2051.96%20L30%2051.96%20Z%27/%3E%20%3Cpath%20d%3D%27M15%2077.94%20L30%2051.96%20L60%2051.96%20L75%2077.94%20L60%20103.92%20L30%20103.92%20Z%27/%3E%20%3Cpath%20d%3D%27M0%2025.98%20L15%2025.98%20M75%2025.98%20L90%2025.98%27/%3E%20%3Cpath%20d%3D%27M0%2077.94%20L15%2077.94%20M75%2077.94%20L90%2077.94%27/%3E%20%3C/g%3E%20%3C%21--%20Benzene%20Resonance%20Rings%20--%3E%20%3Cg%20fill%3D%27none%27%20stroke%3D%27rgba%2814%2C165%2C233%2C0.18%29%27%20stroke-width%3D%271.2%27%20stroke-dasharray%3D%274%2C3%27%3E%20%3Ccircle%20cx%3D%2745%27%20cy%3D%2725.98%27%20r%3D%2714%27/%3E%20%3Cpath%20d%3D%27M0%2037.96%20A14%2014%200%200%201%200%2065.96%27/%3E%20%3Cpath%20d%3D%27M90%2037.96%20A14%2014%200%200%200%2090%2065.96%27/%3E%20%3C/g%3E%20%3C%21--%20Molecular%20Atoms%20%28Carbon%20Nodes%29%20--%3E%20%3Cg%20fill%3D%27rgba%2814%2C165%2C233%2C0.55%29%27%3E%20%3Ccircle%20cx%3D%2730%27%20cy%3D%270%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2760%27%20cy%3D%270%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2715%27%20cy%3D%2725.98%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2775%27%20cy%3D%2725.98%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2730%27%20cy%3D%2751.96%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2760%27%20cy%3D%2751.96%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2715%27%20cy%3D%2777.94%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2775%27%20cy%3D%2777.94%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2730%27%20cy%3D%27103.92%27%20r%3D%272.2%27/%3E%20%3Ccircle%20cx%3D%2760%27%20cy%3D%27103.92%27%20r%3D%272.2%27/%3E%20%3C/g%3E%20%3C/svg%3E");
-
-  --app-bg-gradient: radial-gradient(circle at 18% 15%, rgba(14, 165, 233, 0.09) 0%, transparent 45%),
-                     radial-gradient(circle at 82% 85%, rgba(16, 185, 129, 0.07) 0%, transparent 45%),
-                     radial-gradient(circle at 50% 50%, rgba(2, 132, 199, 0.04) 0%, transparent 60%),
-                     var(--app-bg-pattern),
+  /* Orijinal Aydınlık Mod: Milimetrik Temiz Oda Lab Arkaplanı */
+  --app-bg-gradient: radial-gradient(circle at 15% 15%, rgba(14, 165, 233, 0.08) 0%, transparent 40%),
+                     radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.06) 0%, transparent 45%),
+                     linear-gradient(rgba(2, 132, 199, 0.04) 1px, transparent 1px),
+                     linear-gradient(90deg, rgba(2, 132, 199, 0.04) 1px, transparent 1px),
                      linear-gradient(to bottom, #f4f6fa, #edf2f9);
+  --app-bg-size: auto, auto, 28px 28px, 28px 28px, auto;
+  --app-bg-repeat: no-repeat, no-repeat, repeat, repeat, no-repeat;
   --header-bg: rgba(255, 255, 255, 0.92);
   --tape-dark: #e2e8f0;
   --text-title: #0f172a;
@@ -175,10 +175,9 @@ body {
   flex-direction: column;
   -webkit-font-smoothing: antialiased;
   background-image: var(--app-bg-gradient);
-  background-size: auto, auto, auto, 90px 103.92px, 100% 100%;
-  background-repeat: no-repeat, no-repeat, no-repeat, repeat, no-repeat;
-  background-position: 0 0, 0 0, 0 0, 0 0, 0 0;
-  background-attachment: fixed, fixed, fixed, fixed, fixed;
+  background-size: var(--app-bg-size, auto);
+  background-repeat: var(--app-bg-repeat, repeat);
+  background-attachment: fixed;
   transition: background-color 0.25s ease, color 0.25s ease;
 }
 
