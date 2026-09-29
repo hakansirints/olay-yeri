@@ -3058,156 +3058,255 @@ body {
 }
 
 /* ========================================================
-   MOBİL YATAY (LANDSCAPE) MODU - APP-LIKE EKRANA TAM OTURMA
+   MOBİL YATAY (LANDSCAPE) MODU - HASSAS RESPONSIVE DÜZENLEME
+   Hedef: 640x360, 667x375, 812x375, 844x390
    ======================================================== */
-@media screen and (orientation: landscape) and (max-height: 620px),
-       screen and (orientation: landscape) and (max-width: 1024px) and (max-height: 650px),
-       screen and (max-height: 520px) {
+@media screen and (max-width: 950px) and (orientation: landscape),
+       screen and (orientation: landscape) and (max-height: 500px) {
 
-  /* Tam Ekran Mobil Uygulama Akışı & Taşma Engelleme */
+  /* 1. Ekran Çerçevesi & Taşma Engelleme (100dvh) */
   html, body {
-    height: 100% !important;
+    height: 100dvh !important;
+    height: 100vh !important;
+    max-height: 100dvh !important;
     width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
     overflow-x: hidden !important;
+    overflow-y: hidden !important;
     overscroll-behavior: none !important;
     -webkit-tap-highlight-color: transparent;
     padding-left: env(safe-area-inset-left, 0) !important;
     padding-right: env(safe-area-inset-right, 0) !important;
+    margin: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
   }
 
   #app {
-    min-height: 100% !important;
+    height: 100dvh !important;
+    height: 100vh !important;
+    max-height: 100dvh !important;
+    width: 100% !important;
+    max-width: 100% !important;
     display: flex !important;
     flex-direction: column !important;
+    overflow: hidden !important;
     overflow-x: hidden !important;
+    overflow-y: hidden !important;
   }
 
-  /* App Header (Kompakt Native Mobil Üst Bar) */
+  .orientation-overlay {
+    display: none !important;
+  }
+
+  .crime-tape {
+    height: 3px !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* 2. Kompakt Native Mobil Başlık (Header) */
   .app-header {
-    height: 38px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    max-height: 34px !important;
     padding: 0 !important;
     flex-shrink: 0 !important;
     z-index: 60 !important;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant) !important;
   }
   .header-inner {
-    height: 38px !important;
-    padding: 0 0.65rem !important;
+    height: 34px !important;
+    padding: 0 0.5rem !important;
     max-width: 100% !important;
+    gap: 0.3rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+  }
+  .brand-container {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.35rem !important;
+    flex-shrink: 0 !important;
+    min-width: 0 !important;
   }
   .brand-logo-icon {
-    width: 24px !important;
-    height: 24px !important;
-    border-radius: 6px !important;
+    width: 22px !important;
+    height: 22px !important;
+    border-radius: 5px !important;
+    flex-shrink: 0 !important;
+  }
+  .brand-logo-icon svg {
+    width: 13px !important;
+    height: 13px !important;
   }
   .brand-title {
-    font-size: 0.8rem !important;
-    gap: 0.3rem !important;
+    font-size: clamp(0.68rem, 1.6vw, 0.78rem) !important;
+    font-weight: 800 !important;
+    white-space: nowrap !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.25rem !important;
+    line-height: 1 !important;
   }
   .csi-pill {
-    font-size: 0.52rem !important;
+    font-size: 0.5rem !important;
     padding: 1px 3px !important;
+    line-height: 1 !important;
+    letter-spacing: 0.3px !important;
   }
   .brand-motto {
     display: none !important;
   }
   .rank-badge-box {
-    padding: 0.12rem 0.45rem !important;
-    font-size: 0.64rem !important;
+    padding: 0.1rem 0.35rem !important;
+    font-size: 0.6rem !important;
+    height: 24px !important;
+    border-radius: 9999px !important;
+    gap: 0.2rem !important;
+    flex-shrink: 0 !important;
+  }
+  .rank-badge-box svg {
+    width: 13px !important;
+    height: 13px !important;
+  }
+  .rank-title {
+    font-size: 0.6rem !important;
+    font-weight: 700 !important;
   }
   .rank-counter {
     display: none !important;
   }
   .header-actions {
-    gap: 0.3rem !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.22rem !important;
+    flex-shrink: 0 !important;
   }
-  .btn-guide-header, .btn-notebook, .btn-report {
-    padding: 0.2rem 0.5rem !important;
-    font-size: 0.68rem !important;
-    gap: 0.25rem !important;
-    border-radius: 9999px !important;
-    height: 28px !important;
+  .btn-icon {
+    width: 24px !important;
+    height: 24px !important;
+    padding: 0 !important;
+    border-radius: 6px !important;
   }
-  .btn-guide-header svg, .btn-notebook svg, .btn-report svg {
+  .btn-icon svg {
     width: 13px !important;
     height: 13px !important;
   }
-  .btn-icon {
-    width: 28px !important;
-    height: 28px !important;
+  .btn-guide-header, .btn-notebook, .btn-report {
+    padding: 0.1rem 0.42rem !important;
+    font-size: 0.62rem !important;
+    gap: 0.22rem !important;
+    border-radius: 9999px !important;
+    height: 24px !important;
+    display: inline-flex !important;
+    align-items: center !important;
   }
-  .btn-icon svg {
-    width: 14px !important;
-    height: 14px !important;
+  .btn-guide-header svg, .btn-notebook svg, .btn-report svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+  .btn-notebook span {
+    font-size: 0 !important;
+    line-height: 0 !important;
+  }
+  .btn-notebook span::after {
+    content: 'Defter' !important;
+    font-size: 0.62rem !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+  }
+  .btn-notebook .badge-count {
+    font-size: 0.52rem !important;
+    padding: 0 3px !important;
+    min-width: 13px !important;
+    height: 13px !important;
+    line-height: 13px !important;
+  }
+  .btn-report span {
+    font-size: 0 !important;
+    line-height: 0 !important;
+  }
+  .btn-report span::after {
+    content: 'Rapor' !important;
+    font-size: 0.62rem !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
   }
 
-  /* Ana İçerik Alanı */
+  /* 3. Ana İçerik Kapsayıcısı */
   .main-content {
-    padding: 0.35rem 0.65rem 0.75rem !important;
     flex: 1 1 auto !important;
-    width: 100% !important;
-    max-width: 100% !important;
+    height: calc(100dvh - 37px) !important;
+    max-height: calc(100dvh - 37px) !important;
+    padding: 0.2rem 0.45rem !important;
     box-sizing: border-box !important;
     overflow-x: hidden !important;
+    overflow-y: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
   }
 
-  /* Ana Sayfa Vaka Seçimi (Landscape Compact) */
+  /* 4. Ana Sayfa: 12 Vaka Grid Görünümü */
   .hero-banner {
-    padding: 0.35rem 0.65rem !important;
-    margin-bottom: 0.35rem !important;
-    border-radius: 10px !important;
-    gap: 0.5rem !important;
+    padding: 0.18rem 0.45rem !important;
+    margin-bottom: 0.16rem !important;
+    border-radius: 8px !important;
+    gap: 0.4rem !important;
     flex-direction: row !important;
     align-items: center !important;
     justify-content: space-between !important;
     min-height: unset !important;
+    flex-shrink: 0 !important;
   }
   .hero-pill, .btn-hero-guide-pill {
-    padding: 0.1rem 0.4rem !important;
-    font-size: 0.58rem !important;
-    margin-bottom: 0.05rem !important;
+    padding: 0.08rem 0.35rem !important;
+    font-size: 0.54rem !important;
+    margin-bottom: 0 !important;
+    height: 18px !important;
   }
   .hero-title {
-    font-size: 0.88rem !important;
-    margin-bottom: 0.05rem !important;
+    font-size: 0.78rem !important;
+    margin-bottom: 0 !important;
+    line-height: 1.15 !important;
   }
   .hero-desc {
-    font-size: 0.64rem !important;
-    line-height: 1.2 !important;
-    display: -webkit-box !important;
-    -webkit-line-clamp: 2 !important;
-    -webkit-box-orient: vertical !important;
+    font-size: 0.58rem !important;
+    line-height: 1.15 !important;
+    white-space: nowrap !important;
     overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 330px !important;
     margin: 0 !important;
   }
-
-  /* Hero Banner Sağ Taraf İlerleme Kartı (prop-a-card) Landscape */
   .prop-a-card {
-    padding: 0.25rem 0.55rem !important;
-    border-radius: 10px !important;
+    padding: 0.14rem 0.4rem !important;
+    border-radius: 8px !important;
     flex-shrink: 0 !important;
-    box-shadow: none !important;
   }
   .progress-ring-row {
-    gap: 0.55rem !important;
+    gap: 0.45rem !important;
+    align-items: center !important;
   }
   .ring-wrap {
-    width: 44px !important;
-    height: 44px !important;
+    width: 36px !important;
+    height: 36px !important;
   }
   .ring-wrap svg {
-    width: 44px !important;
-    height: 44px !important;
+    width: 36px !important;
+    height: 36px !important;
   }
   .ring-num {
-    font-size: 0.82rem !important;
+    font-size: 0.72rem !important;
   }
   .ring-label {
-    font-size: 0.48rem !important;
+    font-size: 0.42rem !important;
   }
   .rank-title-big {
-    font-size: 0.74rem !important;
-    margin-bottom: 0.1rem !important;
-    gap: 0.25rem !important;
+    font-size: 0.68rem !important;
+    margin-bottom: 0.04rem !important;
+    line-height: 1.1 !important;
   }
   .rank-sub {
     display: none !important;
@@ -3219,184 +3318,273 @@ body {
     gap: 2px !important;
   }
   .case-dot {
-    width: 19px !important;
-    height: 19px !important;
-    font-size: 0.54rem !important;
-    border-radius: 4px !important;
+    width: 17px !important;
+    height: 17px !important;
+    font-size: 0.52rem !important;
+    border-radius: 3px !important;
+    line-height: 17px !important;
   }
 
-  /* 12 Vaka Izgarası (Landscape Compact) */
-  .cases-compact-grid {
-    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)) !important;
-    gap: 0.35rem !important;
-    margin-bottom: 0.45rem !important;
-  }
-  .case-card-compact {
-    padding: 0.25rem 0.5rem !important;
-    min-height: 44px !important;
-    max-height: 50px !important;
-    border-radius: 8px !important;
-    gap: 0.35rem !important;
-  }
-  .compact-case-num {
-    font-size: 0.6rem !important;
-    padding: 1px 4px !important;
-  }
-  .compact-icon-box {
-    width: 24px !important;
-    height: 24px !important;
-    border-radius: 6px !important;
-  }
-  .compact-icon-box svg {
-    width: 13px !important;
-    height: 13px !important;
-  }
-  .compact-title {
-    font-size: 0.72rem !important;
-    line-height: 1.15 !important;
-  }
-  .compact-subdesc {
-    display: none !important;
-  }
-  .compact-status-badge {
-    font-size: 0.56rem !important;
-    padding: 1px 5px !important;
-  }
-
-  /* Başarı Rozetleri Landscape */
+  /* Başarı Rozetleri Banner */
   .achievements-banner {
-    padding: 0.35rem 0.6rem !important;
-    border-radius: 10px !important;
-    margin-bottom: 0.4rem !important;
+    padding: 0.14rem 0.45rem !important;
+    border-radius: 8px !important;
+    margin-bottom: 0.18rem !important;
+    flex-shrink: 0 !important;
   }
   .achievements-header {
-    margin-bottom: 0.3rem !important;
+    margin-bottom: 0.1rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
   }
   .achievements-title {
-    font-size: 0.74rem !important;
+    font-size: 0.68rem !important;
+    line-height: 1.1 !important;
   }
   .achievements-count-badge {
-    font-size: 0.62rem !important;
-    padding: 0.1rem 0.4rem !important;
+    font-size: 0.56rem !important;
+    padding: 0.05rem 0.35rem !important;
   }
   .badge-showcase {
     display: grid !important;
     grid-template-columns: repeat(6, 1fr) !important;
-    gap: 0.3rem !important;
+    gap: 0.22rem !important;
   }
   .ach-badge {
-    padding: 0.25rem 0.2rem !important;
-    gap: 0.1rem !important;
-    border-radius: 8px !important;
+    padding: 0.12rem 0.15rem !important;
+    border-radius: 6px !important;
+    gap: 0.04rem !important;
+    min-height: unset !important;
   }
   .ach-icon {
-    font-size: 0.95rem !important;
+    font-size: 0.82rem !important;
+    line-height: 1 !important;
   }
   .ach-name {
-    font-size: 0.54rem !important;
+    font-size: 0.52rem !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
 
-  /* ========================================================
-     VAKA İNCELEME - APP KOKPİT (TAM OTURAN 2 SÜTUNLU YAPI)
-     ======================================================== */
-  .case-detail-wrap.detail-landscape-grid {
+  /* 12 Vaka Kartı Izgarası: 4 Sütun x 3 Satır */
+  .cases-compact-grid {
+    flex: 1 1 auto !important;
     display: grid !important;
-    grid-template-columns: 48% 52% !important;
-    gap: 0.55rem !important;
-    height: calc(100dvh - 46px) !important;
-    height: calc(100vh - 46px) !important;
-    max-height: calc(100dvh - 46px) !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 0.22rem !important;
+    margin-bottom: 0 !important;
+    overflow: hidden !important;
+  }
+  .case-card-compact {
+    padding: 0.18rem 0.32rem !important;
+    min-height: 38px !important;
+    max-height: 48px !important;
+    border-radius: 7px !important;
+    gap: 0.2rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    box-sizing: border-box !important;
+  }
+  .compact-left-group {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.22rem !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+  }
+  .compact-case-num {
+    font-size: 0.54rem !important;
+    padding: 1px 2.5px !important;
+    border-radius: 4px !important;
+    font-weight: 800 !important;
+    flex-shrink: 0 !important;
+  }
+  .compact-icon-box {
+    width: 20px !important;
+    height: 20px !important;
+    border-radius: 5px !important;
+    flex-shrink: 0 !important;
+  }
+  .compact-icon-box svg {
+    width: 11px !important;
+    height: 11px !important;
+  }
+  .compact-info-col {
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    overflow: hidden !important;
+  }
+  .compact-title {
+    font-size: clamp(0.58rem, 1.35vw, 0.65rem) !important;
+    line-height: 1.15 !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .compact-subdesc {
+    display: none !important;
+  }
+  .compact-right-group {
+    flex-shrink: 0 !important;
+  }
+  .compact-status-badge {
+    font-size: 0.52rem !important;
+    padding: 1px 4px !important;
+    border-radius: 9999px !important;
+    white-space: nowrap !important;
+    line-height: 1.2 !important;
+  }
+  .compact-status-badge.status-waiting {
+    font-size: 0 !important;
+    padding: 1px 4px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .compact-status-badge.status-waiting::after {
+    content: '→' !important;
+    font-size: 0.68rem !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+  }
+
+  /* 5. Vaka İnceleme Kokpit (2 Sütunlu Yan Yana Düzen) */
+  .case-detail-wrap.detail-landscape-grid {
+    height: 100% !important;
+    max-height: 100% !important;
+    display: grid !important;
+    grid-template-columns: 46% 54% !important;
+    gap: 0.45rem !important;
     overflow: hidden !important;
     align-items: stretch !important;
+    box-sizing: border-box !important;
   }
 
-  /* Sol Sütun: Video / Moleküler ve Kontroller */
+  /* Sol Panel: Video / Moleküler Simülasyon & Medya Kontrolleri */
   .detail-left-pane {
-    position: static !important;
     display: flex !important;
     flex-direction: column !important;
     height: 100% !important;
+    max-height: 100% !important;
     overflow: hidden !important;
-    gap: 0.18rem !important;
+    gap: 0.12rem !important;
+    position: static !important;
   }
-
   .detail-nav-row {
-    margin-bottom: 0 !important;
-    gap: 0.3rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: nowrap !important;
+    height: 22px !important;
+    margin: 0 !important;
+    flex-shrink: 0 !important;
   }
   .nav-left-group {
-    gap: 0.3rem !important;
-  }
-  .nav-right-group {
-    gap: 0.3rem !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.25rem !important;
+    flex-shrink: 0 !important;
   }
   .btn-back {
-    padding: 0.15rem 0.45rem !important;
-    font-size: 0.66rem !important;
-    height: 24px !important;
-    border-radius: 6px !important;
-  }
-  .detail-case-tag-nav, .detail-solved-badge, .btn-detail-nb-pill {
-    font-size: 0.6rem !important;
-    padding: 1px 5px !important;
     height: 22px !important;
-    border-radius: 6px !important;
+    padding: 0.1rem 0.35rem !important;
+    font-size: 0.62rem !important;
+    border-radius: 5px !important;
+    gap: 0.2rem !important;
+  }
+  .btn-back svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+  .detail-case-tag-nav {
+    height: 20px !important;
+    padding: 0.08rem 0.35rem !important;
+    font-size: 0.58rem !important;
+    border-radius: 5px !important;
+    line-height: 20px !important;
+  }
+  .nav-right-group {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.25rem !important;
+    flex-shrink: 0 !important;
+  }
+  .nav-right-group .detail-solved-badge {
+    display: none !important;
+  }
+  .btn-detail-nb-pill {
+    height: 20px !important;
+    padding: 0.08rem 0.35rem !important;
+    font-size: 0.58rem !important;
+    border-radius: 5px !important;
+    gap: 0.2rem !important;
+  }
+  .btn-detail-nb-pill svg {
+    width: 11px !important;
+    height: 11px !important;
   }
 
   .detail-title-section-compact {
-    padding-bottom: 0 !important;
-    margin-bottom: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-bottom: none !important;
+    flex-shrink: 0 !important;
   }
   .detail-heading-compact {
-    font-size: 0.84rem !important;
+    font-size: clamp(0.74rem, 1.8vw, 0.82rem) !important;
     line-height: 1.15 !important;
     margin: 0 !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
+    font-weight: 700 !important;
   }
   .detail-summary-compact {
-    font-size: 0.6rem !important;
+    font-size: 0.58rem !important;
     line-height: 1.15 !important;
+    margin: 0 !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    margin: 0 !important;
   }
 
-  /* Çift-Bakış Barı (Landscape Compact) */
+  /* Çift-Bakış Barı */
   .dual-view-toggle-bar {
-    margin-top: 0.05rem !important;
-    margin-bottom: 0.12rem !important;
-    padding: 2px !important;
+    height: 22px !important;
+    margin: 0.04rem 0 !important;
+    padding: 1px !important;
     gap: 2px !important;
-    height: 26px !important;
+    flex-shrink: 0 !important;
   }
   .btn-dual-toggle {
-    padding: 0.15rem 0.35rem !important;
-    font-size: 0.64rem !important;
+    height: 20px !important;
+    padding: 0 0.3rem !important;
+    font-size: 0.6rem !important;
     gap: 0.2rem !important;
-    height: 22px !important;
   }
   .dual-icon {
-    font-size: 0.75rem !important;
+    font-size: 0.72rem !important;
   }
   .dual-label {
-    font-size: 0.64rem !important;
+    font-size: 0.58rem !important;
   }
   .dual-pulse {
-    font-size: 0.5rem !important;
+    font-size: 0.48rem !important;
     padding: 1px 3px !important;
   }
 
-  /* Video & Moleküler Sahne (Landscape) */
+  /* Video & Moleküler Sahne */
   .video-stage, .molecular-stage {
     flex: 1 1 auto !important;
-    min-height: 110px !important;
-    max-height: calc(100% - 95px) !important;
-    border-radius: 9px !important;
-    position: relative !important;
+    min-height: 85px !important;
+    border-radius: 8px !important;
     overflow: hidden !important;
+    position: relative !important;
   }
   .video-elem {
     width: 100% !important;
@@ -3404,39 +3592,63 @@ body {
     object-fit: cover !important;
   }
   .three-canvas-wrap {
-    min-height: 110px !important;
+    min-height: 85px !important;
     height: 100% !important;
   }
   .video-watermark {
-    font-size: 0.52rem !important;
-    padding: 2px 5px !important;
-    top: 5px !important;
-    left: 5px !important;
+    font-size: 0.48rem !important;
+    padding: 1px 4px !important;
+    top: 4px !important;
+    left: 4px !important;
   }
   .btn-expand-video {
-    font-size: 0.54rem !important;
-    padding: 2px 5px !important;
-    top: 5px !important;
-    right: 5px !important;
+    font-size: 0.52rem !important;
+    padding: 1px 4px !important;
+    top: 4px !important;
+    right: 4px !important;
+    gap: 2px !important;
+  }
+  .btn-expand-video svg {
+    width: 11px !important;
+    height: 11px !important;
+  }
+  .video-overlay-start {
+    padding: 0.4rem !important;
+    gap: 0.35rem !important;
+  }
+  .video-overlay-text {
+    font-size: 0.62rem !important;
+    margin-bottom: 0.15rem !important;
   }
   .btn-big-play {
-    padding: 0.35rem 0.8rem !important;
-    font-size: 0.7rem !important;
+    padding: 0.25rem 0.65rem !important;
+    font-size: 0.68rem !important;
+    border-radius: 9999px !important;
+    gap: 0.3rem !important;
+  }
+  .btn-big-play svg {
+    width: 14px !important;
+    height: 14px !important;
   }
   .video-controls-row {
-    margin-top: 0.1rem !important;
-    gap: 0.25rem !important;
-    height: 26px !important;
+    height: 24px !important;
+    margin-top: 0.08rem !important;
+    gap: 0.22rem !important;
     flex-shrink: 0 !important;
   }
   .btn-media-action {
-    padding: 0.15rem 0.45rem !important;
-    font-size: 0.64rem !important;
-    height: 24px !important;
-    border-radius: 6px !important;
+    height: 22px !important;
+    padding: 0.1rem 0.35rem !important;
+    font-size: 0.6rem !important;
+    border-radius: 5px !important;
+    gap: 0.2rem !important;
+  }
+  .btn-media-action svg {
+    width: 12px !important;
+    height: 12px !important;
   }
 
-  /* Sağ Sütun: Kaydırılabilir Gözlem ve Karar Alanı (App Kokpit) */
+  /* Sağ Panel: Form & Karar Alanı */
   .detail-right-pane {
     display: flex !important;
     flex-direction: column !important;
@@ -3444,294 +3656,326 @@ body {
     max-height: 100% !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
-    padding-right: 4px !important;
-    gap: 0.25rem !important;
+    padding-right: 3px !important;
+    gap: 0.2rem !important;
+    box-sizing: border-box !important;
   }
-
   .interactive-form-grid {
     display: flex !important;
     flex-direction: column !important;
-    gap: 0.25rem !important;
+    gap: 0.2rem !important;
+    flex: 1 1 auto !important;
   }
   .form-box {
-    padding: 0.3rem 0.5rem !important;
-    border-radius: 9px !important;
-    gap: 0.15rem !important;
+    padding: 0.22rem 0.42rem !important;
+    border-radius: 8px !important;
+    gap: 0.08rem !important;
     margin-bottom: 0 !important;
   }
   .form-box-header {
-    margin-bottom: 0.08rem !important;
-    gap: 0.3rem !important;
+    margin-bottom: 0.04rem !important;
+    gap: 0.25rem !important;
+    align-items: center !important;
   }
   .step-num-pill {
-    width: 17px !important;
-    height: 17px !important;
-    font-size: 0.6rem !important;
+    width: 16px !important;
+    height: 16px !important;
+    font-size: 0.58rem !important;
+    line-height: 16px !important;
   }
   .form-box-title {
-    font-size: 0.74rem !important;
+    font-size: 0.72rem !important;
+    line-height: 1.15 !important;
+  }
+  .field-eval-badge {
+    font-size: 0.52rem !important;
+    padding: 0.05rem 0.3rem !important;
   }
   .form-box-desc {
     display: none !important;
   }
-  #obsInput {
-    min-height: 36px !important;
-    height: 40px !important;
-    max-height: 48px !important;
-    font-size: 0.72rem !important;
-    padding: 0.25rem 0.45rem !important;
-    border-radius: 7px !important;
+  #obsInput, #reaInput {
+    height: clamp(34px, 10.5vh, 46px) !important;
+    min-height: 32px !important;
+    max-height: 50px !important;
+    font-size: 0.68rem !important;
+    padding: 0.18rem 0.35rem !important;
+    border-radius: 6px !important;
     resize: none !important;
-  }
-  #reaInput {
-    min-height: 36px !important;
-    height: 40px !important;
-    max-height: 48px !important;
-    font-size: 0.72rem !important;
-    padding: 0.25rem 0.45rem !important;
-    border-radius: 7px !important;
-    resize: none !important;
+    line-height: 1.3 !important;
   }
   .char-counter {
-    font-size: 0.54rem !important;
-    margin-top: 0.05rem !important;
+    font-size: 0.5rem !important;
+    margin-top: 0.04rem !important;
+    line-height: 1 !important;
   }
-
   .type-buttons-row {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
-    gap: 0.35rem !important;
-    margin-bottom: 0.15rem !important;
+    gap: 0.28rem !important;
+    margin-bottom: 0.1rem !important;
   }
   .type-card-mock {
-    padding: 0.25rem 0.45rem !important;
-    border-radius: 8px !important;
-    min-height: 40px !important;
+    padding: 0.18rem 0.35rem !important;
+    border-radius: 7px !important;
+    min-height: 36px !important;
   }
   .tcm-header-row {
-    gap: 0.25rem !important;
-    margin-bottom: 0.04rem !important;
+    gap: 0.2rem !important;
+    margin-bottom: 0.02rem !important;
+    align-items: center !important;
   }
   .tcm-icon {
-    font-size: 0.95rem !important;
+    font-size: 0.85rem !important;
+    line-height: 1 !important;
   }
   .tcm-title {
-    font-size: 0.72rem !important;
+    font-size: 0.68rem !important;
+    line-height: 1.1 !important;
   }
   .tcm-desc {
-    font-size: 0.55rem !important;
-    line-height: 1.15 !important;
+    font-size: 0.52rem !important;
+    line-height: 1.1 !important;
     margin: 0 !important;
   }
-  .tcm-watermark {
+  .tcm-watermark, .tcm-indicators {
     display: none !important;
   }
-  .tcm-indicators {
-    display: none !important;
+  .btn-eval-pill {
+    font-size: 0.5rem !important;
+    padding: 1px 4px !important;
   }
 
   .submit-btn-row {
-    margin-top: 0.12rem !important;
-    margin-bottom: 0.2rem !important;
+    margin-top: 0.08rem !important;
+    margin-bottom: 0.1rem !important;
+    flex-shrink: 0 !important;
   }
   .btn-check-answer {
-    padding: 0.38rem 1rem !important;
-    font-size: 0.74rem !important;
-    height: 32px !important;
+    height: 28px !important;
+    padding: 0.2rem 0.8rem !important;
+    font-size: 0.72rem !important;
     border-radius: 9999px !important;
     width: 100% !important;
+    gap: 0.3rem !important;
+  }
+  .btn-check-answer svg {
+    width: 14px !important;
+    height: 14px !important;
   }
 
-  /* Modallar Landscape (App Diyalog Penceresi Hissi) */
+  /* 6. Modallar (Z-Index 2000, App Header Üstünde) */
   .modal-backdrop {
-    padding: 0.3rem !important;
+    z-index: 2000 !important;
+    padding: 0.25rem !important;
   }
   .modal-window {
     max-height: 96dvh !important;
-    max-height: 96vh !important;
-    border-radius: 14px !important;
+    max-height: 96% !important;
+    border-radius: 12px !important;
   }
   .modal-window-wide {
     max-width: 98vw !important;
     width: 98vw !important;
     max-height: 96dvh !important;
-    max-height: 96vh !important;
+    border-radius: 12px !important;
   }
   .modal-header {
-    padding: 0.35rem 0.75rem !important;
+    padding: 0.3rem 0.65rem !important;
+    flex-shrink: 0 !important;
   }
   .modal-title {
-    font-size: 0.92rem !important;
+    font-size: 0.85rem !important;
   }
   .modal-subtitle {
-    font-size: 0.6rem !important;
+    font-size: 0.58rem !important;
   }
   .modal-content {
-    padding: 0.45rem 0.75rem !important;
-    max-height: calc(96dvh - 75px) !important;
+    padding: 0.35rem 0.65rem !important;
+    max-height: calc(96dvh - 68px) !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
   }
   .modal-footer {
-    padding: 0.3rem 0.75rem !important;
+    padding: 0.25rem 0.65rem !important;
+    flex-shrink: 0 !important;
   }
   .eval-oval-btn {
-    padding: 0.32rem 0.75rem !important;
-    font-size: 0.72rem !important;
+    padding: 0.25rem 0.65rem !important;
+    font-size: 0.68rem !important;
   }
 
-  /* Rehber Modalı Landscape */
+  /* Rehber Modalı */
   .modal-guide-window .lab-guide-steps-row {
     display: grid !important;
     grid-template-columns: repeat(4, 1fr) !important;
-    gap: 0.35rem !important;
+    gap: 0.28rem !important;
   }
   .modal-guide-window .lab-guide-step-card {
-    padding: 0.35rem 0.45rem !important;
-    border-radius: 8px !important;
+    padding: 0.28rem 0.35rem !important;
+    border-radius: 7px !important;
   }
   .modal-guide-window .guide-step-title {
-    font-size: 0.68rem !important;
+    font-size: 0.66rem !important;
   }
   .modal-guide-window .guide-step-desc {
-    font-size: 0.56rem !important;
-    line-height: 1.2 !important;
+    font-size: 0.54rem !important;
+    line-height: 1.15 !important;
+  }
+  .modal-guide-window .guide-modal-intro {
+    font-size: 0.74rem !important;
+    padding: 0.45rem 0.65rem !important;
+    line-height: 1.35 !important;
   }
 
-  /* Dijital Deney Defteri Modalı Landscape */
+  /* Dijital Deney Defteri Modalı */
   .modal-notebook-window {
-    max-height: 95dvh !important;
-    max-height: 95vh !important;
+    max-height: 96dvh !important;
   }
   .modal-notebook-window .notebook-grid-layout {
-    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)) !important;
-    gap: 0.35rem !important;
-    padding: 0.4rem 0.6rem !important;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
+    gap: 0.28rem !important;
+    padding: 0.3rem 0.5rem !important;
   }
   .modal-notebook-window .notebook-case-card {
-    padding: 0.35rem 0.55rem !important;
-    border-radius: 8px !important;
-    gap: 0.2rem !important;
+    padding: 0.28rem 0.45rem !important;
+    border-radius: 7px !important;
+    gap: 0.15rem !important;
   }
   .modal-notebook-window .notebook-card-case-id {
-    font-size: 0.74rem !important;
+    font-size: 0.7rem !important;
   }
   .modal-notebook-window .nb-status-pill {
-    font-size: 0.6rem !important;
-    padding: 0.08rem 0.35rem !important;
+    font-size: 0.56rem !important;
+    padding: 0.05rem 0.3rem !important;
   }
   .modal-notebook-window .notebook-card-entry-compact {
-    font-size: 0.66rem !important;
-    padding: 0.2rem 0.4rem !important;
+    font-size: 0.62rem !important;
+    padding: 0.15rem 0.35rem !important;
   }
 
-  /* Vaka Raporu Modalı Landscape */
+  /* Vaka Raporu Modalı */
   .modal-report-window .report-content-compact {
-    padding: 0.4rem 0.7rem !important;
-    gap: 0.3rem !important;
+    padding: 0.3rem 0.5rem !important;
+    gap: 0.25rem !important;
   }
   .modal-report-window .report-badges-section {
-    padding: 0.25rem 0.45rem !important;
-    margin-bottom: 0.3rem !important;
+    padding: 0.2rem 0.4rem !important;
+    margin-bottom: 0.25rem !important;
   }
   .modal-report-window .badge-showcase-compact {
+    display: grid !important;
     grid-template-columns: repeat(6, 1fr) !important;
-    gap: 0.2rem !important;
+    gap: 0.18rem !important;
+    overflow-x: visible !important;
+  }
+  .modal-report-window .badge-showcase-compact .ach-badge {
+    padding: 0.2rem 0.15rem !important;
+    min-width: 0 !important;
   }
   .modal-report-window .report-table-wrap {
-    max-height: 38dvh !important;
-    max-height: 38vh !important;
+    max-height: 42dvh !important;
     overflow-y: auto !important;
   }
   .modal-report-window .report-table th, 
   .modal-report-window .report-table td {
-    padding: 0.22rem 0.4rem !important;
-    font-size: 0.66rem !important;
+    padding: 0.18rem 0.35rem !important;
+    font-size: 0.62rem !important;
   }
 
-  /* Video & 3D Tam Ekran Modalı Landscape */
-  .video-modal-stage {
-    height: calc(92dvh - 84px) !important;
-    max-height: 250px !important;
+  /* Video & 3D Tam Ekran Modalı */
+  .video-modal-backdrop {
+    z-index: 2100 !important;
   }
-  .three-modal-stage {
-    height: calc(92dvh - 84px) !important;
+  .video-modal-card {
+    max-width: 98vw !important;
+    width: 98vw !important;
+    max-height: 96dvh !important;
+    border-radius: 12px !important;
+  }
+  .video-modal-stage, .three-modal-stage {
+    height: calc(96dvh - 78px) !important;
     max-height: 250px !important;
   }
   .video-modal-footer {
-    padding: 0.35rem 0.8rem !important;
+    padding: 0.25rem 0.65rem !important;
   }
   .video-modal-hint {
-    font-size: 0.65rem !important;
+    font-size: 0.62rem !important;
   }
 
-  /* Değerlendirme / Dönüt Modalı Landscape */
+  /* Değerlendirme / Dönüt Modalı */
+  .eval-modal-backdrop {
+    z-index: 2050 !important;
+  }
   .eval-modal-wide {
     max-width: 96vw !important;
-    max-height: 94dvh !important;
-    border-radius: 14px !important;
+    width: 96vw !important;
+    max-height: 96dvh !important;
+    border-radius: 12px !important;
   }
   .eval-modal-header {
-    padding: 0.45rem 0.8rem !important;
+    padding: 0.35rem 0.7rem !important;
   }
   .eval-status-icon {
-    width: 28px !important;
-    height: 28px !important;
+    width: 26px !important;
+    height: 26px !important;
   }
   .eval-title {
-    font-size: 0.88rem !important;
+    font-size: 0.82rem !important;
   }
   .eval-tabs-nav {
-    padding: 0.25rem 0.8rem !important;
-    gap: 0.35rem !important;
-  }
-  .eval-tab-pill {
-    padding: 0.25rem 0.55rem !important;
-    font-size: 0.68rem !important;
-  }
-  .eval-modal-body {
-    padding: 0.5rem 0.8rem !important;
-    max-height: 48dvh !important;
-    gap: 0.45rem !important;
-  }
-  .eval-feedback-card {
-    padding: 0.5rem 0.65rem !important;
-  }
-  .eval-feedback-heading {
-    font-size: 0.78rem !important;
-  }
-  .eval-feedback-desc {
-    font-size: 0.68rem !important;
-    line-height: 1.3 !important;
-  }
-  .eval-verdict-grid {
-    gap: 0.35rem !important;
-  }
-  .verdict-cell {
-    padding: 0.25rem 0.45rem !important;
-  }
-  .verdict-label {
-    font-size: 0.55rem !important;
-  }
-  .verdict-val {
-    font-size: 0.68rem !important;
-  }
-  .eval-quick-links-row {
-    gap: 0.35rem !important;
-    margin-top: 0.1rem !important;
-  }
-  .eval-oval-pill {
-    padding: 0.25rem 0.65rem !important;
-    font-size: 0.68rem !important;
-    border-radius: 8px !important;
+    padding: 0.2rem 0.7rem !important;
     gap: 0.3rem !important;
   }
+  .eval-tab-pill {
+    padding: 0.2rem 0.45rem !important;
+    font-size: 0.65rem !important;
+  }
+  .eval-modal-body {
+    padding: 0.35rem 0.7rem !important;
+    max-height: 52dvh !important;
+    gap: 0.35rem !important;
+    overflow-y: auto !important;
+  }
+  .eval-feedback-card {
+    padding: 0.35rem 0.55rem !important;
+  }
+  .eval-feedback-heading {
+    font-size: 0.72rem !important;
+  }
+  .eval-feedback-desc {
+    font-size: 0.64rem !important;
+    line-height: 1.25 !important;
+  }
+  .eval-verdict-grid {
+    gap: 0.25rem !important;
+  }
+  .verdict-cell {
+    padding: 0.2rem 0.35rem !important;
+  }
+  .verdict-label {
+    font-size: 0.52rem !important;
+  }
+  .verdict-val {
+    font-size: 0.64rem !important;
+  }
+  .eval-quick-links-row {
+    gap: 0.25rem !important;
+    margin-top: 0.08rem !important;
+  }
+  .eval-oval-pill {
+    padding: 0.2rem 0.55rem !important;
+    font-size: 0.64rem !important;
+    border-radius: 7px !important;
+    gap: 0.25rem !important;
+  }
   .oval-pill-icon {
-    width: 18px !important;
-    height: 18px !important;
-    border-radius: 5px !important;
+    width: 16px !important;
+    height: 16px !important;
   }
 }
+
 
 /* Print Styles */
 @media print {
@@ -3991,7 +4235,7 @@ body {
   text-overflow: ellipsis !important;
   max-width: 100% !important;
 }
-@media (max-width: 650px) {
+@media (max-width: 650px) and (orientation: portrait) {
   .badge-showcase-compact {
     display: flex !important;
     overflow-x: auto !important;
