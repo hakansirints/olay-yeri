@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<!-- saved from url=(0117)file:///C:/Users/hakan/.gemini/antigravity/brain/f5fa3cb7-3062-40d7-a2f4-bfa410e2ee5f/tasarim_analiz_ve_oneriler.html -->
+<html lang="tr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kimyasal Olay Yeri Uzmanı — Tasarım Analizi &amp; Öneriler</title>
+<style>
+  :root {
+    --bg: #0b0f17;
+    --surface: #131a27;
+    --surface2: #1a2338;
+    --border: rgba(56,189,248,0.18);
+    --primary: #38bdf8;
+    --secondary: #2dd4bf;
+    --amber: #fbbf24;
+    --green: #10b981;
+    --red: #f87171;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --radius: 18px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    padding: 2rem 1.5rem 5rem;
+  }
+
+  /* GRID background like the actual site */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: -1;
+    background:
+      radial-gradient(circle at 15% 15%, rgba(56,189,248,0.12) 0%, transparent 40%),
+      radial-gradient(circle at 85% 85%, rgba(16,185,129,0.1) 0%, transparent 45%),
+      repeating-linear-gradient(60deg, rgba(56,189,248,0.035) 0, rgba(56,189,248,0.035) 1px, transparent 0, transparent 35px),
+      repeating-linear-gradient(-60deg, rgba(56,189,248,0.035) 0, rgba(56,189,248,0.035) 1px, transparent 0, transparent 35px),
+      linear-gradient(to bottom, #0b0f17, #070a10);
+  }
+
+  .doc-title {
+    text-align: center;
+    margin-bottom: 3.5rem;
+    padding: 2.25rem 2rem;
+    background: rgba(19,26,39,0.9);
+    border-radius: 24px;
+    border: 1.5px solid var(--border);
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    backdrop-filter: blur(20px);
+  }
+  .doc-title h1 { font-size: 1.7rem; font-weight: 800; letter-spacing:-0.02em; color:#fff; margin-bottom:0.5rem; }
+  .doc-title p  { color: var(--muted); font-size:0.9rem; line-height:1.55; max-width:640px; margin:0 auto; }
+  .doc-title .badge-row { display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap; margin-top:1rem; }
+  .badge { padding:0.25rem 0.75rem; border-radius:9999px; font-size:0.72rem; font-weight:700; }
+  .badge-teacher { background: rgba(56,189,248,0.18); color: #7dd3fc; border: 1px solid rgba(56,189,248,0.4); }
+  .badge-student { background: rgba(45,212,191,0.18); color: #5eead4; border: 1px solid rgba(45,212,191,0.4); }
+  .badge-design  { background: rgba(251,191,36,0.18); color: #fde68a; border: 1px solid rgba(251,191,36,0.4); }
+
+  /* SECTIONS */
+  .section { max-width: 900px; margin: 0 auto 4rem; }
+  .section-header {
+    display: flex; align-items: center; gap: 0.85rem;
+    margin-bottom: 1.5rem; padding-bottom: 0.9rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-icon {
+    width: 42px; height: 42px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.25rem; flex-shrink: 0;
+  }
+  .icon-teacher { background: rgba(56,189,248,0.18); }
+  .icon-student { background: rgba(45,212,191,0.18); }
+  .icon-proposal { background: rgba(251,191,36,0.18); }
+  .section-header h2 { font-size: 1.25rem; font-weight: 800; color: #fff; }
+  .section-header small { font-size: 0.78rem; color: var(--muted); font-weight: normal; display:block; margin-top:0.1rem; }
+
+  /* ANALYSIS GRID */
+  .analysis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 640px) { .analysis-grid { grid-template-columns: 1fr; } }
+
+  .analysis-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    backdrop-filter: blur(12px);
+  }
+  .analysis-card h3 {
+    font-size: 0.88rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 0.05em; margin-bottom: 0.85rem;
+    display: flex; align-items: center; gap: 0.45rem;
+  }
+  .h3-positive { color: #4ade80; }
+  .h3-negative { color: #f87171; }
+  .analysis-card ul { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+  .analysis-card li {
+    font-size: 0.8rem; color: var(--muted); line-height: 1.5;
+    padding-left: 1.25rem; position: relative;
+  }
+  .analysis-card li::before {
+    content: '•'; position: absolute; left: 0;
+    font-weight: 900;
+  }
+  .analysis-card.positive li::before { color: #4ade80; }
+  .analysis-card.negative li::before { color: #f87171; }
+  .analysis-card li strong { color: var(--text); }
+
+  /* PERSONA CARD */
+  .persona-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  @media (max-width: 640px) { .persona-row { grid-template-columns: 1fr; } }
+  .persona-card {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 1.25rem;
+  }
+  .persona-card h4 {
+    font-size: 0.9rem; font-weight: 800; color: #fff;
+    margin-bottom: 0.6rem; display: flex; align-items: center; gap: 0.5rem;
+  }
+  .persona-card p { font-size: 0.78rem; color: var(--muted); line-height: 1.55; }
+
+  /* MOCKUP SCREENS */
+  .mockup-section { margin: 2rem 0; }
+  .mockup-label {
+    font-size: 0.72rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--muted); margin-bottom: 0.65rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .mockup-label span { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+  /* ===========================
+     PROPOSAL MOCKUPS
+     =========================== */
+  
+  /* ─── ÖNERI A: Gantt Tipi İlerleme Göstergesi ─── */
+  .prop-a-demo {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .prop-header-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;
+  }
+  .prop-title { font-weight: 800; font-size: 0.9rem; color: #fff; }
+  .prop-subtitle { font-size: 0.72rem; color: var(--muted); }
+  .progress-ring-row {
+    display: flex; align-items: center; gap: 1.25rem; margin-bottom: 1.25rem;
+  }
+  .ring-wrap { position: relative; flex-shrink: 0; }
+  .ring-wrap svg { transform: rotate(-90deg); }
+  .ring-center {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 0.65rem; line-height: 1.2;
+  }
+  .ring-num { font-size: 1.2rem; font-weight: 800; color: var(--primary); }
+  .ring-label { font-size: 0.6rem; color: var(--muted); }
+  .rank-info { flex: 1; }
+  .rank-title-big { font-size: 0.92rem; font-weight: 800; color: var(--amber); margin-bottom: 0.25rem; }
+  .rank-sub { font-size: 0.72rem; color: var(--muted); }
+  
+  /* Case status dots grid */
+  .case-dot-grid { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+  .case-dot {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.62rem; font-weight: 800; font-family: monospace;
+    border: 1px solid;
+  }
+  .dot-solved   { background: rgba(16,185,129,0.2); color: #34d399; border-color: rgba(16,185,129,0.4); }
+  .dot-partial  { background: rgba(250,204,21,0.18); color: #fde047; border-color: rgba(250,204,21,0.4); }
+  .dot-wrong    { background: rgba(248,113,113,0.18); color: #fca5a5; border-color: rgba(248,113,113,0.4); }
+  .dot-empty    { background: rgba(148,163,184,0.1); color: var(--muted); border-color: rgba(148,163,184,0.2); }
+
+  /* ─── ÖNERI B: Öğretmen Paneli Mockup ─── */
+  .prop-b-demo {
+    background: #0a1628;
+    border: 1.5px solid rgba(56,189,248,0.2);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 1rem;
+  }
+  .teacher-topbar {
+    background: linear-gradient(90deg, rgba(56,189,248,0.12) 0%, rgba(45,212,191,0.08) 100%);
+    border-bottom: 1px solid rgba(56,189,248,0.15);
+    padding: 0.75rem 1.25rem;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .teacher-topbar-title { font-size: 0.78rem; font-weight: 800; color: #7dd3fc; }
+  .teacher-topbar-badge {
+    padding: 0.2rem 0.65rem;
+    border-radius: 9999px; font-size: 0.65rem; font-weight: 700;
+    background: rgba(56,189,248,0.15); color: #7dd3fc;
+    border: 1px solid rgba(56,189,248,0.3);
+  }
+  .teacher-content { padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; }
+  .class-stats-row { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+  .stat-box {
+    flex: 1; min-width: 80px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px; padding: 0.7rem 0.85rem;
+    text-align: center;
+  }
+  .stat-num { font-size: 1.4rem; font-weight: 800; line-height: 1; margin-bottom: 0.2rem; }
+  .stat-label { font-size: 0.62rem; color: var(--muted); }
+  .student-list-mini { display: flex; flex-direction: column; gap: 0.4rem; }
+  .student-row-mini {
+    display: flex; align-items: center; gap: 0.6rem;
+    background: rgba(255,255,255,0.03); border-radius: 8px;
+    padding: 0.45rem 0.65rem;
+    font-size: 0.72rem;
+  }
+  .stu-avatar {
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.6rem; font-weight: 800; flex-shrink: 0;
+  }
+  .stu-name { flex: 1; color: var(--text); font-weight: 600; }
+  .stu-score { font-family: monospace; font-weight: 700; }
+  .stu-bar-wrap { width: 60px; height: 5px; background: rgba(255,255,255,0.08); border-radius: 9999px; overflow: hidden; }
+  .stu-bar-fill { height: 100%; border-radius: 9999px; }
+
+  /* ─── ÖNERI C: Oyunlaştırma / Badge Sistemi Mockup ─── */
+  .prop-c-demo {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .badge-showcase { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.75rem; }
+  .ach-badge {
+    display: flex; flex-direction: column; align-items: center; gap: 0.35rem;
+    padding: 0.75rem 0.85rem; border-radius: 16px;
+    border: 1.5px solid; min-width: 80px; flex: 1; max-width: 100px;
+    text-align: center;
+    position: relative;
+  }
+  .ach-icon { font-size: 1.6rem; line-height: 1; }
+  .ach-name { font-size: 0.6rem; font-weight: 700; color: var(--muted); line-height: 1.3; }
+  .ach-badge.earned { opacity: 1; }
+  .ach-badge.locked { opacity: 0.4; filter: grayscale(0.6); }
+  .ach-badge.earned::after {
+    content: '✓';
+    position: absolute; top: -5px; right: -5px;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: #10b981; color: #fff;
+    font-size: 0.58rem; font-weight: 900;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ach-badge-1 { background: rgba(251,191,36,0.12); border-color: rgba(251,191,36,0.35); }
+  .ach-badge-2 { background: rgba(56,189,248,0.12); border-color: rgba(56,189,248,0.35); }
+  .ach-badge-3 { background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.35); }
+  .ach-badge-4 { background: rgba(248,113,113,0.12); border-color: rgba(248,113,113,0.35); }
+  .ach-badge-5 { background: rgba(192,132,252,0.12); border-color: rgba(192,132,252,0.35); }
+  .ach-badge-6 { background: rgba(148,163,184,0.12); border-color: rgba(148,163,184,0.35); }
+
+  /* ─── ÖNERI D: Gözlem Kartı Yeniden Tasarımı ─── */
+  .prop-d-demo {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .obs-step-row {
+    display: flex; align-items: flex-start; gap: 0.85rem;
+    background: rgba(56,189,248,0.06);
+    border: 1px solid rgba(56,189,248,0.2);
+    border-radius: 14px; padding: 0.9rem 1rem; margin-bottom: 0.65rem;
+  }
+  .obs-step-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(56,189,248,0.2); border: 1px solid rgba(56,189,248,0.5);
+    color: #7dd3fc; font-weight: 800; font-size: 0.75rem;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .obs-step-body { flex: 1; }
+  .obs-step-title { font-size: 0.82rem; font-weight: 800; color: #fff; margin-bottom: 0.25rem; }
+  .obs-textarea-mock {
+    width: 100%; background: rgba(255,255,255,0.04);
+    border: 1.5px solid rgba(56,189,248,0.2); border-radius: 10px;
+    padding: 0.65rem 0.8rem; font-size: 0.75rem; color: var(--muted);
+    font-style: italic; line-height: 1.5;
+  }
+  .char-counter { font-size: 0.62rem; color: var(--muted); text-align: right; margin-top: 0.2rem; }
+
+  /* ─── ÖNERI E: Sonuç Modalı Renk Bloğu ─── */
+  .prop-e-demo {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 1rem;
+  }
+  .result-header-correct {
+    background: linear-gradient(135deg, rgba(16,185,129,0.25) 0%, rgba(16,185,129,0.1) 100%);
+    border-bottom: 1px solid rgba(16,185,129,0.3);
+    padding: 1rem 1.25rem;
+    display: flex; align-items: center; gap: 1rem;
+  }
+  .result-header-partial {
+    background: linear-gradient(135deg, rgba(250,204,21,0.25) 0%, rgba(250,204,21,0.1) 100%);
+    border-bottom: 1px solid rgba(250,204,21,0.3);
+    padding: 1rem 1.25rem;
+    display: flex; align-items: center; gap: 1rem;
+    margin-top: 0.65rem;
+  }
+  .result-big-icon {
+    width: 52px; height: 52px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; flex-shrink: 0;
+  }
+  .icon-correct { background: rgba(16,185,129,0.25); border: 2px solid rgba(16,185,129,0.5); }
+  .icon-partial { background: rgba(250,204,21,0.25); border: 2px solid rgba(250,204,21,0.5); }
+  .result-head-text h4 { font-size: 0.95rem; font-weight: 800; color: #fff; margin-bottom: 0.2rem; }
+  .result-head-text p  { font-size: 0.72rem; color: var(--muted); }
+  .score-large {
+    margin-left: auto; font-size: 2rem; font-weight: 900;
+    font-family: monospace;
+  }
+  .score-correct { color: #34d399; }
+  .score-partial  { color: #fde047; }
+  .result-rows { padding: 0.85rem 1.25rem; display: flex; flex-direction: column; gap: 0.5rem; }
+  .result-row-item {
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 0.55rem 0.8rem; border-radius: 10px; font-size: 0.75rem;
+  }
+  .rri-correct { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.25); }
+  .rri-wrong   { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.25); }
+  .rri-partial { background: rgba(250,204,21,0.1); border: 1px solid rgba(250,204,21,0.25); }
+  .rri-icon { font-size: 0.9rem; flex-shrink: 0; }
+  .rri-label { flex: 1; color: var(--text); }
+  .rri-verdict { font-weight: 800; font-size: 0.72rem; }
+  .rv-c { color: #34d399; } .rv-w { color: #fca5a5; } .rv-p { color: #fde047; }
+
+  /* ─── ÖNERI F: Mobil Kart Tasarımı ─── */
+  .prop-f-demo {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    display: flex; gap: 1.25rem; flex-wrap: wrap;
+  }
+  .mobile-mock {
+    width: 200px; flex-shrink: 0;
+    background: #06090f; border: 1px solid rgba(56,189,248,0.2);
+    border-radius: 20px; overflow: hidden;
+    padding: 0.75rem 0.65rem; display: flex; flex-direction: column; gap: 0.45rem;
+  }
+  .mob-topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.25rem 0; margin-bottom: 0.25rem;
+  }
+  .mob-logo { font-size: 0.55rem; font-weight: 800; color: var(--primary); }
+  .mob-dots { display: flex; gap: 3px; }
+  .mob-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.15); }
+  .mob-case-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 0.55rem 0.65rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .mob-case-icon {
+    width: 28px; height: 28px; border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem; flex-shrink: 0;
+  }
+  .mob-case-info { flex: 1; min-width: 0; }
+  .mob-case-title { font-size: 0.6rem; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mob-case-type  { font-size: 0.52rem; color: var(--muted); }
+  .mob-status { font-size: 0.55rem; font-weight: 700; padding: 0.12rem 0.35rem; border-radius: 9999px; flex-shrink: 0; }
+  .ms-solved   { background: rgba(16,185,129,0.2); color: #34d399; }
+  .ms-open     { background: rgba(148,163,184,0.12); color: var(--muted); }
+  .ms-partial  { background: rgba(250,204,21,0.18); color: #fde047; }
+  .mob-bottom-nav {
+    display: flex; border-top: 1px solid rgba(255,255,255,0.07);
+    padding-top: 0.5rem; margin-top: 0.25rem; gap: 0;
+  }
+  .mob-nav-btn {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+    font-size: 0.5rem; color: var(--muted);
+    padding: 0.25rem 0;
+  }
+  .mob-nav-btn.active { color: var(--primary); }
+  .mob-nav-icon { font-size: 0.75rem; }
+  .mobile-notes { flex: 1; min-width: 200px; }
+  .mobile-notes h4 { font-size: 0.82rem; font-weight: 800; color: #fff; margin-bottom: 0.65rem; }
+  .mobile-notes ul { list-style: none; display: flex; flex-direction: column; gap: 0.45rem; }
+  .mobile-notes li { font-size: 0.75rem; color: var(--muted); padding-left: 1.1rem; position: relative; line-height: 1.45; }
+  .mobile-notes li::before { content: '→'; position: absolute; left: 0; color: var(--primary); }
+
+  /* ─── ÖNERI G: Bölüm Renk Temaları (Fiziksel vs Kimyasal) ─── */
+  .prop-g-demo {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  @media (max-width: 520px) { .prop-g-demo { grid-template-columns: 1fr; } }
+  .type-card-mock {
+    border-radius: 16px; padding: 1.15rem; border: 2px solid;
+    position: relative; overflow: hidden;
+  }
+  .tcm-physical {
+    background: linear-gradient(135deg, rgba(56,189,248,0.1) 0%, rgba(126,208,255,0.06) 100%);
+    border-color: rgba(56,189,248,0.4);
+  }
+  .tcm-chemical {
+    background: linear-gradient(135deg, rgba(16,185,129,0.12) 0%, rgba(45,212,191,0.06) 100%);
+    border-color: rgba(16,185,129,0.45);
+  }
+  .tcm-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+  .tcm-title { font-size: 0.95rem; font-weight: 800; margin-bottom: 0.35rem; }
+  .tcm-physical .tcm-title { color: #7dd3fc; }
+  .tcm-chemical .tcm-title { color: #5eead4; }
+  .tcm-desc { font-size: 0.72rem; color: var(--muted); line-height: 1.45; margin-bottom: 0.7rem; }
+  .tcm-indicators { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+  .tcm-tag {
+    padding: 0.15rem 0.55rem; border-radius: 9999px;
+    font-size: 0.62rem; font-weight: 700; border: 1px solid;
+  }
+  .tcm-physical .tcm-tag { background: rgba(56,189,248,0.12); color: #7dd3fc; border-color: rgba(56,189,248,0.25); }
+  .tcm-chemical .tcm-tag { background: rgba(16,185,129,0.12); color: #5eead4; border-color: rgba(16,185,129,0.25); }
+  .tcm-watermark {
+    position: absolute; right: -12px; bottom: -8px;
+    font-size: 3.5rem; opacity: 0.06; font-weight: 900; line-height: 1;
+    user-select: none; pointer-events: none;
+  }
+  .tcm-physical .tcm-watermark { color: #38bdf8; }
+  .tcm-chemical .tcm-watermark { color: #10b981; }
+
+  /* SUMMARY CARD */
+  .summary-card {
+    background: var(--surface2);
+    border: 1.5px solid rgba(251,191,36,0.25);
+    border-radius: 20px; padding: 1.5rem;
+    max-width: 900px; margin: 0 auto 2rem;
+  }
+  .summary-card h3 { color: var(--amber); font-size: 1rem; font-weight: 800; margin-bottom: 1rem; display:flex; align-items:center; gap:0.5rem; }
+  .priority-table { width: 100%; border-collapse: collapse; }
+  .priority-table th, .priority-table td { padding: 0.6rem 0.85rem; font-size: 0.78rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .priority-table th { color: var(--muted); font-weight: 700; text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.05em; }
+  .priority-table td { color: var(--text); }
+  .priority-table tr:last-child td { border-bottom: none; }
+  .p-high   { color: #f87171; font-weight: 800; }
+  .p-medium { color: #fde047; font-weight: 800; }
+  .p-low    { color: #94a3b8; font-weight: 700; }
+  .p-who    { font-size: 0.68rem; }
+  .who-t    { color: #7dd3fc; }
+  .who-s    { color: #5eead4; }
+  .who-ts   { color: var(--amber); }
+  .prop-id  { font-family: monospace; font-weight: 800; color: var(--amber); }
+
+  /* DIVIDER */
+  .divider { height: 1px; background: var(--border); max-width: 900px; margin: 3rem auto; }
+  
+  /* PROPOSAL LABEL */
+  .proposal-label {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.3);
+    color: #fde68a; padding: 0.3rem 0.85rem; border-radius: 9999px;
+    font-size: 0.7rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 0.05em; margin-bottom: 0.75rem; display: flex; width: fit-content;
+  }
+
+  .proposal-block {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 20px; padding: 1.5rem; margin-bottom: 1.5rem;
+  }
+  .proposal-block h3 { font-size: 1rem; font-weight: 800; color: #fff; margin-bottom: 0.4rem; }
+  .proposal-block > p { font-size: 0.8rem; color: var(--muted); margin-bottom: 1rem; line-height: 1.5; }
+  
+  .benefit-pills { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem; }
+  .bp { padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.65rem; font-weight: 700; border: 1px solid; }
+  .bp-t { background: rgba(56,189,248,0.1); color: #7dd3fc; border-color: rgba(56,189,248,0.25); }
+  .bp-s { background: rgba(45,212,191,0.1); color: #5eead4; border-color: rgba(45,212,191,0.25); }
+
+  /* TIP BOX */
+  .tip-box {
+    background: rgba(56,189,248,0.06);
+    border: 1px solid rgba(56,189,248,0.2);
+    border-radius: 12px; padding: 0.85rem 1rem;
+    font-size: 0.76rem; color: var(--muted); margin-top: 0.5rem; line-height: 1.5;
+  }
+  .tip-box strong { color: #7dd3fc; }
+</style>
+</head>
+<body>
+
+<!-- BAŞLIK -->
+<div class="doc-title">
+  <h1>🔬 Kimyasal Olay Yeri Uzmanı — Tasarım Analizi</h1>
+  <p>Bu belge, siteyi <strong style="color:#7dd3fc">kimya öğretmeni</strong> ve <strong style="color:#5eead4">lise öğrencisi</strong> gözünden inceleyen bağımsız bir analiz ile görselleştirilmiş tasarım önerileri içermektedir.</p>
+  <div class="badge-row">
+    <span class="badge badge-teacher">👩‍🏫 Öğretmen Perspektifi</span>
+    <span class="badge badge-student">🎓 Öğrenci Perspektifi</span>
+    <span class="badge badge-design">🎨 7 Görsel Öneri</span>
+  </div>
+</div>
+
+<!-- BÖLÜM 1: KİMYA ÖĞRETMENİ PERSPEKTİFİ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon icon-teacher">👩‍🏫</div>
+    <div>
+      <h2>Kimya Öğretmeni Perspektifi</h2>
+      <small>Değerlendirme etkinliği, pedagojik geri bildirim netliği ve sınıf yönetimi açısından</small>
+    </div>
+  </div>
+
+  <div class="analysis-grid">
+    <div class="analysis-card positive">
+      <h3 class="h3-positive">✓ Güçlü Yönler</h3>
+      <ul>
+        <li><strong>Akıllı değerlendirme:</strong> Anahtar kelime + kabul edilebilir cevap mantığı; yüzeysel cevaplara "isShallowOrTrap" ile tuzak kontrolü.</li>
+        <li><strong>Pedagojik geri bildirim:</strong> Her vaka için "feedbacks.correct / incomplete / incorrect" ayrı dönüt metinleri.</li>
+        <li><strong>Çelişki tespiti:</strong> Buton seçimi ↔ yazılı gerekçe çelişkisi otomatik yakalanıyor.</li>
+        <li><strong>Vaka Raporu:</strong> 12 vaka için tablo halinde özet, öğrenci adı ve sınıf düzenlenebilir.</li>
+        <li><strong>Rütbe sistemi:</strong> Öğrenci motivasyonunu destekleyen kademeli unvanlar.</li>
+        <li><strong>Dijital Deney Defteri:</strong> Tüm gözlem ve kararlar kayıt altında, deftere tıklayarak vakalara dönülebiliyor.</li>
+      </ul>
+    </div>
+    <div class="analysis-card negative">
+      <h3 class="h3-negative">⚠ Geliştirme Alanları</h3>
+      <ul>
+        <li><strong>Sınıf geneli görünüm yok:</strong> Öğretmen, tüm öğrencilerin performansını bir arada göremez. Yalnızca tek öğrenci oturumu takip edilebiliyor.</li>
+        <li><strong>Öğretmen değerlendirmesi:</strong> Mevcut değerlendirme tamamen otomatik; öğretmenin el ile not/yorum ekleyebileceği bir alan yok.</li>
+        <li><strong>Yazdırma arayüzü:</strong> "Vaka Raporu" modalı görsel olarak karmaşık; baskı için optimize edilmiş hafif bir görünüm olabilir.</li>
+        <li><strong>Puan ağırlığı görünmez:</strong> %100 / %65 / %25 gibi puan eşikleri öğrenciye açıklanmıyor, öğretmenin kriterlerle uyumu belirsiz.</li>
+        <li><strong>Vaka sırası zorunlu değil:</strong> Öğrenci istediği vakadan başlayabilir; öğretmen belirli bir sıra veya zorunlu olay isteyebilir.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- BÖLÜM 2: LİSE ÖĞRENCİSİ PERSPEKTİFİ -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon icon-student">🎓</div>
+    <div>
+      <h2>Lise Öğrencisi Perspektifi</h2>
+      <small>Kullanım kolaylığı, motivasyon, görsel netlik ve mobil kullanım açısından</small>
+    </div>
+  </div>
+
+  <div class="analysis-grid">
+    <div class="analysis-card positive">
+      <h3 class="h3-positive">✓ Güçlü Yönler</h3>
+      <ul>
+        <li><strong>CSI teması:</strong> "Dedektif" + "olay yeri" çerçevesi lise öğrencileri için oldukça ilgi çekici ve motivasyon artırıcı.</li>
+        <li><strong>Animasyonlu ikonlar:</strong> 12 vakaya özgü hover animasyonları görsel zenginlik sağlıyor.</li>
+        <li><strong>Anlık geri bildirim:</strong> Kontrol Et butonuna basınca hemen değerlendirme alınması motivasyonu destekliyor.</li>
+        <li><strong>3D Moleküler görünüm:</strong> Mikro/makro geçiş benzersiz ve çok etkili bir öğrenme deneyimi.</li>
+        <li><strong>Karanlık/Aydınlık tema:</strong> Öğrencinin tercihine göre ayarlanabiliyor.</li>
+        <li><strong>İlerleme çubuğu:</strong> Kaç vaka çözüldüğü net görünüyor.</li>
+      </ul>
+    </div>
+    <div class="analysis-card negative">
+      <h3 class="h3-negative">⚠ Geliştirme Alanları</h3>
+      <ul>
+        <li><strong>İlerleme görselliği zayıf:</strong> İlerleme çubuğu var fakat kişisel başarı (rozet, puan, unvan) çok göz önünde değil. Öğrenci "ben neredeyim?" sorusunu sormaya devam eder.</li>
+        <li><strong>Gözlem formu boş sayfa hissi:</strong> Öğrenci video izleyince forma geçmesi gerektiğini her zaman sezmiyor; yönlendirme zayıf.</li>
+        <li><strong>Mobil optimizasyon:</strong> Yatay kaydırma, sol/sağ panel düzeni mobilde daralmakta. Özellikle metin alanları küçük ekranlarda sıkışıyor.</li>
+        <li><strong>Başarı anı kutlaması:</strong> Confetti var ama 12. vakayı bitirme özel ekranı / başarı kartı yok.</li>
+        <li><strong>Yazı alanı boyutu:</strong> 70px min-height çok kısa, öğrenci uzun cümle yazmaya isteksizleşebilir.</li>
+        <li><strong>Rehber bilgi sürekliliği:</strong> Rehber açılıp kapandıktan sonra, olay ekranında adım adım ne yapacağını hatırlatan mini bir yönlendirme bulunmuyor.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- BÖLÜM 3: GÖRSEL ÖNERİLER -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon icon-proposal">🎨</div>
+    <div>
+      <h2>Görsel Tasarım Önerileri</h2>
+      <small>7 farklı iyileştirme alanı için gerçek görünüm mockupları</small>
+    </div>
+  </div>
+
+  <!-- ─── ÖNERI A ─── -->
+  <div class="proposal-block">
+    <div class="proposal-label">💡 Öneri A</div>
+    <h3>Dairesel İlerleme + Rütbe Ekranı — Hero Banner Yeniden Tasarımı</h3>
+    <p>Mevcut yatay ilerleme çubuğu yerine, öğrencinin rütbesini ve kaç vakayı çözdüğünü bir bakışta gösteren bir dairesel progress ring ile vaka durumu nokta ızgarası. Öğrenci girişte hemen "ben ne durumdayım?" sorusuna cevap alıyor.</p>
+    <div class="prop-a-demo">
+      <div class="prop-header-bar">
+        <div>
+          <div class="prop-title">İncelenecek Olayı Seç</div>
+          <div class="prop-subtitle">Olayı izle, kanıtları topla ve değişimi belirle.</div>
+        </div>
+        <span class="badge badge-teacher">Öneri A</span>
+      </div>
+      <div class="progress-ring-row">
+        <div class="ring-wrap">
+          <svg width="82" height="82" viewBox="0 0 82 82">
+            <circle cx="41" cy="41" r="34" fill="none" stroke="rgba(56,189,248,0.12)" stroke-width="7"></circle>
+            <circle cx="41" cy="41" r="34" fill="none" stroke="#38bdf8" stroke-width="7" stroke-dasharray="213" stroke-dashoffset="71" stroke-linecap="round"></circle>
+          </svg>
+          <div class="ring-center">
+            <span class="ring-num">7</span>
+            <span class="ring-label">/ 12 Vaka</span>
+          </div>
+        </div>
+        <div class="rank-info">
+          <div class="rank-title-big">🏅 Adli Kimya Dedektifi</div>
+          <div class="rank-sub">9 vaka çözünce → Kıdemli Uzman!</div>
+          <div style="margin-top:0.65rem; font-size:0.7rem; color:var(--muted);">Vaka durumları:</div>
+          <div class="case-dot-grid" style="margin-top:0.35rem;">
+            <div class="case-dot dot-solved">1</div>
+            <div class="case-dot dot-solved">2</div>
+            <div class="case-dot dot-solved">3</div>
+            <div class="case-dot dot-partial">4</div>
+            <div class="case-dot dot-wrong">5</div>
+            <div class="case-dot dot-solved">6</div>
+            <div class="case-dot dot-solved">7</div>
+            <div class="case-dot dot-empty">8</div>
+            <div class="case-dot dot-empty">9</div>
+            <div class="case-dot dot-empty">10</div>
+            <div class="case-dot dot-empty">11</div>
+            <div class="case-dot dot-empty">12</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="benefit-pills">
+      <span class="bp bp-s">Öğrenci: Motivasyon ↑</span>
+      <span class="bp bp-s">Öğrenci: Hedef netleşir</span>
+      <span class="bp bp-t">Öğretmen: Hızlı durum özeti</span>
+    </div>
+    <div class="tip-box" style="margin-top:0.75rem;">
+      <strong>Uygulama notu:</strong> Dairesel SVG progress ring yalnızca HTML/CSS/JS ile kolayca uygulanabilir. "stroke-dashoffset" değeri (solvedCount / 12) * circumference formülüyle hesaplanır. Vaka nokta ızgarası mevcut kart renk sınıflarından yararlanır.
+    </div>
+  </div>
+
+  <!-- ─── ÖNERI B ─── -->
+  <div class="proposal-block">
+    <div class="proposal-label">💡 Öneri B</div>
+    <h3>Öğretmen Özet Paneli — Sınıf Performans Görünümü</h3>
+    <p>Öğretmen "Vaka Raporu" yerine sınıf bazlı bir özet paneli görebilseydi bu panel nasıl görünürdü? (Şu anki mimari tek kullanıcı odaklı; bu yapıya ulaşmak büyük değişiklik gerektirir, ancak tek kullanıcı için de yararlı bir "oturum özeti" paneli olabilir.)</p>
+    <div class="prop-b-demo">
+      <div class="teacher-topbar">
+        <span class="teacher-topbar-title">👩‍🏫 Öğretmen Değerlendirmesi — 10-A Sınıfı</span>
+        <span class="teacher-topbar-badge">12 Öğrenci</span>
+      </div>
+      <div class="teacher-content">
+        <div class="class-stats-row">
+          <div class="stat-box">
+            <div class="stat-num" style="color:#34d399;">8</div>
+            <div class="stat-label">Tam Doğru</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num" style="color:#fde047;">3</div>
+            <div class="stat-label">Eksik</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num" style="color:#fca5a5;">1</div>
+            <div class="stat-label">Hatalı</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-num" style="color:#7dd3fc;">%72</div>
+            <div class="stat-label">Ortalama</div>
+          </div>
+        </div>
+        <div class="student-list-mini">
+          <div class="student-row-mini">
+            <div class="stu-avatar" style="background:rgba(16,185,129,0.2);color:#34d399;">A</div>
+            <span class="stu-name">Ahmet K.</span>
+            <div class="stu-bar-wrap"><div class="stu-bar-fill" style="width:92%;background:#34d399;"></div></div>
+            <span class="stu-score" style="color:#34d399;">%92</span>
+          </div>
+          <div class="student-row-mini">
+            <div class="stu-avatar" style="background:rgba(56,189,248,0.2);color:#7dd3fc;">B</div>
+            <span class="stu-name">Beliz S.</span>
+            <div class="stu-bar-wrap"><div class="stu-bar-fill" style="width:78%;background:#7dd3fc;"></div></div>
+            <span class="stu-score" style="color:#7dd3fc;">%78</span>
+          </div>
+          <div class="student-row-mini">
+            <div class="stu-avatar" style="background:rgba(250,204,21,0.2);color:#fde047;">C</div>
+            <span class="stu-name">Caner M.</span>
+            <div class="stu-bar-wrap"><div class="stu-bar-fill" style="width:55%;background:#fde047;"></div></div>
+            <span class="stu-score" style="color:#fde047;">%55</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="benefit-pills">
+      <span class="bp bp-t">Öğretmen: Sınıf geneli izleme</span>
+      <span class="bp bp-t">Öğretmen: Sorunlu noktaları tespit</span>
+    </div>
+    <div class="tip-box" style="margin-top:0.75rem;">
+      <strong>Not:</strong> Bu panel, mevcut tek kullanıcılı mimaride <em>öğretmenin bir sınıfı yönetmesi</em> için backend gerektirir. Ancak kısa vadede, "Öğretmen Değerlendirmesi" bölümüne elle not/yorum kutusu eklemek çok daha kolay ve anlamlı bir adım olabilir.
+    </div>
+  </div>
+
+  <!-- ─── ÖNERI C ─── -->
+  <div class="proposal-block">
+    <div class="proposal-label">💡 Öneri C</div>
+    <h3>Başarı Rozet Sistemi — Oyunlaştırma Katmanı</h3>
+    <p>Mevcut rütbe sistemine ek olarak, belirli başarılar için kazanılabilecek görsel rozetler. Öğrenci bunları "Vaka Raporu" veya profil bölümünde görebilir. Motivation ve yeniden deneme isteği artar.</p>
+    <div class="prop-c-demo">
+      <div style="font-size:0.8rem; font-weight:800; color:#fff; margin-bottom:0.25rem;">🏆 Kazanılan &amp; Kilitli Başarılar</div>
+      <div style="font-size:0.72rem; color:var(--muted); margin-bottom:0.85rem;">Tüm 12 vakayı tamamla ve tüm rozetleri aç!</div>
+      <div class="badge-showcase">
+        <div class="ach-badge ach-badge-1 earned">
+          <span class="ach-icon">🔥</span>
+          <span class="ach-name">İlk Keşif</span>
+        </div>
+        <div class="ach-badge ach-badge-2 earned">
+          <span class="ach-icon">🧪</span>
+          <span class="ach-name">Kimya Uzmanı</span>
+        </div>
+        <div class="ach-badge ach-badge-3 earned">
+          <span class="ach-icon">❄️</span>
+          <span class="ach-name">Buz Dedektifi</span>
+        </div>
+        <div class="ach-badge ach-badge-4 locked">
+          <span class="ach-icon">⚡</span>
+          <span class="ach-name">Elektroliz Pro</span>
+        </div>
+        <div class="ach-badge ach-badge-5 locked">
+          <span class="ach-icon">🏅</span>
+          <span class="ach-name">Başmüfettiş</span>
+        </div>
+        <div class="ach-badge ach-badge-6 locked">
+          <span class="ach-icon">📓</span>
+          <span class="ach-name">Dolu Defter</span>
+        </div>
+      </div>
+    </div>
+    <div class="benefit-pills">
+      <span class="bp bp-s">Öğrenci: Yeniden oynama isteği ↑</span>
+      <span class="bp bp-s">Öğrenci: Sosyal paylaşım motivasyonu</span>
+      <span class="bp bp-t">Öğretmen: Ek puan kriteri</span>
+    </div>
+  </div>
+
+  <!-- ─── ÖNERI D ─── -->
+  <div class="proposal-block">
+    <div class="proposal-label">💡 Öneri D</div>
+    <h3>Gözlem Formu — Adım Adım Kılavuzlu Yazma Deneyimi</h3>
+    <p>Mevcut form, "gözlemini yaz" ve "kararını ver" kutularını tek seferde gösteriyor. Öneri: Kutuların tasarımı daha fazla alan, karakter sayacı ve gömülü yönlendirme ile desteklensin. Özellikle metin kutusunun boyutu büyütülsün.</p>
+    <div class="prop-d-demo">
+      <div class="obs-step-row">
+        <div class="obs-step-num">1</div>
+        <div class="obs-step-body">
+          <div class="obs-step-title">Gözlemini Yaz</div>
+          <div class="obs-textarea-mock">Buzun eridiğini gözlemledim. Su oluştu ve madde sıvıya döndü...</div>
+          <div class="char-counter">47 / 500 karakter</div>
+        </div>
+      </div>
+      <div class="obs-step-row" style="background:rgba(16,185,129,0.06); border-color:rgba(16,185,129,0.2);">
+        <div class="obs-step-num" style="background:rgba(16,185,129,0.2); border-color:rgba(16,185,129,0.5); color:#5eead4;">2</div>
+        <div class="obs-step-body">
+          <div class="obs-step-title" style="color:#5eead4;">Kararını Ver</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin-bottom:0.5rem;">
+            <div style="background:rgba(56,189,248,0.15); border:2px solid rgba(56,189,248,0.5); border-radius:10px; padding:0.55rem 0.65rem; text-align:center; font-size:0.72rem; font-weight:800; color:#7dd3fc;">🧊 Fiziksel Değişim</div>
+            <div style="background:rgba(16,185,129,0.06); border:1.5px solid rgba(16,185,129,0.2); border-radius:10px; padding:0.55rem 0.65rem; text-align:center; font-size:0.72rem; font-weight:700; color:var(--muted);">🧪 Kimyasal Değişim</div>
+          </div>
+          <div class="obs-textarea-mock">Maddenin kimliği değişmedi, sadece hali değişti. Bu yüzden fiziksel değişimdir.</div>
+          <div class="char-counter">64 / 500 karakter</div>
+        </div>
+      </div>
+    </div>
+    <div class="benefit-pills">
+      <span class="bp bp-s">Öğrenci: Daha az boş bırakma</span>
+      <span class="bp bp-s">Öğrenci: Yazma akışı gelişir</span>
+      <span class="bp bp-t">Öğretmen: Daha zengin cevaplar</span>
+    </div>
+    <div class="tip-box" style="margin-top:0.75rem;">
+      <strong>Uygulama notu:</strong> Karakter sayacı: textarea'nın <code>input</code> olayında <code>obsInput.value.length</code> ile gerçek zamanlı güncellenir. Textarea <code>min-height</code> değeri 70px'ten 110–130px'e yükseltilmesi önerilir.
+    </div>
+  </div>
+
+  <!-- ─── ÖNERI E ─── -->
+  <div class="proposal-block">
+    <div class="proposal-label">💡 Öneri E</div>
+    <h3>Sonuç Modalı — Büyük Renk Bloklu Başarı/Eksik Ekranı</h3>
+    <p>Mevcut "Kontrol Et" modalında tespitler mevcut fakat tam başarı ile eksik durum görsel olarak çok yakın görünüyor. Öneri: Modal üst kısmına belirgin büyük renk bloğu + büyük puan sayısı eklesin.</p>
+    <div class="prop-e-demo">
+      <div class="result-header-correct">
+        <div class="result-big-icon icon-correct">✅</div>
+        <div class="result-head-text">
+          <h4>TAM BAŞARILI TEŞHİS · VAKA #4</h4>
+          <p>Buzun Erimesi — Tüm bölümler doğru ve eksiksiz.</p>
+        </div>
+        <div class="score-large score-correct">%100</div>
+      </div>
+      <div class="result-rows">
+        <div class="result-row-item rri-correct">
+          <span class="rri-icon">🧊</span>
+          <span class="rri-label">1. Değişim Türü Tespiti</span>
+          <span class="rri-verdict rv-c">✓ DOĞRU</span>
+        </div>
+        <div class="result-row-item rri-correct">
+          <span class="rri-icon">👁</span>
+          <span class="rri-label">2. Gözlem Raporu</span>
+          <span class="rri-verdict rv-c">✓ DOĞRU</span>
+        </div>
+        <div class="result-row-item rri-correct">
+          <span class="rri-icon">🔬</span>
+          <span class="rri-label">3. Bilimsel Gerekçe</span>
+          <span class="rri-verdict rv-c">✓ DOĞRU</span>
+        </div>
+      </div>
+
+      <div class="result-header-partial">
+        <div class="result-big-icon icon-partial">⚠️</div>
+        <div class="result-head-text">
+          <h4>EKSİK GÖZLEM / GEREKÇE · VAKA #1</h4>
+          <p>Demirin Paslanması — Karar doğru, gerekçe eksik.</p>
+        </div>
+        <div class="score-large score-partial">%65</div>
+      </div>
+      <div class="result-rows">
+        <div class="result-row-item rri-correct">
+          <span class="rri-icon">🧪</span>
+          <span class="rri-label">1. Değişim Türü Tespiti</span>
+          <span class="rri-verdict rv-c">✓ DOĞRU</span>
+        </div>
+        <div class="result-row-item rri-partial">
+          <span class="rri-icon">👁</span>
+          <span class="rri-label">2. Gözlem Raporu</span>
+          <span class="rri-verdict rv-p">⚠ EKSİK</span>
+        </div>
+        <div class="result-row-item rri-wrong">
+          <span class="rri-icon">🔬</span>
+          <span class="rri-label">3. Bilimsel Gerekçe yazılmadı</span>
+          <span class="rri-verdict rv-w">✕ BOŞ</span>
+        </div>
+      </div>
+    </div>
+    <div class="benefit-pills">
+      <span class="bp bp-s">Öğrenci: Anında durum kavranır</span>
+      <span class="bp bp-t">Öğretmen: Değerlendirme netliği ↑</span>
+    </div>
+  </div>
+
+  <!-- ─── ÖNERI F ─── -->
+  <div class="proposal-block">
+    <div class="proposal-label">💡 Öneri F</div>
+    <h3>Mobil Deneyim — Altta Gezinme Çubuğu</h3>
+    <p>Küçük ekranlarda üst menünün "Rehber / Defter / Rapor" butonları çok sıkışıyor. Öneri: Mobil için altta sabit bir navigasyon çubuğu ve kart tasarımının dikey yeniden düzenlenmesi.</p>
+    <div class="prop-f-demo">
+      <div class="mobile-mock">
+        <div class="mob-topbar">
+          <span class="mob-logo">⚗ CSI LAB</span>
+          <div class="mob-dots">
+            <div class="mob-dot" style="background:var(--primary); opacity:0.7;"></div>
+            <div class="mob-dot"></div>
+            <div class="mob-dot"></div>
+          </div>
+        </div>
+        <div class="mob-case-card">
+          <div class="mob-case-icon" style="background:rgba(16,185,129,0.15);">🦷</div>
+          <div class="mob-case-info">
+            <div class="mob-case-title">Demirin Paslanması</div>
+            <div class="mob-case-type">Kimyasal Değişim</div>
+          </div>
+          <div class="mob-status ms-solved">✓</div>
+        </div>
+        <div class="mob-case-card">
+          <div class="mob-case-icon" style="background:rgba(245,158,11,0.15);">🔥</div>
+          <div class="mob-case-info">
+            <div class="mob-case-title">Kağıdın Yanması</div>
+            <div class="mob-case-type">Kimyasal Değişim</div>
+          </div>
+          <div class="mob-status ms-solved">✓</div>
+        </div>
+        <div class="mob-case-card">
+          <div class="mob-case-icon" style="background:rgba(56,189,248,0.15);">🧊</div>
+          <div class="mob-case-info">
+            <div class="mob-case-title">Buzun Erimesi</div>
+            <div class="mob-case-type">Fiziksel Değişim</div>
+          </div>
+          <div class="mob-status ms-partial">⚠</div>
+        </div>
+        <div class="mob-case-card">
+          <div class="mob-case-icon" style="background:rgba(148,163,184,0.1);">🍞</div>
+          <div class="mob-case-info">
+            <div class="mob-case-title">Ekmeğin Küflenmesi</div>
+            <div class="mob-case-type">—</div>
+          </div>
+          <div class="mob-status ms-open">İncele</div>
+        </div>
+        <div class="mob-bottom-nav">
+          <div class="mob-nav-btn active">
+            <span class="mob-nav-icon">🏠</span>
+            <span>Olaylar</span>
+          </div>
+          <div class="mob-nav-btn">
+            <span class="mob-nav-icon">📓</span>
+            <span>Defter</span>
+          </div>
+          <div class="mob-nav-btn">
+            <span class="mob-nav-icon">📋</span>
+            <span>Rapor</span>
+          </div>
+          <div class="mob-nav-btn">
+            <span class="mob-nav-icon">ℹ️</span>
+            <span>Rehber</span>
+          </div>
+        </div>
+      </div>
+      <div class="mobile-notes">
+        <h4>Mobil Optimizasyon Notları</h4>
+        <ul>
+          <li>Üst menü butonları altta sabit nav bar'a taşınır → daha az kaydırma, daha kolay erişim.</li>
+          <li>Kart listesi dikey tek sütun olur, sol-sağ panel yerine üst-alt sekmeli görünüm.</li>
+          <li>Video + form, sekme geçişli (Tab seçimi) olarak gösterilir; aynı anda ikisi görünmez.</li>
+          <li>Textarea min-height artırılır, sanal klavye açık olduğunda form kaymaz.</li>
+          <li>Vaka ikon boyutu dokunma hedefi olarak en az 44×44px korunur.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="benefit-pills">
+      <span class="bp bp-s">Öğrenci: Mobil kullanım kolaylaşır</span>
+      <span class="bp bp-s">Öğrenci: Parmaklarla navigasyon</span>
+    </div>
+  </div>
+
+  <!-- ─── ÖNERI G ─── -->
+  <div class="proposal-block">
+    <div class="proposal-label">💡 Öneri G</div>
+    <h3>Fiziksel vs Kimyasal — Renk Dilli Yönlendirici Kartlar (Olay Detay Ekranı)</h3>
+    <p>Gözlem formu üzerinde, seçilen değişim türüne göre tüm sağ panel hafifçe renk değiştirir. Böylece öğrenci hem görsel olarak hangi türü seçtiğini daha net görür hem de iki değişim türünün farkı pekişir.</p>
+    <div class="prop-g-demo">
+      <div class="type-card-mock tcm-physical">
+        <div class="tcm-watermark">PHY</div>
+        <div class="tcm-icon">🧊</div>
+        <div class="tcm-title">Fiziksel Değişim</div>
+        <div class="tcm-desc">Maddenin dış görünüşü değişir; kimliği korunur. Geri döndürülebilir.</div>
+        <div class="tcm-indicators">
+          <span class="tcm-tag">Hal değişimi</span>
+          <span class="tcm-tag">Şekil değişimi</span>
+          <span class="tcm-tag">Çözünme</span>
+          <span class="tcm-tag">Karışım</span>
+        </div>
+      </div>
+      <div class="type-card-mock tcm-chemical">
+        <div class="tcm-watermark">CHM</div>
+        <div class="tcm-icon">🧪</div>
+        <div class="tcm-title">Kimyasal Değişim</div>
+        <div class="tcm-desc">Yeni madde oluşur; özellikler değişir. Çoğunlukla geri döndürülemez.</div>
+        <div class="tcm-indicators">
+          <span class="tcm-tag">Gaz oluşumu</span>
+          <span class="tcm-tag">Renk değişimi</span>
+          <span class="tcm-tag">Isı açığa çıkması</span>
+          <span class="tcm-tag">Çökelti</span>
+        </div>
+      </div>
+    </div>
+    <div class="benefit-pills">
+      <span class="bp bp-s">Öğrenci: İki tür arasındaki fark pekişir</span>
+      <span class="bp bp-t">Öğretmen: Kavramsal iskeleti gösterir</span>
+    </div>
+    <div class="tip-box" style="margin-top:0.75rem;">
+      <strong>Uygulama notu:</strong> Seçim yapıldığında <code>.form-box</code> container'ına <code>selected-physical</code> veya <code>selected-chemical</code> sınıfı eklenerek border-color ve arka plan rengi geçiş animasyonuyla değişebilir. Mevcut CSS değişken sistemiyle kolayca entegre edilir.
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ÖZET TABLO -->
+<div class="summary-card">
+  <h3>📊 Önceliklendirme Özeti</h3>
+  <table class="priority-table">
+    <thead>
+      <tr>
+        <th>Öneri</th>
+        <th>Açıklama</th>
+        <th>Öncelik</th>
+        <th>Kime Fayda?</th>
+        <th>Uygulama Zorluğu</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="prop-id">A</td>
+        <td>Dairesel ilerleme + vaka nokta ızgarası</td>
+        <td class="p-high">Yüksek</td>
+        <td><span class="p-who who-ts">Öğrenci + Öğretmen</span></td>
+        <td>Düşük</td>
+      </tr>
+      <tr>
+        <td class="prop-id">D</td>
+        <td>Gözlem formu — büyük textarea + karakter sayacı</td>
+        <td class="p-high">Yüksek</td>
+        <td><span class="p-who who-s">Öğrenci</span></td>
+        <td>Çok Düşük</td>
+      </tr>
+      <tr>
+        <td class="prop-id">G</td>
+        <td>Seçim türüne göre panel renk geçişi</td>
+        <td class="p-high">Yüksek</td>
+        <td><span class="p-who who-ts">Öğrenci + Öğretmen</span></td>
+        <td>Düşük</td>
+      </tr>
+      <tr>
+        <td class="prop-id">E</td>
+        <td>Sonuç modalı büyük renk bloğu + puan</td>
+        <td class="p-medium">Orta</td>
+        <td><span class="p-who who-ts">Öğrenci + Öğretmen</span></td>
+        <td>Orta</td>
+      </tr>
+      <tr>
+        <td class="prop-id">C</td>
+        <td>Başarı rozet sistemi</td>
+        <td class="p-medium">Orta</td>
+        <td><span class="p-who who-s">Öğrenci</span></td>
+        <td>Orta</td>
+      </tr>
+      <tr>
+        <td class="prop-id">F</td>
+        <td>Mobil alt navigasyon çubuğu</td>
+        <td class="p-medium">Orta</td>
+        <td><span class="p-who who-s">Öğrenci</span></td>
+        <td>Orta–Yüksek</td>
+      </tr>
+      <tr>
+        <td class="prop-id">B</td>
+        <td>Öğretmen sınıf panel görünümü</td>
+        <td class="p-low">Düşük</td>
+        <td><span class="p-who who-t">Öğretmen</span></td>
+        <td>Çok Yüksek (backend)</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+
+</body></html>
