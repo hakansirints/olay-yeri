@@ -1642,6 +1642,89 @@ body {
   border-radius: 0;
 }
 
+/* Sekme geçişinde gizlenen sahnenin kesin olarak görünmemesini sağla */
+.video-modal-stage[style*="display:none"],
+.video-modal-stage[style*="display: none"],
+.video-modal-stage[hidden] {
+  display: none !important;
+}
+
+/* Mobil Dikey Ekranlar İçin Video & 3D Büyütme Modalı */
+@media (max-width: 820px) and (orientation: portrait) {
+  .video-modal-backdrop {
+    padding: 0.5rem !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 2100 !important;
+  }
+  .video-modal-card {
+    width: 100% !important;
+    max-width: 520px !important;
+    height: auto !important;
+    max-height: 94dvh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6) !important;
+  }
+  .video-modal-header {
+    padding: 0.55rem 0.85rem !important;
+    flex-shrink: 0 !important;
+  }
+  .video-modal-title {
+    font-size: 0.88rem !important;
+    line-height: 1.2 !important;
+  }
+  .video-modal-tabs-nav {
+    padding: 0.25rem 0.75rem !important;
+    gap: 0.35rem !important;
+    flex-shrink: 0 !important;
+  }
+  .video-modal-tabs-nav .eval-tab-pill {
+    padding: 0.22rem 0.55rem !important;
+    font-size: 0.7rem !important;
+  }
+  .video-modal-stage {
+    width: 100% !important;
+    max-height: 55vh !important;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    overflow: hidden;
+  }
+  .video-modal-stage:not(.three-modal-stage) {
+    aspect-ratio: 16 / 9 !important;
+    height: auto !important;
+  }
+  .video-modal-elem {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    object-fit: contain !important;
+  }
+  .video-modal-stage.three-modal-stage {
+    min-height: 220px !important;
+    height: clamp(220px, 45vh, 340px) !important;
+    max-height: 50vh !important;
+  }
+  .video-modal-footer {
+    padding: 0.45rem 0.85rem !important;
+    flex-shrink: 0 !important;
+    gap: 0.35rem !important;
+  }
+  .video-modal-hint {
+    font-size: 0.68rem !important;
+    line-height: 1.25 !important;
+  }
+  .video-modal-footer .eval-oval-btn {
+    padding: 0.35rem 0.85rem !important;
+    font-size: 0.74rem !important;
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+
 /* Gözlem ve Karar Örnek İfade Çipleri */
 .form-examples-row {
   display: flex;
@@ -3885,23 +3968,92 @@ body {
 
   /* Video & 3D Tam Ekran Modalı */
   .video-modal-backdrop {
+    padding: 0.25rem !important;
     z-index: 2100 !important;
   }
   .video-modal-card {
-    max-width: 98vw !important;
-    width: 98vw !important;
+    width: 96vw !important;
+    max-width: 96vw !important;
+    height: 96dvh !important;
     max-height: 96dvh !important;
-    border-radius: 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    border-radius: 10px !important;
   }
-  .video-modal-stage, .three-modal-stage {
-    height: calc(96dvh - 78px) !important;
-    max-height: 250px !important;
+  .video-modal-header {
+    padding: 0.2rem 0.6rem !important;
+    height: 28px !important;
+    min-height: 28px !important;
+    flex-shrink: 0 !important;
+  }
+  .video-modal-title {
+    font-size: 0.76rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .video-modal-tabs-nav {
+    padding: 0.15rem 0.5rem !important;
+    height: 24px !important;
+    min-height: 24px !important;
+    gap: 0.25rem !important;
+    flex-shrink: 0 !important;
+  }
+  .video-modal-tabs-nav .eval-tab-pill {
+    padding: 0.1rem 0.4rem !important;
+    font-size: 0.6rem !important;
+    height: 20px !important;
+  }
+  .video-modal-stage {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    overflow: hidden;
+  }
+  .video-modal-stage:not(.three-modal-stage) {
+    aspect-ratio: unset !important;
+  }
+  .video-modal-elem {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    object-fit: contain !important;
+  }
+  .video-modal-stage.three-modal-stage {
+    min-height: 0 !important;
+    height: 100% !important;
+    max-height: none !important;
   }
   .video-modal-footer {
-    padding: 0.25rem 0.65rem !important;
+    padding: 0.2rem 0.6rem !important;
+    height: 28px !important;
+    min-height: 28px !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: nowrap !important;
+    gap: 0.4rem !important;
   }
   .video-modal-hint {
+    font-size: 0.58rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    margin: 0 !important;
+    flex: 1 1 auto !important;
+  }
+  .video-modal-footer .eval-oval-btn {
+    padding: 0.15rem 0.6rem !important;
     font-size: 0.62rem !important;
+    height: 22px !important;
+    width: auto !important;
+    flex-shrink: 0 !important;
   }
 
   /* Değerlendirme / Dönüt Modalı */
