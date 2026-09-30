@@ -3655,8 +3655,8 @@ body {
     height: 100% !important;
     max-height: 100% !important;
     display: grid !important;
-    grid-template-columns: 46% 54% !important;
-    gap: 0.45rem !important;
+    grid-template-columns: 37% 63% !important;
+    gap: 0.35rem !important;
     overflow: hidden !important;
     align-items: stretch !important;
     box-sizing: border-box !important;
@@ -3864,29 +3864,31 @@ body {
     flex: 1 1 auto !important;
   }
   .form-box {
-    padding: 0.12rem 0.35rem !important;
-    border-radius: 7px !important;
+    padding: 0.16rem 0.55rem !important;
+    border-radius: 8px !important;
     gap: 0.04rem !important;
     margin-bottom: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
   .form-box-header {
     margin-bottom: 0.02rem !important;
-    gap: 0.2rem !important;
+    gap: 0.25rem !important;
     align-items: center !important;
   }
   .step-num-pill {
-    width: 14px !important;
-    height: 14px !important;
-    font-size: 0.52rem !important;
-    line-height: 14px !important;
+    width: 15px !important;
+    height: 15px !important;
+    font-size: 0.54rem !important;
+    line-height: 15px !important;
   }
   .form-box-title {
-    font-size: 0.68rem !important;
+    font-size: 0.7rem !important;
     line-height: 1.15 !important;
   }
   .field-eval-badge {
-    font-size: 0.5rem !important;
-    padding: 0.04rem 0.25rem !important;
+    font-size: 0.52rem !important;
+    padding: 0.04rem 0.28rem !important;
   }
   .form-box-desc {
     display: none !important;
@@ -3895,21 +3897,25 @@ body {
     height: clamp(24px, 6.5vh, 32px) !important;
     min-height: 22px !important;
     max-height: 34px !important;
-    font-size: 0.64rem !important;
-    padding: 0.12rem 0.3rem !important;
+    font-size: 0.65rem !important;
+    padding: 0.14rem 0.45rem !important;
     border-radius: 5px !important;
     resize: none !important;
     line-height: 1.25 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
   #reaInput {
     height: clamp(24px, 6.5vh, 32px) !important;
     min-height: 22px !important;
     max-height: 34px !important;
-    font-size: 0.64rem !important;
-    padding: 0.12rem 0.3rem !important;
+    font-size: 0.65rem !important;
+    padding: 0.14rem 0.45rem !important;
     border-radius: 5px !important;
     resize: none !important;
     line-height: 1.25 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
   .char-counter {
     font-size: 0.46rem !important;
@@ -3919,13 +3925,15 @@ body {
   .type-buttons-row {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
-    gap: 0.25rem !important;
+    gap: 0.35rem !important;
     margin-bottom: 0.1rem !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
   .type-card-mock {
-    padding: 0.1rem 0.3rem !important;
-    border-radius: 6px !important;
-    min-height: 26px !important;
+    padding: 0.12rem 0.45rem !important;
+    border-radius: 7px !important;
+    min-height: 27px !important;
   }
   .tcm-header-row {
     gap: 0.18rem !important;
