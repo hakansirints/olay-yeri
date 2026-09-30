@@ -3652,13 +3652,13 @@ body {
 
   /* 5. Vaka İnceleme Kokpit (2 Sütunlu Yan Yana Düzen) */
   .case-detail-wrap.detail-landscape-grid {
-    height: 100% !important;
+    height: auto !important;
     max-height: 100% !important;
     display: grid !important;
     grid-template-columns: 37% 63% !important;
     gap: 0.35rem !important;
     overflow: hidden !important;
-    align-items: stretch !important;
+    align-items: start !important;
     box-sizing: border-box !important;
   }
 
@@ -3666,7 +3666,7 @@ body {
   .detail-left-pane {
     display: flex !important;
     flex-direction: column !important;
-    height: 100% !important;
+    height: auto !important;
     max-height: 100% !important;
     overflow: hidden !important;
     gap: 0.12rem !important;
@@ -3849,30 +3849,31 @@ body {
   .detail-right-pane {
     display: flex !important;
     flex-direction: column !important;
-    height: 100% !important;
+    height: auto !important;
     max-height: 100% !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
     padding-right: 3px !important;
-    gap: 0.2rem !important;
+    gap: 0 !important;
     box-sizing: border-box !important;
+    justify-content: flex-start !important;
   }
   .interactive-form-grid {
     display: flex !important;
     flex-direction: column !important;
-    gap: 0.2rem !important;
-    flex: 1 1 auto !important;
+    gap: 0.22rem !important;
+    flex: 0 0 auto !important;
   }
   .form-box {
-    padding: 0.16rem 0.55rem !important;
+    padding: 0.26rem 0.55rem !important;
     border-radius: 8px !important;
-    gap: 0.04rem !important;
+    gap: 0.08rem !important;
     margin-bottom: 0 !important;
     width: 100% !important;
     box-sizing: border-box !important;
   }
   .form-box-header {
-    margin-bottom: 0.02rem !important;
+    margin-bottom: 0.04rem !important;
     gap: 0.25rem !important;
     align-items: center !important;
   }
@@ -3883,7 +3884,7 @@ body {
     line-height: 15px !important;
   }
   .form-box-title {
-    font-size: 0.7rem !important;
+    font-size: 0.72rem !important;
     line-height: 1.15 !important;
   }
   .field-eval-badge {
@@ -3894,46 +3895,46 @@ body {
     display: none !important;
   }
   #obsInput {
-    height: clamp(24px, 6.5vh, 32px) !important;
-    min-height: 22px !important;
-    max-height: 34px !important;
-    font-size: 0.65rem !important;
-    padding: 0.14rem 0.45rem !important;
-    border-radius: 5px !important;
+    height: clamp(52px, 14vh, 72px) !important;
+    min-height: 48px !important;
+    max-height: 80px !important;
+    font-size: 0.68rem !important;
+    padding: 0.26rem 0.5rem !important;
+    border-radius: 6px !important;
     resize: none !important;
-    line-height: 1.25 !important;
+    line-height: 1.35 !important;
     width: 100% !important;
     box-sizing: border-box !important;
   }
   #reaInput {
-    height: clamp(24px, 6.5vh, 32px) !important;
-    min-height: 22px !important;
-    max-height: 34px !important;
-    font-size: 0.65rem !important;
-    padding: 0.14rem 0.45rem !important;
-    border-radius: 5px !important;
+    height: clamp(44px, 11.5vh, 60px) !important;
+    min-height: 40px !important;
+    max-height: 70px !important;
+    font-size: 0.68rem !important;
+    padding: 0.24rem 0.5rem !important;
+    border-radius: 6px !important;
     resize: none !important;
-    line-height: 1.25 !important;
+    line-height: 1.35 !important;
     width: 100% !important;
     box-sizing: border-box !important;
   }
   .char-counter {
     font-size: 0.46rem !important;
-    margin-top: 0.01rem !important;
+    margin-top: 0.02rem !important;
     line-height: 1 !important;
   }
   .type-buttons-row {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
     gap: 0.35rem !important;
-    margin-bottom: 0.1rem !important;
+    margin-bottom: 0.12rem !important;
     width: 100% !important;
     box-sizing: border-box !important;
   }
   .type-card-mock {
-    padding: 0.12rem 0.45rem !important;
+    padding: 0.15rem 0.45rem !important;
     border-radius: 7px !important;
-    min-height: 27px !important;
+    min-height: 29px !important;
   }
   .tcm-header-row {
     gap: 0.18rem !important;
@@ -3962,14 +3963,15 @@ body {
   }
 
   .submit-btn-row {
-    margin-top: 0 !important;
-    margin-bottom: 0.02rem !important;
+    margin-top: 0.22rem !important;
+    margin-bottom: 0 !important;
     flex-shrink: 0 !important;
   }
   .btn-check-answer {
-    height: 26px !important;
-    padding: 0.12rem 0.75rem !important;
-    font-size: 0.7rem !important;
+    height: 28px !important;
+    padding: 0.15rem 0.75rem !important;
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
     border-radius: 9999px !important;
     width: 100% !important;
     gap: 0.3rem !important;
