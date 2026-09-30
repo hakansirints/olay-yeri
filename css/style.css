@@ -1940,15 +1940,6 @@ body {
   border: none;
 }
 
-@media (max-width: 900px) {
-  .type-buttons-row {
-    margin-bottom: 0.75rem !important;
-  }
-  #reaInput {
-    margin-top: 0.25rem !important;
-  }
-}
-
 .btn-type-toggle {
   display: flex;
   flex-direction: column;
@@ -3919,7 +3910,6 @@ body {
     border-radius: 5px !important;
     resize: none !important;
     line-height: 1.25 !important;
-    margin-top: 0.14rem !important;
   }
   .char-counter {
     font-size: 0.46rem !important;
@@ -3930,7 +3920,7 @@ body {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
     gap: 0.25rem !important;
-    margin-bottom: 0.45rem !important;
+    margin-bottom: 0.1rem !important;
   }
   .type-card-mock {
     padding: 0.1rem 0.3rem !important;
