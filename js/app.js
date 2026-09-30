@@ -8,6 +8,7 @@
   var STORAGE_KEY = 'kimyasal_olay_yeri_records_v1';
   var SOUND_KEY = 'kimyasal_olay_yeri_sound_v1';
   var THEME_KEY = 'kimyasal_olay_yeri_theme_v1';
+  var GUIDE_AUTO_OPEN_KEY = 'olay_yeri_guide_dont_show_auto_v2';
 
   var state = {
     cases: window.CASES_DATA || [],
@@ -20,7 +21,6 @@
     viewMode: 'macro', // 'macro' (video) or 'micro' (canlı moleküler simülasyon)
     soundEnabled: loadSoundSetting(),
     theme: loadThemeSetting(),
-    isOrientationDismissed: false,
     showNotebook: false,
     showReport: false,
     showMolecular: false,
@@ -28,7 +28,7 @@
     showFeedbackModal: false,
     showGuideModal: (function () {
       try {
-        return localStorage.getItem('olay_yeri_guide_seen_v1') !== 'true';
+        return localStorage.getItem(GUIDE_AUTO_OPEN_KEY) !== 'true';
       } catch (e) {
         return true;
       }
@@ -64,6 +64,40 @@
 
   function applyTheme(t) {
     document.documentElement.setAttribute('data-theme', t);
+  }
+
+  function triggerFullscreenAndRotate() {
+    var doc = document.documentElement;
+    var reqFs = doc.requestFullscreen ||
+                doc.webkitRequestFullscreen ||
+                doc.webkitRequestFullScreen ||
+                doc.mozRequestFullScreen ||
+                doc.msRequestFullscreen;
+
+    if (reqFs && !document.fullscreenElement && !document.webkitFullscreenElement) {
+      try {
+        var p = reqFs.call(doc);
+        if (p && p.catch) {
+          p.catch(function () {});
+        }
+      } catch (e) {}
+    }
+
+    try {
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock('landscape').catch(function (err) {
+          console.log('Orientation lock note:', err);
+        });
+      } else if (screen.lockOrientation) {
+        screen.lockOrientation('landscape');
+      } else if (screen.webkitLockOrientation) {
+        screen.webkitLockOrientation('landscape');
+      } else if (screen.mozLockOrientation) {
+        screen.mozLockOrientation('landscape');
+      } else if (screen.msLockOrientation) {
+        screen.msLockOrientation('landscape');
+      }
+    } catch (e) {}
   }
 
   function loadRecords() {
@@ -564,7 +598,7 @@
     html += '        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2a10 10 0 0 0-8 16.5"/><path d="M12 6a6 6 0 0 0-4.8 9.6"/><path d="M12 10a2 2 0 0 0-1.6 3.2"/><path d="M12 14v4"/><path d="M16 12v6"/><path d="M8 12v6"/></svg>';
     html += '      </div>';
     html += '      <div>';
-    html += '        <div class="brand-title">Kimyasal Olay Yeri Uzmanı <span class="csi-pill">CSI LAB</span></div>';
+    html += '        <div class="brand-title">Kimyasal Olay Yeri Uzmanı</div>';
     html += '        <div class="brand-motto">Gözlemle<span>•</span>Kanıtları Topla<span>•</span>Karar Ver</div>';
     html += '      </div>';
     html += '    </div>';
@@ -639,20 +673,24 @@
       html += renderFeedbackModal(state.activeCase, state.records[state.activeCase.id]);
     }
 
-    // Confetti Canvas
-    if (!state.isOrientationDismissed) {
-      html += '<div class="orientation-overlay" id="orientationOverlay">';
-      html += '  <div class="orientation-card">';
-      html += '    <div class="phone-rotate-icon">';
-      html += '      <svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="var(--md-sys-color-primary)" stroke-width="1.8"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></svg>';
-      html += '    </div>';
-      html += '    <div class="orientation-badge">Yatay Ekran Gerekli</div>';
-      html += '    <h3 class="orientation-title">Cihazınızı Yatay Çevirin</h3>';
-      html += '    <p class="orientation-desc">Laboratuvar simülasyonunu mobil ekranda tam ekran deneyimiyle kullanmak için lütfen telefonunuzu yatay konuma getirin.</p>';
-      html += '    <button type="button" class="btn-dismiss-orientation" id="btnDismissOrientation">Dikeyde Devam Et</button>';
-      html += '  </div>';
-      html += '</div>';
-    }
+    // Mobil Dikey Ekran Uyarısı (Yatay Ekran Zorunlu)
+    html += '<div class="orientation-overlay" id="orientationOverlay">';
+    html += '  <div class="orientation-card">';
+    html += '    <div class="phone-rotate-icon">';
+    html += '      <svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="var(--md-sys-color-primary)" stroke-width="1.8"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></svg>';
+    html += '    </div>';
+    html += '    <div class="orientation-badge">Yatay Ekran Gerekli</div>';
+    html += '    <h3 class="orientation-title">Cihazınızı Yatay Çevirin</h3>';
+    html += '    <p class="orientation-desc">Laboratuvar simülasyonunu mobil cihazınızda en iyi deneyimle kullanmak için lütfen telefonunuzu yatay konuma getirin.</p>';
+    html += '    <button type="button" class="btn-rotate-fullscreen" id="btnRotateFullscreen">';
+    html += '      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">';
+    html += '        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>';
+    html += '      </svg>';
+    html += '      <span>Tam Ekrana Geç ve Çevir</span>';
+    html += '    </button>';
+    html += '    <p class="orientation-subhint">Cihazınızı yatay çevirdiğinizde laboratuvar otomatik olarak açılacaktır.</p>';
+    html += '  </div>';
+    html += '</div>';
 
     // Confetti Canvas
     html += '<canvas id="confettiCanvas" style="position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:99;display:none;"></canvas>';
@@ -817,6 +855,11 @@
 
   // Laboratuvar Görev Rehberi Bilgi Kartı Modalı (Yatay Oval Dikdörtgen Format)
   function renderGuideModal() {
+    var isDontShowChecked = false;
+    try {
+      isDontShowChecked = localStorage.getItem(GUIDE_AUTO_OPEN_KEY) === 'true';
+    } catch (e) {}
+
     var h = '';
     h += '<div class="modal-backdrop" id="guideModalBackdrop">';
     h += '  <div class="modal-window modal-window-wide modal-guide-window">';
@@ -873,7 +916,11 @@
     h += '      </div>';
     h += '    </div>';
     h += '';
-    h += '    <div class="modal-footer eval-modal-footer">';
+    h += '    <div class="modal-footer eval-modal-footer guide-modal-footer">';
+    h += '      <label class="guide-auto-show-toggle" for="chkDontShowGuide">';
+    h += '        <input type="checkbox" id="chkDontShowGuide"' + (isDontShowChecked ? ' checked' : '') + '>';
+    h += '        <span>Bir sonraki açılışta bu kartı otomatik gösterme</span>';
+    h += '      </label>';
     h += '      <button class="eval-oval-btn btn-primary-oval" id="btnCloseGuideModalBottom">Laboratuvara Başla →</button>';
     h += '    </div>';
     h += '  </div>';
@@ -929,7 +976,7 @@
       // Video Player
       h += '<div class="video-stage">';
       h += '  <video id="caseVideo" class="video-elem" poster="' + c.thumbnailUrl + '" playsinline src="' + c.videoUrl + '"></video>';
-      h += '  <div class="video-watermark">● CSI LABORATUVAR KAYDI</div>';
+      h += '  <div class="video-watermark">● LABORATUVAR KAYDI</div>';
       h += '  <button type="button" class="btn-expand-video" id="btnExpandVideo" title="Videoyu Daha Büyük Kartta Aç">';
       h += '    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>';
       h += '    <span>Büyüt</span>';
@@ -1187,7 +1234,7 @@
     h += '    </div>';
 
     // Body (Tek, Odaklanmış ve Belirgin Tespit Kartları Listesi - 3D Sekmesi Kaldırıldı)
-    h += '    <div class="eval-modal-body" style="padding: 1.25rem 1.5rem; display:flex; flex-direction:column; gap:0.9rem;">';
+    h += '    <div class="eval-modal-body">';
 
     // Tespit 1: Değişim Türü
     var typeTitleClass = isTypeCorrect ? 'verdict-row-success' : 'verdict-row-danger';
@@ -1272,16 +1319,16 @@
     h += '      </div>';
 
     // Öğretmen Bilimsel Vaka Raporu / Detaylı Dönüt
-    h += '      <div class="eval-feedback-card" style="margin-top:0.25rem;">';
+    h += '      <div class="eval-feedback-card">';
     h += '        <div class="eval-feedback-title-row">';
     h += '          <span class="eval-icon-dot"></span>';
     h += '          <span class="eval-feedback-heading">🔬 Öğretmen Değerlendirmesi</span>';
     h += '        </div>';
-    h += '        <p class="eval-feedback-desc" style="font-size:0.86rem; line-height:1.55; margin-top:0.4rem;">' + ev.message + '</p>';
+    h += '        <p class="eval-feedback-desc">' + ev.message + '</p>';
     h += '      </div>';
 
     // Hızlı Bağlantı Butonları
-    h += '      <div class="eval-quick-links-row" style="margin-top:0.35rem;">';
+    h += '      <div class="eval-quick-links-row">';
     h += '        <button type="button" class="eval-oval-pill" id="btnModalGoNotebook">';
     h += '          <div class="oval-pill-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>';
     h += '          <span>Dijital Deney Defteri</span>';
@@ -1482,14 +1529,14 @@
       };
     }
 
-    // Dismiss Orientation Overlay (Dikeyde Devam Et)
-    var btnDismissOri = document.getElementById('btnDismissOrientation');
-    if (btnDismissOri) {
-      btnDismissOri.onclick = function () {
-        state.isOrientationDismissed = true;
-        document.body.classList.add('orientation-dismissed');
-        if (state.soundEnabled) window.SoundManager.playClick();
-        render();
+    // Tam Ekrana Geç ve Çevir Buton Dinleyicisi
+    var btnRotateFs = document.getElementById('btnRotateFullscreen');
+    if (btnRotateFs) {
+      btnRotateFs.onclick = function () {
+        if (state.soundEnabled && window.SoundManager) {
+          window.SoundManager.playClick();
+        }
+        triggerFullscreenAndRotate();
       };
     }
 
@@ -1526,11 +1573,26 @@
 
     // Guide Modal Handlers
     function closeGuideModal() {
+      var chk = document.getElementById('chkDontShowGuide');
+      if (chk) {
+        try {
+          localStorage.setItem(GUIDE_AUTO_OPEN_KEY, chk.checked ? 'true' : 'false');
+        } catch (e) {}
+      }
       state.showGuideModal = false;
-      try {
-        localStorage.setItem('olay_yeri_guide_seen_v1', 'true');
-      } catch (e) {}
+      if (state.soundEnabled && window.SoundManager) {
+        window.SoundManager.playClick();
+      }
       render();
+    }
+
+    var chkDontShow = document.getElementById('chkDontShowGuide');
+    if (chkDontShow) {
+      chkDontShow.onchange = function () {
+        try {
+          localStorage.setItem(GUIDE_AUTO_OPEN_KEY, chkDontShow.checked ? 'true' : 'false');
+        } catch (e) {}
+      };
     }
 
     var btnCloseGuide = document.getElementById('btnCloseGuideModal');
