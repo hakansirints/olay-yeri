@@ -698,6 +698,13 @@
     app.innerHTML = html;
     bindEvents();
 
+    function formatTimer(sec) {
+      var s = Math.floor(sec || 0);
+      var m = Math.floor(s / 60);
+      s = s % 60;
+      return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+    }
+
     // 3D Simülasyon Yönetimi
     // 1. Video Modalı içinde Mikro Moleküller 3D açıksa:
     if (state.showVideoModal && state.videoModalTab === 'micro' && state.activeCase) {
@@ -710,7 +717,31 @@
     else if (state.activeCase && state.viewMode === 'micro' && !state.showFeedbackModal && !state.showVideoModal) {
       var molEl = document.getElementById('molecularStage');
       if (molEl && window.ThreeMolecularSimulator) {
-        window.ThreeMolecularSimulator.init(molEl, state.activeCase);
+        window.ThreeMolecularSimulator.init(molEl, state.activeCase, {
+          onTimeUpdate: function (info) {
+            var lbl = document.getElementById('lblPlayMicro');
+            var btn = document.getElementById('btnPlayMicro');
+            var bar = document.getElementById('microTimelineBar');
+            var thumb = document.getElementById('microTimelineThumb');
+            var badge = document.getElementById('microTimerBadge');
+
+            if (btn && lbl) {
+              if (info.isEnded) {
+                lbl.textContent = 'Yenile';
+                btn.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg> <span id="lblPlayMicro">Yenile</span>';
+              } else if (info.isPlaying) {
+                lbl.textContent = 'Duraklat';
+                btn.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> <span id="lblPlayMicro">Duraklat</span>';
+              } else {
+                lbl.textContent = 'Başlat';
+                btn.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg> <span id="lblPlayMicro">Başlat</span>';
+              }
+            }
+            if (bar) bar.style.width = (info.progress * 100) + '%';
+            if (thumb) thumb.style.left = (info.progress * 100) + '%';
+            if (badge) badge.textContent = formatTimer(info.currentTime) + ' / ' + formatTimer(info.duration);
+          }
+        });
       }
     } else {
       if (window.ThreeMolecularSimulator && (!state.showVideoModal || state.videoModalTab !== 'micro')) {
@@ -972,6 +1003,20 @@
     // Sahne Alanı (Makro Video veya Mikro Moleküler Canvas)
     if (state.viewMode === 'micro') {
       h += '<div id="molecularStage" class="molecular-stage"></div>';
+
+      // 3D Moleküler Simülasyon Video Kontrolleri (Laboratuvar Videosu ile Birebir Eşzamanlı)
+      var cDur = (c.id === 9 ? 6 : 8);
+      var durStr = (cDur < 10 ? '0' : '') + cDur;
+      h += '<div class="video-controls-row micro-controls-row">';
+      h += '  <button class="btn-media-action btn-primary-action" id="btnPlayMicro"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg> <span id="lblPlayMicro">Başlat</span></button>';
+      h += '  <button class="btn-media-action btn-secondary-action" id="btnRefreshMicro"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg> Yenile</button>';
+      h += '  <div class="micro-timeline-container" id="microTimelineContainer" title="Zamanı İleri/Geri Sar">';
+      h += '    <div class="micro-timeline-bar" id="microTimelineBar"></div>';
+      h += '    <div class="micro-timeline-thumb" id="microTimelineThumb"></div>';
+      h += '  </div>';
+      h += '  <span class="micro-timer-badge" id="microTimerBadge">00:00 / 00:' + durStr + '</span>';
+      h += '  <button class="btn-media-action btn-expand-action" id="btnOpenLargeMicro" title="Moleküler Simülasyonu Büyük Ekranda İncele"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg> Büyüt</button>';
+      h += '</div>';
     } else {
       // Video Player
       h += '<div class="video-stage">';
@@ -1843,6 +1888,45 @@
         if (state.soundEnabled) window.SoundManager.playClick();
         state.showVideoModal = true;
         state.videoModalTab = 'macro';
+        render();
+      };
+    }
+
+    // 3D Mikro Moleküler Simülasyon Oynatma Butonları
+    var btnPlayMicro = document.getElementById('btnPlayMicro');
+    if (btnPlayMicro) {
+      btnPlayMicro.onclick = function () {
+        if (state.soundEnabled) window.SoundManager.playClick();
+        if (window.ThreeMolecularSimulator) {
+          window.ThreeMolecularSimulator.togglePlay();
+        }
+      };
+    }
+    var btnRefreshMicro = document.getElementById('btnRefreshMicro');
+    if (btnRefreshMicro) {
+      btnRefreshMicro.onclick = function () {
+        if (state.soundEnabled) window.SoundManager.playClick();
+        if (window.ThreeMolecularSimulator) {
+          window.ThreeMolecularSimulator.restart();
+        }
+      };
+    }
+    var microTimeline = document.getElementById('microTimelineContainer');
+    if (microTimeline) {
+      microTimeline.onclick = function (e) {
+        if (!window.ThreeMolecularSimulator) return;
+        var rect = microTimeline.getBoundingClientRect();
+        var ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+        var dur = window.ThreeMolecularSimulator.getDuration();
+        window.ThreeMolecularSimulator.seek(ratio * dur);
+      };
+    }
+    var btnOpenLargeMicro = document.getElementById('btnOpenLargeMicro');
+    if (btnOpenLargeMicro) {
+      btnOpenLargeMicro.onclick = function () {
+        if (state.soundEnabled) window.SoundManager.playClick();
+        state.showVideoModal = true;
+        state.videoModalTab = 'micro';
         render();
       };
     }
