@@ -2406,7 +2406,8 @@ body {
 /* Submit Action Button */
 .submit-btn-row {
   text-align: center;
-  margin-top: 0.25rem;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
 }
 .btn-check-answer {
   display: inline-flex;
@@ -3854,6 +3855,7 @@ body {
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
     padding-right: 3px !important;
+    padding-bottom: 0.35rem !important;
     gap: 0 !important;
     box-sizing: border-box !important;
     justify-content: flex-start !important;
@@ -3964,7 +3966,7 @@ body {
 
   .submit-btn-row {
     margin-top: 0.22rem !important;
-    margin-bottom: 0 !important;
+    margin-bottom: 0.35rem !important;
     flex-shrink: 0 !important;
   }
   .btn-check-answer {
@@ -4748,6 +4750,7 @@ body {
 .detail-right-pane {
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: var(--md-shape-corner-extra-large);
+  padding-bottom: 0.85rem;
 }
 .detail-right-pane.selected-physical {
   background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.09) 0%, transparent 75%);
