@@ -46,6 +46,12 @@ window.ThreeMolecularSimulator = (function () {
   var minDistance = 10;
   var maxDistance = 45;
   var autoRotate = true;
+  var orbitListeners = [];
+
+  function listen(target, type, handler, options) {
+    target.addEventListener(type, handler, options);
+    orbitListeners.push({ target: target, type: type, handler: handler, options: options });
+  }
 
   // ========================================================
   // COREY-PAULING-KOLTUN (CPK) RESMİ KİMYASAL RENK STANDARDI
@@ -783,6 +789,11 @@ window.ThreeMolecularSimulator = (function () {
     isPlaying = false;
     isEnded = false;
     timeListeners = [];
+    clock = 0;
+    isDragging = false;
+    autoRotate = true;
+    targetRotation = { x: 0.2, y: 0.4 };
+    currentRotation = { x: 0.2, y: 0.4 };
     if (typeof options.onTimeUpdate === 'function') {
       timeListeners.push(options.onTimeUpdate);
     }
@@ -904,7 +915,15 @@ window.ThreeMolecularSimulator = (function () {
     targetCameraDistance = 22;
     updateCameraPosition();
 
-    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    } catch (err) {
+      stop();
+      var fallback = document.createElement('p');
+      fallback.textContent = 'Bu cihazda 3D görüntü açılamadı. Olay videosuyla incelemeye devam edebilirsin.';
+      containerEl.appendChild(fallback);
+      return;
+    }
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -953,14 +972,14 @@ window.ThreeMolecularSimulator = (function () {
   function bindOrbitControls(el) {
     if (!el) return;
 
-    el.addEventListener('mousedown', function (e) {
+    listen(el, 'mousedown', function (e) {
       if (e.target.closest('.three-canvas-scrubber-bar') || e.target.closest('.video-overlay-start')) return;
       isDragging = true;
       autoRotate = false;
       previousMousePosition = { x: e.clientX, y: e.clientY };
     });
 
-    window.addEventListener('mousemove', function (e) {
+    listen(window, 'mousemove', function (e) {
       if (!isDragging) return;
       var deltaX = e.clientX - previousMousePosition.x;
       var deltaY = e.clientY - previousMousePosition.y;
@@ -972,11 +991,11 @@ window.ThreeMolecularSimulator = (function () {
       previousMousePosition = { x: e.clientX, y: e.clientY };
     });
 
-    window.addEventListener('mouseup', function () {
+    listen(window, 'mouseup', function () {
       isDragging = false;
     });
 
-    el.addEventListener('wheel', function (e) {
+    listen(el, 'wheel', function (e) {
       e.preventDefault();
       targetCameraDistance += e.deltaY * 0.02;
       targetCameraDistance = Math.max(minDistance, Math.min(maxDistance, targetCameraDistance));
@@ -985,7 +1004,7 @@ window.ThreeMolecularSimulator = (function () {
     // Touch Support (Mobil)
     var initialTouchDistance = null;
 
-    el.addEventListener('touchstart', function (e) {
+    listen(el, 'touchstart', function (e) {
       if (e.target.closest('.three-canvas-scrubber-bar') || e.target.closest('.video-overlay-start')) return;
       if (e.touches.length === 1) {
         isDragging = true;
@@ -998,7 +1017,7 @@ window.ThreeMolecularSimulator = (function () {
       }
     }, { passive: true });
 
-    el.addEventListener('touchmove', function (e) {
+    listen(el, 'touchmove', function (e) {
       if (e.touches.length === 1 && isDragging) {
         var deltaX = e.touches[0].clientX - previousMousePosition.x;
         var deltaY = e.touches[0].clientY - previousMousePosition.y;
@@ -1020,7 +1039,7 @@ window.ThreeMolecularSimulator = (function () {
       }
     }, { passive: true });
 
-    el.addEventListener('touchend', function () {
+    listen(el, 'touchend', function () {
       isDragging = false;
       initialTouchDistance = null;
     });
@@ -1170,7 +1189,11 @@ window.ThreeMolecularSimulator = (function () {
   }
 
   function stop() {
-    if (animFrameId) {
+    orbitListeners.forEach(function (listener) {
+      listener.target.removeEventListener(listener.type, listener.handler, listener.options);
+    });
+    orbitListeners = [];
+    if (animFrameId !== null) {
       cancelAnimationFrame(animFrameId);
       animFrameId = null;
     }
@@ -1181,8 +1204,34 @@ window.ThreeMolecularSimulator = (function () {
     caseUpdater = null;
     dynamicObjects = [];
 
-    if (renderer && renderer.domElement && renderer.domElement.parentNode) {
-      renderer.domElement.parentNode.removeChild(renderer.domElement);
+    // Paylaşılan geometri/malzeme/dokular bir kez serbest bırakılır.
+    var disposed = new Set();
+    function dispose(resource) {
+      if (!resource || disposed.has(resource) || typeof resource.dispose !== 'function') return;
+      disposed.add(resource);
+      resource.dispose();
+    }
+    if (scene) {
+      scene.traverse(function (object) {
+        dispose(object.geometry);
+        var materials = Array.isArray(object.material) ? object.material : [object.material];
+        materials.forEach(function (material) {
+          if (!material) return;
+          Object.keys(material).forEach(function (key) {
+            if (material[key] && material[key].isTexture) dispose(material[key]);
+          });
+          dispose(material);
+        });
+      });
+      if (scene.background && scene.background.isTexture) dispose(scene.background);
+      if (scene.environment && scene.environment.isTexture) dispose(scene.environment);
+    }
+    if (renderer) {
+      renderer.dispose();
+      if (typeof renderer.forceContextLoss === 'function') renderer.forceContextLoss();
+    }
+    if (wrapElement && wrapElement.parentNode) {
+      wrapElement.parentNode.removeChild(wrapElement);
     }
     renderer = null;
     scene = null;
@@ -1196,6 +1245,9 @@ window.ThreeMolecularSimulator = (function () {
     canvasScrubberThumb = null;
     canvasTimeBadge = null;
     watermarkEl = null;
+    container = null;
+    currentCase = null;
+    isDragging = false;
   }
 
   return {

@@ -1,0 +1,211 @@
+/* Telefonlarda yatay görünüm. Tek bir mobil katman; masaüstü stilleri style.css içinde. */
+@media screen and (orientation: landscape) and (max-width: 1100px),
+       screen and (orientation: landscape) and (max-height: 540px) {
+  html, body { height: 100%; min-height: 0; width: 100%; margin: 0; overflow: hidden; overscroll-behavior: none; }
+  #app {
+    height: 100vh;
+    height: var(--app-height, 100dvh);
+    width: 100%; min-width: 0;
+    display: flex; flex-direction: column; overflow: hidden;
+    padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+    box-sizing: border-box;
+  }
+  .crime-tape { height: 3px; flex: 0 0 3px; }
+  .app-header { position: static; flex: 0 0 44px; min-height: 44px; padding: 0; z-index: 20; }
+  .header-inner { height: 44px; padding: 0 8px; gap: 8px; max-width: none; min-width: 0; }
+  .brand-container { min-width: 0; flex: 1; gap: 6px; }
+  .brand-logo-icon { width: 28px; height: 28px; flex-shrink: 0; border-radius: 8px; }
+  .brand-logo-icon svg { width: 18px; height: 18px; }
+  .brand-title { font-size: 13px; line-height: 1.25; white-space: nowrap; }
+  .brand-motto, .rank-badge-box { display: none; }
+  .header-actions { gap: 4px; flex-shrink: 0; }
+  .header-actions .btn-icon, .header-actions .btn-guide-header,
+  .header-actions .btn-notebook, .header-actions .btn-report {
+    min-width: 40px; width: 40px; height: 40px; padding: 8px; border-radius: 12px; justify-content: center;
+  }
+  .header-actions svg { width: 18px; height: 18px; }
+  .header-actions button > span { display: none; }
+  .header-actions .badge-count { display: none; }
+  .main-content {
+    width: 100%; max-width: none; margin: 0; padding: 6px 8px;
+    flex: 1; min-height: 0; overflow-x: hidden; overflow-y: auto; box-sizing: border-box;
+    -webkit-overflow-scrolling: touch;
+  }
+  .main-case-detail { display: flex; flex-direction: column; overflow: hidden; }
+  .storage-notice { margin: 0 0 4px; padding: 4px 8px; font-size: 12px; flex-shrink: 0; }
+  .case-detail-wrap.detail-landscape-grid {
+    display: grid; grid-template-columns: minmax(0, 43fr) minmax(0, 57fr);
+    grid-template-rows: minmax(0, 1fr); gap: 8px;
+    flex: 1; min-height: 0; width: 100%; height: 100%; align-items: stretch;
+  }
+  .detail-left-pane, .detail-right-pane { min-width: 0; min-height: 0; height: 100%; position: static; }
+  .detail-left-pane { display: flex; flex-direction: column; gap: 4px; overflow: auto; }
+  .detail-title-section-compact { padding: 0; margin: 0; border: 0; flex-shrink: 0; }
+  .detail-heading-compact { font-size: 16px; line-height: 1.15; margin: 0 0 2px; white-space: normal; }
+  .detail-summary-compact { font-size: 12px; line-height: 1.25; margin: 0; white-space: normal; }
+  .detail-nav-row { margin: 0; gap: 4px; flex-wrap: nowrap; flex-shrink: 0; min-height: 32px; }
+  .nav-left-group, .nav-right-group { min-width: 0; gap: 4px; }
+  .btn-back, .btn-detail-nb-pill { min-height: 32px; font-size: 11px; padding: 4px 6px; gap: 3px; }
+  .detail-case-tag-nav { padding: 3px 5px; font-size: 10px; white-space: nowrap; }
+  .nav-right-group .detail-solved-badge { display: none; }
+  .video-stage, .molecular-stage {
+    flex: 1; min-height: 80px; height: auto; aspect-ratio: auto; width: 100%;
+    border-radius: 12px; overflow: hidden;
+  }
+  .video-elem { height: 100%; width: 100%; object-fit: contain; background: #111827; }
+  .three-canvas-wrap { height: 100%; min-height: 0; }
+  .video-overlay-start { padding: 8px; gap: 6px; }
+  .video-overlay-text { font-size: 12px; line-height: 1.3; margin: 0; }
+  .btn-big-play { min-height: 36px; padding: 6px 12px; font-size: 12px; }
+  .video-watermark { font-size: 8px; padding: 2px 4px; }
+  .btn-expand-video { display: none; } /* Sahnenin altındaki Büyüt düğmesi aynı işlemi yapar. */
+  .dual-view-toggle-bar { margin: 0; padding: 2px; min-height: 34px; flex-shrink: 0; border-radius: 10px; }
+  .btn-dual-toggle { padding: 5px 3px; font-size: 11px; min-height: 30px; gap: 3px; }
+  .dual-label { font-size: 11px; }
+  .dual-icon { font-size: 14px; }
+  .dual-pulse { font-size: 9px; padding: 1px 3px; }
+  .video-controls-row, .micro-controls-row { margin: 0; min-height: 36px; gap: 4px; flex-wrap: wrap; flex-shrink: 0; }
+  .btn-media-action { min-height: 34px; padding: 5px 8px; font-size: 11px; gap: 4px; }
+  .btn-media-action svg { width: 14px; height: 14px; }
+  .micro-timeline-container { flex: 1; min-width: 35px; }
+  .micro-timer-badge { font-size: 9px; padding: 2px 3px; }
+  .detail-right-pane { display: flex; flex-direction: column; gap: 4px; padding: 0; overflow: hidden; }
+  .interactive-form-grid { display: flex; flex-direction: column; gap: 4px; flex: 1; min-height: 0; overflow-y: auto; padding: 0 2px 1px; }
+  .interactive-form-grid .answer-card {
+    padding: 3px 7px; border-radius: 12px; gap: 1px; margin: 0; flex-shrink: 0; min-width: 0;
+  }
+  .answer-card .form-box-header { margin: 0; min-height: 20px; gap: 5px; }
+  .answer-card .step-num-pill { width: 20px; height: 20px; line-height: 20px; font-size: 11px; flex-shrink: 0; }
+  .answer-card .form-box-title { font-size: 13px; line-height: 1.2; }
+  .answer-card .form-box-desc { display: none; }
+  .answer-card .field-eval-badge { padding: 3px 6px; font-size: 10px; gap: 3px; }
+  .answer-card #obsInput, .answer-card #reaInput {
+    height: 44px; min-height: 44px; max-height: none; width: 100%; resize: none;
+    font-size: 16px; line-height: 1.2; padding: 4px 6px; border-radius: 8px; box-sizing: border-box;
+  }
+  .answer-card .char-counter { font-size: 9px; line-height: 10px; margin: 0; }
+  .answer-card .type-buttons-row { gap: 5px; margin: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .answer-card .type-card-mock { padding: 5px; min-height: 44px; border-radius: 10px; justify-content: center; }
+  .answer-card .tcm-header-row { gap: 4px; margin: 0; }
+  .answer-card .tcm-icon { font-size: 17px; }
+  .answer-card .tcm-title { font-size: 12px; line-height: 1.15; }
+  .answer-card .tcm-desc, .answer-card .tcm-watermark, .answer-card .tcm-indicators { display: none; }
+  .submit-btn-row { flex: 0 0 auto; margin: 0; min-height: 40px; }
+  .btn-check-answer { min-height: 40px; padding: 7px 18px; font-size: 14px; }
+  .btn-check-answer svg { width: 16px; height: 16px; }
+
+  /* Ana ekran küçük ekranda da erişilebilir; içerik yalnızca gerektiğinde kayar. */
+  .hero-banner { padding: 8px 10px; margin: 0 0 6px; gap: 8px; flex-direction: row; align-items: center; }
+  .hero-title { font-size: 17px; margin: 0 0 3px; }
+  .hero-desc { font-size: 12px; line-height: 1.35; margin: 0; }
+  .hero-pill, .btn-hero-guide-pill { display: none; }
+  .prop-a-card { padding: 6px 8px; min-width: 0; }
+  .progress-ring-row { gap: 6px; }
+  .ring-wrap, .ring-wrap svg { width: 44px; height: 44px; }
+  .ring-num { font-size: 16px; }
+  .ring-label { font-size: 8px; }
+  .rank-title-big { font-size: 12px; }
+  .rank-sub, .case-dots-label, .case-dot-grid { display: none; }
+  .achievements-banner { padding: 6px 8px; margin: 0 0 6px; }
+  .achievements-header { margin-bottom: 4px; }
+  .achievements-header > div:last-child { display: none; }
+  .achievements-title { font-size: 12px; }
+  .achievements-count-badge { font-size: 10px; }
+  .badge-showcase { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; }
+  .ach-badge { min-width: 0; padding: 4px; gap: 2px; border-radius: 10px; }
+  .ach-icon { font-size: 18px; }
+  .ach-name { font-size: 10px; white-space: normal; line-height: 1.2; }
+  .cases-compact-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: 0; }
+  .case-card-compact { min-width: 0; min-height: 52px; padding: 6px; gap: 4px; }
+  .compact-left-group, .compact-info-col { min-width: 0; gap: 4px; }
+  .compact-icon-box { display: none; }
+  .compact-case-num { font-size: 11px; }
+  .compact-title { font-size: 12px; white-space: normal; line-height: 1.2; }
+  .compact-subdesc { display: none; }
+  .compact-status-badge { font-size: 9px; padding: 2px 4px; }
+
+  /* Kartın başlığı ve kapatma düğmeleri sabit kalır; yalnız içerik kayar. */
+  .modal-backdrop, .eval-modal-backdrop, .video-modal-backdrop {
+    top: var(--app-top, 0px); bottom: auto; height: var(--app-height, 100dvh);
+    padding: max(6px, env(safe-area-inset-top, 0px)) max(8px, env(safe-area-inset-right, 0px)) max(6px, env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px)) !important;
+  }
+  .modal-window, .modal-window-wide, .eval-modal-card, .video-modal-card {
+    width: 100% !important; max-width: 980px !important;
+    max-height: calc(var(--app-height, 100dvh) - 16px) !important;
+    min-height: 0; border-radius: 16px !important;
+  }
+  .modal-header, .eval-modal-header, .video-modal-header { padding: 6px 10px !important; flex-shrink: 0; gap: 6px; }
+  .modal-title, .eval-title, .video-modal-title { font-size: 16px !important; line-height: 1.2; }
+  .modal-subtitle { font-size: 11px; margin: 2px 0 0; }
+  .modal-window .btn-icon, .video-modal-card .btn-icon { width: 36px; height: 36px; flex-shrink: 0; }
+  .eval-status-icon { width: 28px !important; height: 28px !important; }
+  .eval-status-icon svg { width: 18px; height: 18px; }
+  .eval-status-badge { font-size: 10px !important; }
+  .eval-score-chip { font-size: 11px !important; padding: 4px 7px !important; white-space: normal; }
+  .modal-content, .eval-modal-body {
+    flex: 1; min-height: 0; max-height: none !important;
+    padding: 6px 10px !important; overflow-y: auto; overscroll-behavior: contain; gap: 6px !important;
+  }
+  .verdict-banner-row { padding: 6px 8px !important; gap: 6px !important; border-radius: 10px !important; }
+  .verdict-row-info { min-width: 0; flex: 1; }
+  .verdict-row-icon { width: 22px !important; height: 22px !important; font-size: 13px !important; flex-shrink: 0; }
+  .eval-modal-card .verdict-row-title { font-size: 13px !important; line-height: 1.2; flex-wrap: wrap; gap: 4px; }
+  .eval-modal-card .field-eval-badge { font-size: 10px !important; padding: 3px 6px !important; }
+  .verdict-row-text, .verdict-answer, .eval-feedback-desc { font-size: 12px !important; line-height: 1.4 !important; }
+  .verdict-answer { margin: 3px 0; }
+  .eval-feedback-card { padding: 6px 8px !important; margin: 0 !important; }
+  .eval-feedback-heading { font-size: 12px !important; }
+  .eval-clarification { font-size: 12px; padding: 6px 8px; }
+  .eval-quick-links-row { display: flex; flex-wrap: wrap; gap: 6px !important; margin: 0 !important; }
+  .eval-oval-pill { padding: 6px 9px !important; min-height: 36px; font-size: 12px !important; }
+  .oval-pill-icon { width: 18px !important; height: 18px !important; }
+  .modal-footer, .eval-modal-footer, .video-modal-footer { flex-shrink: 0; padding: 6px 10px !important; gap: 6px !important; }
+  .eval-oval-btn { min-height: 36px; padding: 6px 12px !important; font-size: 12px !important; }
+  .notebook-grid-layout { grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)) !important; gap: 8px !important; }
+  .notebook-case-card { min-width: 0; }
+  .lab-guide-steps-row { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .badge-showcase-compact { flex-wrap: wrap; }
+  .report-table-wrap { overflow: auto; flex-shrink: 0; }
+  .report-table th, .report-table td { font-size: 12px; }
+  .video-modal-card { height: calc(var(--app-height, 100dvh) - 16px) !important; }
+  .video-modal-tabs-nav { padding: 4px 10px; flex-shrink: 0; }
+  .video-modal-tabs-nav .eval-tab-pill { min-height: 32px; font-size: 12px; }
+  .video-modal-stage { flex: 1; min-height: 0 !important; height: auto !important; aspect-ratio: auto !important; }
+  .video-modal-stage.three-modal-stage { height: auto !important; flex: 1; }
+  .video-modal-elem { width: 100%; height: 100%; object-fit: contain; }
+  .video-modal-hint { display: none; }
+  .action-dialog { max-width: 520px !important; padding: 16px !important; overflow-y: auto; }
+  .action-dialog-symbol { width: 44px; height: 44px; font-size: 28px; margin-bottom: 8px; }
+  .action-dialog h2 { font-size: 20px; }
+  .action-dialog p { font-size: 14px; margin: 8px 0 14px; }
+}
+
+@media screen and (orientation: landscape) and (max-width: 740px) {
+  .brand-title { max-width: 210px; overflow: hidden; text-overflow: ellipsis; }
+  .header-actions { gap: 2px; }
+  .header-actions .btn-icon, .header-actions .btn-guide-header,
+  .header-actions .btn-notebook, .header-actions .btn-report { width: 36px; min-width: 36px; height: 40px; padding: 7px; }
+  .compact-right-group { display: none; }
+  .case-card-compact { min-height: 56px; }
+  .hero-desc { max-width: 290px; }
+}
+
+@media screen and (orientation: landscape) and (max-height: 350px) {
+  .detail-heading-compact { font-size: 14px; }
+  .detail-summary-compact { font-size: 11px; }
+  .hero-banner { padding: 6px 8px; }
+  .interactive-form-grid { overflow-y: auto; }
+}
+
+/* Masaüstü pencere daraltıldığında ve büyütme açıkken içerik erişilebilir kalır. */
+@media screen and (orientation: landscape) and (max-width: 560px) {
+  .header-actions #btnOpenGuide, .header-actions #btnOpenNotebook, .header-actions #btnOpenReport { display: none; }
+  .brand-title { max-width: 150px; }
+  .case-detail-wrap.detail-landscape-grid { grid-template-columns: minmax(0, 1fr); overflow-y: auto; }
+  .main-case-detail { overflow-y: auto; }
+  .detail-left-pane, .detail-right-pane { height: auto; overflow: visible; }
+  .video-stage, .molecular-stage { height: 140px; flex: none; }
+  .interactive-form-grid { flex: none; overflow: visible; }
+  .cases-compact-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hero-banner { flex-direction: column; align-items: stretch; }
+}

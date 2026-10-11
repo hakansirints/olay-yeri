@@ -5,16 +5,27 @@
 (function () {
   'use strict';
 
-  var STORAGE_KEY = 'kimyasal_olay_yeri_records_v1';
   var SOUND_KEY = 'kimyasal_olay_yeri_sound_v1';
   var THEME_KEY = 'kimyasal_olay_yeri_theme_v1';
   var GUIDE_AUTO_OPEN_KEY = 'olay_yeri_guide_dont_show_auto_v2';
 
+  var storage;
+  try { storage = window.localStorage; } catch (err) {
+    storage = { getItem: function () { throw err; }, setItem: function () { throw err; }, removeItem: function () { throw err; } };
+  }
+  var recordStore = window.CaseRecordStore.create(storage, window.CASES_DATA || []);
+
+  function loadDraftField(field) {
+    var values = {};
+    Object.keys(recordStore.drafts).forEach(function (id) { values[id] = recordStore.drafts[id][field]; });
+    return values;
+  }
+
   var state = {
     cases: window.CASES_DATA || [],
-    records: loadRecords(),
-    draftObservations: {},
-    draftReasonings: {},
+    records: recordStore.records,
+    draftObservations: loadDraftField('observation'),
+    draftReasonings: loadDraftField('reasoning'),
     activeCase: null,
     selectedClueIds: [],
     selectedType: null,
@@ -26,6 +37,11 @@
     showMolecular: false,
     showVideoModal: false,
     showFeedbackModal: false,
+    showResetModal: false,
+    resetError: '',
+    completionPending: false,
+    completionCelebrated: false,
+    completionStage: null, // 'fireworks' veya 'message'
     showGuideModal: (function () {
       try {
         return localStorage.getItem(GUIDE_AUTO_OPEN_KEY) !== 'true';
@@ -38,7 +54,7 @@
   };
 
   function escapeHtml(str) {
-    if (!str) return '';
+    if (str === null || str === undefined) return '';
     return String(str)
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
@@ -74,61 +90,235 @@
                 doc.mozRequestFullScreen ||
                 doc.msRequestFullscreen;
 
-    if (reqFs && !document.fullscreenElement && !document.webkitFullscreenElement) {
-      try {
-        var p = reqFs.call(doc);
-        if (p && p.catch) {
-          p.catch(function () {});
-        }
-      } catch (e) {}
+    function manualRotation() {
+      var hint = document.querySelector('.orientation-subhint');
+      if (hint) hint.textContent = 'Cihazını elle yatay çevir. Gerekirse telefonunun otomatik döndürme ayarını aç.';
     }
-
-    try {
-      if (screen.orientation && screen.orientation.lock) {
-        screen.orientation.lock('landscape').catch(function (err) {
-          console.log('Orientation lock note:', err);
-        });
-      } else if (screen.lockOrientation) {
-        screen.lockOrientation('landscape');
-      } else if (screen.webkitLockOrientation) {
-        screen.webkitLockOrientation('landscape');
-      } else if (screen.mozLockOrientation) {
-        screen.mozLockOrientation('landscape');
-      } else if (screen.msLockOrientation) {
-        screen.msLockOrientation('landscape');
+    function lockLandscape() {
+      var display = window.screen;
+      if (display && display.orientation && display.orientation.lock) {
+        return display.orientation.lock('landscape').catch(manualRotation);
       }
-    } catch (e) {}
-  }
-
-  function loadRecords() {
-    try {
-      var d = localStorage.getItem(STORAGE_KEY);
-      return d ? JSON.parse(d) : {};
-    } catch (e) {
-      return {};
+      manualRotation();
     }
+    try {
+      if (reqFs && !document.fullscreenElement && !document.webkitFullscreenElement) {
+        // Yön kilidi tam ekran isteği tamamlandıktan sonra denenir.
+        Promise.resolve(reqFs.call(doc)).then(lockLandscape).catch(manualRotation);
+      } else {
+        Promise.resolve().then(lockLandscape).catch(manualRotation);
+      }
+    } catch (err) { manualRotation(); }
   }
 
   function saveRecord(rec) {
-    try {
-      state.records[rec.caseId] = rec;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.records));
-    } catch (e) {
-      console.error(e);
-    }
+    return recordStore.saveAttempt(rec).persisted;
   }
 
   function clearAllData() {
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-      state.records = {};
-      state.draftObservations = {};
-      state.draftReasonings = {};
-      state.activeCase = null;
-      render();
-    } catch (e) {
-      console.error(e);
+    if (!recordStore.clear()) {
+      state.resetError = recordStore.persistence().error || 'İlerleme sıfırlanamadı. Yeniden deneyebilirsin.';
+      render(); return;
     }
+    stopCelebration();
+    state.showResetModal = false;
+    state.resetError = '';
+    state.completionStage = null;
+    state.completionPending = state.completionCelebrated = false;
+    state.showFeedbackModal = state.showNotebook = state.showReport = state.showVideoModal = state.showGuideModal = false;
+    state.draftObservations = {};
+    state.draftReasonings = {};
+    state.activeCase = null;
+    state.selectedType = null;
+    render();
+  }
+
+  function allCasesSolved() {
+    return state.cases.length > 0 && state.cases.every(function (c) { return state.records[c.id] && state.records[c.id].isSolved; });
+  }
+
+  function goHome() {
+    saveCurrentDraft();
+    state.activeCase = null;
+    state.showFeedbackModal = state.showNotebook = state.showReport = state.showVideoModal = false;
+    render();
+  }
+
+  // Değerlendirme kartının tüm çıkışları aynı tamamlanma akışını kullanır.
+  function dismissFeedback(destination) {
+    state.showFeedbackModal = false;
+    if (state.completionPending && allCasesSolved()) {
+      state.completionPending = false;
+      state.completionCelebrated = true;
+      state.showNotebook = state.showReport = state.showVideoModal = false;
+      state.completionStage = 'fireworks';
+      render();
+      return;
+    }
+    if (destination === 'home') { goHome(); return; }
+    if (destination === 'notebook') state.showNotebook = true;
+    if (destination === 'report') state.showReport = true;
+    if (destination === 'next') {
+      var nextId = (state.activeCase.id % state.cases.length) + 1;
+      var next = state.cases.find(function (c) { return c.id === nextId; });
+      if (next) { openCase(next); return; }
+    }
+    render();
+    if (destination === 'edit' && state.activeCase) {
+      var ev = state.records[state.activeCase.id] && state.records[state.activeCase.id].evaluation;
+      var field = ev && ev.reviewReasons && ev.reviewReasons[0];
+      var input = document.getElementById(field && field.field === 'reasoning' ? 'reaInput' : 'obsInput');
+      if (input) input.focus();
+    }
+  }
+
+  var celebrationFrame = null, celebrationTimer = null;
+  function stopCelebration() {
+    if (celebrationFrame !== null) cancelAnimationFrame(celebrationFrame);
+    if (celebrationTimer !== null) clearTimeout(celebrationTimer);
+    celebrationFrame = celebrationTimer = null;
+  }
+
+  function startFireworks() {
+    stopCelebration();
+    function finish() {
+      stopCelebration();
+      if (state.completionStage !== 'fireworks') return;
+      state.completionStage = 'message'; render();
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { finish(); return; }
+    var canvas = document.getElementById('fireworksCanvas');
+    var ctx = canvas && canvas.getContext('2d');
+    if (!ctx) { finish(); return; }
+    var width = window.innerWidth, height = window.innerHeight;
+    var scale = Math.min(window.devicePixelRatio || 1, 1.5);
+    canvas.width = Math.round(width * scale); canvas.height = Math.round(height * scale);
+    ctx.setTransform(scale, 0, 0, scale, 0, 0);
+    var colors = ['#38bdf8', '#fbbf24', '#34d399', '#f472b6'];
+    var bursts = [{ x: .25, y: .34, start: 300 }, { x: .72, y: .3, start: 800 }, { x: .5, y: .43, start: 1300 }];
+    var started = null;
+    function frame(now) {
+      if (state.completionStage !== 'fireworks') return;
+      if (started === null) started = now;
+      var elapsed = now - started;
+      ctx.clearRect(0, 0, width, height);
+      bursts.forEach(function (burst, index) {
+        var age = elapsed - burst.start;
+        if (age < -300 || age > 950) return;
+        var x = width * burst.x, y = height * burst.y;
+        ctx.fillStyle = colors[index];
+        if (age < 0) {
+          ctx.globalAlpha = 1;
+          ctx.beginPath(); ctx.arc(x, height - (height - y) * (age + 300) / 300, 2.5, 0, Math.PI * 2); ctx.fill();
+          return;
+        }
+        var progress = age / 950;
+        ctx.globalAlpha = 1 - progress;
+        for (var i = 0; i < 48; i++) {
+          var angle = i * Math.PI * 2 / 48;
+          var radius = Math.min(width, height) * (.2 + (i % 3) * .04) * progress;
+          ctx.beginPath(); ctx.arc(x + Math.cos(angle) * radius, y + Math.sin(angle) * radius + progress * progress * 35, 2, 0, Math.PI * 2); ctx.fill();
+        }
+      });
+      ctx.globalAlpha = 1;
+      if (elapsed >= 2400) { finish(); return; }
+      celebrationFrame = requestAnimationFrame(frame);
+    }
+    celebrationFrame = requestAnimationFrame(frame);
+    celebrationTimer = setTimeout(finish, 2600); // Arka plan sekmesinde de akış tamamlanır.
+  }
+
+  function renderResetModal() {
+    return '<div class="modal-backdrop action-modal-backdrop" id="resetBackdrop">' +
+      '<section class="modal-window action-dialog" role="dialog" aria-modal="true" aria-labelledby="resetTitle" aria-describedby="resetDescription" tabindex="-1">' +
+      '<div class="action-dialog-symbol reset-symbol" aria-hidden="true">↺</div><h2 id="resetTitle">İlerlemeyi sıfırla</h2>' +
+      '<p id="resetDescription">Tüm vaka sonuçların, deneme geçmişin ve taslak notların silinecek. Yeniden başlamak istiyor musun?</p>' +
+      (state.resetError ? '<p class="save-status-error" role="alert">' + escapeHtml(state.resetError) + '</p>' : '') +
+      '<div class="action-dialog-buttons"><button class="eval-oval-btn btn-secondary-oval" id="btnCancelReset">Vazgeç</button>' +
+      '<button class="eval-oval-btn btn-danger-oval" id="btnConfirmReset">Evet, sıfırla</button></div></section></div>';
+  }
+
+  function renderCompletion() {
+    if (state.completionStage === 'fireworks') {
+      return '<div class="completion-fireworks" role="status" aria-live="polite"><canvas id="fireworksCanvas" aria-hidden="true"></canvas><p>Tüm olaylar tamamlandı!</p></div>';
+    }
+    return '<div class="modal-backdrop action-modal-backdrop" id="completionBackdrop">' +
+      '<section class="modal-window action-dialog completion-dialog" role="dialog" aria-modal="true" aria-labelledby="completionTitle" aria-describedby="completionDescription" tabindex="-1">' +
+      '<button class="btn-icon action-dialog-close" id="btnCloseCompletion" aria-label="Tebrik kartını kapat ve ana ekrana dön">✕</button>' +
+      '<div class="action-dialog-symbol completion-symbol" aria-hidden="true">🏆</div><h2 id="completionTitle">Tebrikler, tüm olayları çözdün!</h2>' +
+      '<p id="completionDescription">' + state.cases.length + ' olayın tamamını başarıyla inceledin. Gözlemlerin, kararların ve bilimsel gerekçelerin deney defterinde seni bekliyor.</p>' +
+      '<button class="eval-oval-btn btn-primary-oval" id="btnCompletionHome">Ana Ekrana Dön</button></section></div>';
+  }
+
+  function draftStatusText() {
+    var status = recordStore.persistence();
+    if (!status.records) return 'Sonuç kaydedilemedi — sayfayı kapatma';
+    if (!status.drafts) return 'Taslak kaydedilemedi — sayfayı kapatma';
+    var draft = state.activeCase && recordStore.drafts[state.activeCase.id];
+    if (draft) return 'Taslak kaydedildi ✓';
+    return state.activeCase && state.records[state.activeCase.id] ? 'Son deneme kayıtlı ✓' : 'Yazdıkların otomatik kaydedilir';
+  }
+
+  function clearCurrentEvaluation() {
+    document.querySelectorAll('.field-eval-badge, .btn-eval-pill').forEach(function (el) { el.remove(); });
+    document.querySelectorAll('.form-textarea').forEach(function (el) {
+      el.classList.remove('input-eval-success', 'input-eval-warning', 'input-eval-danger');
+    });
+    document.querySelectorAll('.type-card-mock').forEach(function (el) {
+      el.classList.remove('btn-eval-correct', 'btn-eval-wrong');
+    });
+    document.querySelectorAll('.answer-card').forEach(function (el) {
+      el.classList.remove('card-eval-success', 'card-eval-warning', 'card-eval-danger');
+    });
+  }
+
+  // Aynı durum adı ve simgesi giriş kartlarında ve dönütlerde kullanılır.
+  function fieldPresentation(status) {
+    if (!status) return { card: '', border: '', badge: '' };
+    var tone = status === 'correct' ? 'success' : ((status === 'incomplete' || status === 'review') ? 'warning' : 'danger');
+    var label = status === 'correct' ? 'Doğru' : (status === 'incomplete' ? 'Eksik' :
+      (status === 'review' ? 'İnceleme gerekli' : (status === 'irrelevant' ? 'Konu dışı' : (status === 'empty' ? 'Boş' : (status === 'contradiction' ? 'Çelişkili' : 'Hatalı')))));
+    var icon = tone === 'success' ? '✓' : (tone === 'warning' ? '!' : '✕');
+    return {
+      card: ' card-eval-' + tone,
+      border: ' input-eval-' + tone,
+      badge: '<span class="field-eval-badge badge-eval-' + tone + '"><span class="field-status-icon" aria-hidden="true">' + icon + '</span>' + label + '</span>'
+    };
+  }
+
+  function saveCurrentDraft() {
+    if (!state.activeCase) return;
+    var obs = document.getElementById('obsInput');
+    var rea = document.getElementById('reaInput');
+    if (!obs || !rea) return;
+    var id = state.activeCase.id;
+    state.draftObservations[id] = obs.value;
+    state.draftReasonings[id] = rea.value;
+    recordStore.saveDraft(id, { observation: obs.value, reasoning: rea.value, decisionType: state.selectedType });
+    var label = document.getElementById('draftSaveStatus');
+    if (label) {
+      var saveFailed = !recordStore.persistence().drafts || !recordStore.persistence().records;
+      label.hidden = !saveFailed;
+      label.textContent = saveFailed ? draftStatusText() : '';
+    }
+    clearCurrentEvaluation();
+  }
+
+  function decisionLabel(value) {
+    return value === 'chemical' ? '🧪 Kimyasal Değişim' : (value === 'physical' ? '🧊 Fiziksel Değişim' : 'Belirtilmedi');
+  }
+
+  function statusLabel(value) {
+    return value === 'correct' ? '✓ Doğru' : (value === 'incorrect' ? '✕ Hatalı' : (value === 'incomplete' ? '⚠️ Eksik' : (value === 'review' ? '⚠ İnceleme gerekli' : 'Belirtilmedi')));
+  }
+
+  function scoreLabel(value) {
+    return typeof value === 'number' ? '%' + value : 'Değerlendirme bekliyor';
+  }
+
+  function reviewSummary(ev, c, rec) {
+    var presentation = c && rec ? window.AnswerFeedback.messages(c, ev, rec.observation, rec.decisionType, rec.reasoning) : ev;
+    return (presentation && Array.isArray(presentation.reviewReasons) ? presentation.reviewReasons : []).map(function (item) { return (item.field === 'observation' ? 'Gözlemim: ' : 'Gerekçem: ') + item.question; }).join(' ');
   }
 
   function loadSoundSetting() {
@@ -203,8 +393,8 @@
         id: 'electrolysis_pro',
         icon: '⚡',
         name: 'Elektroliz Pro',
-        desc: 'Suyun Elektrolizi vakasını hatasız çöz',
-        earned: Boolean(state.records[7] && state.records[7].isSolved),
+        desc: 'Suyun Elektrolizi vakasını ilk denemede, ipucu almadan doğru çöz',
+        earned: Boolean(state.records[9] && state.records[9].firstAttemptCorrect),
         colorClass: 'ach-badge-4'
       },
       {
@@ -226,350 +416,7 @@
     ];
   }
 
-  // Akıllı Değerlendirme Algoritması (Gözlem, Karar ve Gerekçe Odaklı)
-  function evaluateAnswer(cItem, obsText, decType, decReason) {
-    var obsLower = (obsText || '').toLowerCase().trim();
-    var reaLower = (decReason || '').toLowerCase().trim();
-    var fullText = obsLower + ' ' + reaLower;
-    var hasObs = obsLower.length >= 4;
-    var hasRea = reaLower.length >= 4;
-
-    // Gözlem Denetimi (Kabul edilebilir gözlemler, anahtar kelimeler ve içerik kontrolü)
-    var matchedAcceptedObs = false;
-    if (cItem.acceptedObservations && cItem.acceptedObservations.length > 0) {
-      matchedAcceptedObs = cItem.acceptedObservations.some(function (p) {
-        var cleanP = p.toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, '');
-        var words = cleanP.split(/\s+/).filter(function (w) { return w.length > 3; });
-        return words.some(function (w) { return obsLower.indexOf(w) !== -1; });
-      });
-    }
-    var matchedObsKey = (cItem.observationKeywords || []).filter(function (k) {
-      return obsLower.indexOf(k.toLowerCase()) !== -1;
-    });
-    var isObsValid = (obsLower.length >= 6 && (matchedAcceptedObs || matchedObsKey.length > 0)) || obsLower.length >= 15;
-
-    var obsStatus = 'empty';
-    if (obsLower.length === 0) {
-      obsStatus = 'empty';
-    } else if (isObsValid) {
-      obsStatus = 'correct';
-    } else {
-      obsStatus = 'incomplete';
-    }
-
-    if (!decType) {
-      return {
-        status: 'incomplete',
-        title: 'Kararını Belirtmelisin',
-        message: 'Lütfen olayın "Fiziksel Değişim" mi yoksa "Kimyasal Değişim" mi olduğuna karar verip gerekçeni yaz.',
-        score: 0,
-        isTypeCorrect: false,
-        hasObs: isObsValid,
-        hasRea: false,
-        obsStatus: obsStatus,
-        reaStatus: 'empty',
-        typeStatus: 'empty',
-        isContradiction: false,
-        isShallowOrTrap: false
-      };
-    }
-
-    // Madde 6: Seçilen buton ile yazılan açıklama arasındaki çelişki kontrolü
-    var contradiction = null;
-    if (decType === 'physical') {
-      var claimsChemical = /(kimyasal\s+değişim|kimyasal\s+bir\s+değişim|kimyasal\s+tepkime|kimyasal\s+reaksiyon|olay\s+kimyasal|bence\s+kimyasal|kimyasaldır)/i.test(fullText);
-      var negChemical = /(kimyasal[^\.\,\;\!\?]{0,30}(değil|olmad|sayılmaz|yok))/i.test(fullText);
-      if (claimsChemical && !negChemical) {
-        contradiction = {
-          status: 'incorrect',
-          title: 'Seçim ve Gerekçe Çelişkisi',
-          message: 'Üstte "Fiziksel Değişim" butonunu seçtiniz ancak yazılı açıklamanızda "kimyasal değişim" ifadesini kullandınız. Buton seçiminiz ile açıklamanız birbiriyle çeliştiği için ifadeniz hatalı kabul edilmiştir. Lütfen seçiminizi ve açıklamanızı uyumlu hale getiriniz.',
-          score: 20,
-          isTypeCorrect: false,
-          hasObs: isObsValid,
-          hasRea: false,
-          obsStatus: obsStatus,
-          reaStatus: 'contradiction',
-          typeStatus: decType === cItem.correctType ? 'correct' : 'incorrect',
-          isContradiction: true,
-          isShallowOrTrap: false
-        };
-      }
-    } else if (decType === 'chemical') {
-      var claimsPhysical = /(fiziksel\s+değişim|fiziksel\s+bir\s+değişim|olay\s+fiziksel|bence\s+fiziksel|sadece\s+fiziksel|fizikseldir)/i.test(fullText);
-      var negPhysical = /(fiziksel[^\.\,\;\!\?]{0,30}(değil|olmad|sayılmaz|yok))/i.test(fullText);
-      if (claimsPhysical && !negPhysical) {
-        contradiction = {
-          status: 'incorrect',
-          title: 'Seçim ve Gerekçe Çelişkisi',
-          message: 'Üstte "Kimyasal Değişim" butonunu seçtiniz ancak yazılı açıklamanızda "fiziksel değişim" ifadesini kullandınız. Buton seçiminiz ile açıklamanız birbiriyle çeliştiği için ifadeniz hatalı kabul edilmiştir. Lütfen seçiminizi ve açıklamanızı uyumlu hale getiriniz.',
-          score: 20,
-          isTypeCorrect: false,
-          hasObs: isObsValid,
-          hasRea: false,
-          obsStatus: obsStatus,
-          reaStatus: 'contradiction',
-          typeStatus: decType === cItem.correctType ? 'correct' : 'incorrect',
-          isContradiction: true,
-          isShallowOrTrap: false
-        };
-      }
-    }
-
-    if (contradiction) {
-      return contradiction;
-    }
-
-    var isTypeCorrect = decType === cItem.correctType;
-
-    if (!isTypeCorrect) {
-      return {
-        status: 'incorrect',
-        title: 'Değişim Türü Hatalı',
-        message: cItem.feedbacks.incorrect,
-        score: 25,
-        isTypeCorrect: false,
-        hasObs: isObsValid,
-        hasRea: false,
-        obsStatus: obsStatus,
-        reaStatus: reaLower.length === 0 ? 'empty' : 'incorrect',
-        typeStatus: 'incorrect',
-        isContradiction: false,
-        isShallowOrTrap: false
-      };
-    }
-
-    // 4. Doğru seçim yapıldı; Gerekçe ve Bilimsel Açıklama Denetimi
-    var matchedAcceptedDec = false;
-    if (cItem.acceptedDecisions && cItem.acceptedDecisions.length > 0) {
-      matchedAcceptedDec = cItem.acceptedDecisions.some(function (p) {
-        var cleanP = p.toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, '');
-        var words = cleanP.split(/\s+/).filter(function (w) { return w.length > 3; });
-        return words.filter(function (w) { return reaLower.indexOf(w) !== -1; }).length >= 1;
-      });
-    }
-
-    // 12 Olayın Her Biri İçin Pedagojik Bilimsel Gerekçe & Yanılgı Denetimi:
-    var hasCoreReason = false;
-    var isShallowOrTrap = false;
-
-    switch (cItem.id) {
-      case 1: // Demirin Paslanması
-        // Yalnızca renk değişti demek yetersizdir; pas / yeni madde / tabaka belirtilmelidir.
-        var hasRustOrNew = /(pas|yeni\s*madde|tabaka|oksit|bileşik|bilesik|farklı\s*madde)/i.test(fullText);
-        if (hasRustOrNew) {
-          hasCoreReason = true;
-        } else {
-          isShallowOrTrap = true;
-        }
-        break;
-
-      case 2: // Kağıdın Yanması
-        // Alev/ısı yanında kül, duman, gaz veya yeni madde ürünleri belirtilmelidir.
-        var hasAshOrGas = /(kül|kul|duman|gaz|yeni\s*madde|farklı\s*madde|ürün|urun)/i.test(fullText);
-        if (hasAshOrGas) {
-          hasCoreReason = true;
-        } else {
-          isShallowOrTrap = true;
-        }
-        break;
-
-      case 3: // Elmanın Çürümesi
-        // Çürümede yalnızca görünüm/renk değil, kimyasal yapı değişimi / yeni madde belirtilmelidir.
-        var hasStructureChange = /(kimyasal\s*yapı|kimyasal\s*özellik|yapısı\s*değiş|yapisi\s*degis|yeni\s*madde|biyokimyasal|kalıcı\s*değiş|kalici|özelliği\s*değiş)/i.test(fullText);
-        if (hasStructureChange) {
-          hasCoreReason = true;
-        } else {
-          isShallowOrTrap = true;
-        }
-        break;
-
-      case 4: // Buzun Erimesi
-        // Erime sırasında yeni madde oluşmadığı, yalnızca hâl değişimi olduğu veya su kaldığı belirtilmelidir.
-        var hasPhaseOnly = /(hâl\s*değiş|hal\s*değiş|yeni\s*madde\s*oluşma|yeni\s*madde\s*yok|aynı\s*madde|yine\s*su|su\s*kal|kimliği\s*değişme|kimlik\s*korun|erime)/i.test(fullText);
-        if (hasPhaseOnly) {
-          hasCoreReason = true;
-        } else {
-          isShallowOrTrap = true;
-        }
-        break;
-
-      case 5: // Bakır Telin Dövülmesi
-        // Yeni madde oluşmadığı, bakırın aynı kaldığı veya kimyasal yapısının değişmediği belirtilmelidir.
-        var hasShapeOnly = /(yeni\s*madde\s*oluşma|yeni\s*madde\s*yok|madde\s*aynı|bakır\s*aynı|bakir\s*ayni|kimyasal\s*yapı|kimliği\s*değişme|kimlik\s*korun)/i.test(reaLower || fullText);
-        if (hasShapeOnly) {
-          hasCoreReason = true;
-        } else {
-          isShallowOrTrap = true;
-        }
-        break;
-
-      case 6: // Suyun Donması
-        // Yeni madde oluşmadığı, yalnızca hâl değişimi olduğu ve buzun da su olduğu belirtilmelidir.
-        var hasFreezingPhase = /(hâl\s*değiş|hal\s*değiş|yeni\s*madde\s*oluşma|yeni\s*madde\s*yok|aynı\s*madde|su\s*aynı|buz\s*da\s*su|yine\s*su|kimliği\s*değişme|kimlik\s*korun)/i.test(fullText);
-        if (hasFreezingPhase) {
-          hasCoreReason = true;
-        } else {
-          isShallowOrTrap = true;
-        }
-        break;
-
-      case 7: // Betonun Sertleşmesi ("Donması")
-        // Basit donma/katılaşma değil; çimento ile su arasında kimyasal tepkime/reaksiyon olduğu belirtilmelidir.
-        var hasReaction = /(tepkime|reaksiyon|çimento|cimento|yeni\s*yapı|yeni\s*madde|hidrat|bağ\s*oluş)/i.test(fullText);
-        var isOnlySimpleDonma = /(sadece\s*don|basit\s*don|sadece\s*katılaş|yalnızca\s*katılaş)/i.test(fullText);
-        if (hasReaction && !isOnlySimpleDonma) {
-          hasCoreReason = true;
-        } else {
-          isShallowOrTrap = true;
-        }
-        break;
-
-      case 8: // Ekmeğin Küflenmesi
-        // Yalnızca yüzey lekeleri değil; ekmeğin yapısında kimyasal/biyokimyasal değişim olduğu belirtilmelidir.
-        var hasMoldChem = /(yapısı\s*değiş|yapisi\s*degis|kimyasal\s*yapı|yeni\s*madde|biyokimyasal|ayrış|ayris|kalıcı|kalici)/i.test(fullText);
-        if (hasMoldChem) {
-          hasCoreReason = true;
-        } else {
-          isShallowOrTrap = true;
-        }
-        break;
-
-      case 9: // Suyun Elektrolizi
-        // Yalnızca kabarcık/hareket değil; suyun kimyasal olarak ayrışıp yeni/farklı maddeler (gazlar) oluşturduğu belirtilmelidir.
-        var hasElectrolysisChem = /(yeni\s*madde|farklı\s*madde|farkli\s*madde|ayrış|ayris|hidrojen|oksijen|ayrıl)/i.test(fullText);
-        if (hasElectrolysisChem) {
-          hasCoreReason = true;
-        } else {
-          isShallowOrTrap = true;
-        }
-        break;
-
-      case 10: // Mumun Yanması
-        // Yalnızca erime değil; alev, yanma tepkimesi, enerji açığa çıkması ve yeni maddelerin oluşumu belirtilmelidir.
-        var hasCombustion = /(yanma|yanar|yeni\s*madde|ürün|urun|enerji|alev|gaz|duman)/i.test(reaLower);
-        if (hasCombustion) {
-          hasCoreReason = true;
-        } else {
-          isShallowOrTrap = true;
-        }
-        break;
-
-      case 11: // Şekerin Suda Çözünmesi
-        // Şekerin yok olmadığı, çözündüğü, yeni madde oluşmadığı ve kimliğini koruduğu belirtilmelidir.
-        var hasDissolve = /(çözün|cozun|yeni\s*madde\s*oluşma|yeni\s*madde\s*yok|şeker\s*aynı|kimliğini\s*korur|tanecik|dağıl)/i.test(fullText);
-        var hasYokOlduMisconception = fullText.indexOf('yok oldu') !== -1 && fullText.indexOf('çözün') === -1;
-        if (hasDissolve && !hasYokOlduMisconception) {
-          hasCoreReason = true;
-        } else {
-          isShallowOrTrap = true;
-        }
-        break;
-
-      case 12: // Sütün Ekşimesi (Kesilmesi)
-        // Yalnızca biçim/hâl değil; sütün yapısında kimyasal değişimler, yeni madde ve asitlik oluşumu belirtilmelidir.
-        var hasSourChem = /(kimyasal|yapısı\s*değiş|yapisi\s*degis|yeni\s*madde|asit|bozul|pıhtılaşma)/i.test(fullText);
-        if (hasSourChem) {
-          hasCoreReason = true;
-        } else {
-          isShallowOrTrap = true;
-        }
-        break;
-
-      default:
-        hasCoreReason = reaLower.length >= 8;
-        break;
-    }
-
-    var isReaValid = (reaLower.length >= 4 && hasCoreReason) || matchedAcceptedDec;
-
-    var isWellFormed = isObsValid && isReaValid && !isShallowOrTrap;
-
-    if (!isWellFormed) {
-      var reaSt = reaLower.length === 0 ? 'empty' : (isReaValid && !isShallowOrTrap ? 'correct' : 'incomplete');
-      return {
-        status: 'incomplete',
-        title: 'Kararın Doğru, Gerekçeni Tamamla',
-        message: cItem.feedbacks.incomplete,
-        score: 65,
-        isTypeCorrect: true,
-        hasObs: isObsValid,
-        hasRea: isReaValid && !isShallowOrTrap,
-        obsStatus: obsStatus,
-        reaStatus: reaSt,
-        typeStatus: 'correct',
-        isContradiction: false,
-        isShallowOrTrap: isShallowOrTrap
-      };
-    }
-
-    return {
-      status: 'correct',
-      title: 'Doğru Karar ve Eksiksiz Gözlem',
-      message: cItem.feedbacks.correct,
-      score: 100,
-      isTypeCorrect: true,
-      hasObs: true,
-      hasRea: true,
-      obsStatus: 'correct',
-      reaStatus: 'correct',
-      typeStatus: 'correct',
-      isContradiction: false,
-      isShallowOrTrap: false
-    };
-  }
-
-  window.evaluateAnswer = evaluateAnswer;
-
-  // Basit Parçacık / Konfeti Efekti
-  function launchConfetti() {
-    var canvas = document.getElementById('confettiCanvas');
-    if (!canvas) return;
-    var ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    canvas.style.display = 'block';
-
-    var pieces = [];
-    var colors = ['#38bdf8', '#0ea5e9', '#10b981', '#f59e0b', '#ec4899', '#ffffff'];
-    for (var i = 0; i < 90; i++) {
-      pieces.push({
-        x: canvas.width * 0.5 + (Math.random() - 0.5) * 200,
-        y: canvas.height * 0.6,
-        vx: (Math.random() - 0.5) * 14,
-        vy: -Math.random() * 12 - 5,
-        size: Math.random() * 8 + 4,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        rotation: Math.random() * 360,
-        vr: (Math.random() - 0.5) * 10
-      });
-    }
-
-    var frame = 0;
-    function animate() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      frame++;
-      for (var i = 0; i < pieces.length; i++) {
-        var p = pieces[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += 0.35; // gravity
-        p.rotation += p.vr;
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate((p.rotation * Math.PI) / 180);
-        ctx.fillStyle = p.color;
-        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
-        ctx.restore();
-      }
-      if (frame < 80) {
-        requestAnimationFrame(animate);
-      } else {
-        canvas.style.display = 'none';
-      }
-    }
-    requestAnimationFrame(animate);
-  }
+  var evaluateAnswer = window.evaluateAnswer;
 
   // ========================================================
   // RENDER FONKSİYONLARI
@@ -591,9 +438,10 @@
     html += '<div class="crime-tape"></div>';
 
     // Header
-    html += '<header class="app-header">';
+    var blocking = state.showResetModal || state.completionStage || state.showFeedbackModal || state.showNotebook || state.showReport || state.showVideoModal || state.showGuideModal;
+    html += '<header class="app-header"' + (blocking ? ' inert' : '') + '>';
     html += '  <div class="header-inner">';
-    html += '    <div class="brand-container" id="btnGoHome">';
+    html += '    <div class="brand-container" id="btnGoHome" role="button" tabindex="0" aria-label="Ana ekrana dön">';
     html += '      <div class="brand-logo-icon">';
     html += '        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2a10 10 0 0 0-8 16.5"/><path d="M12 6a6 6 0 0 0-4.8 9.6"/><path d="M12 10a2 2 0 0 0-1.6 3.2"/><path d="M12 14v4"/><path d="M16 12v6"/><path d="M8 12v6"/></svg>';
     html += '      </div>';
@@ -627,7 +475,7 @@
     html += '        <span>Rehber</span>';
     html += '      </button>';
     html += '';
-    html += '      <button class="btn-notebook" id="btnOpenNotebook">';
+    html += '      <button class="btn-notebook" id="btnOpenNotebook" aria-label="Dijital Deney Defteri" title="Dijital Deney Defteri">';
     html += '        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>';
     html += '        <span>Dijital Deney Defteri</span>';
     if (solvedCount > 0) {
@@ -635,7 +483,7 @@
     }
     html += '      </button>';
     html += '';
-    html += '      <button class="btn-report" id="btnOpenReport">';
+    html += '      <button class="btn-report" id="btnOpenReport" aria-label="Vaka Raporu" title="Vaka Raporu">';
     html += '        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
     html += '        <span>Vaka Raporu</span>';
     html += '      </button>';
@@ -648,7 +496,11 @@
     html += '</header>';
 
     // Main Content
-    html += '<main class="main-content">';
+    html += '<main class="main-content' + (state.activeCase ? ' main-case-detail' : ' main-case-grid') + '"' + (blocking ? ' inert' : '') + '>';
+    var persistence = recordStore.persistence();
+    if (persistence.error || !persistence.records || !persistence.drafts) {
+      html += '<p class="save-status-error storage-notice" role="alert">' + escapeHtml(persistence.error || draftStatusText()) + '</p>';
+    }
     if (state.activeCase) {
       html += renderCaseDetail(state.activeCase, solvedCount);
     } else {
@@ -669,9 +521,12 @@
     if (state.showVideoModal && state.activeCase) {
       html += renderVideoModal(state.activeCase);
     }
-    if (state.showFeedbackModal && state.activeCase && state.records[state.activeCase.id]) {
+    if (state.showFeedbackModal && !state.showResetModal && state.activeCase && state.records[state.activeCase.id]) {
       html += renderFeedbackModal(state.activeCase, state.records[state.activeCase.id]);
     }
+
+    if (state.showResetModal) html += renderResetModal();
+    if (state.completionStage) html += renderCompletion();
 
     // Mobil Dikey Ekran Uyarısı (Yatay Ekran Zorunlu)
     html += '<div class="orientation-overlay" id="orientationOverlay">';
@@ -692,11 +547,14 @@
     html += '  </div>';
     html += '</div>';
 
-    // Confetti Canvas
-    html += '<canvas id="confettiCanvas" style="position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:99;display:none;"></canvas>';
-
+    if (window.ThreeMolecularSimulator) window.ThreeMolecularSimulator.stop();
     app.innerHTML = html;
     bindEvents();
+    if (document.body) document.body.classList.toggle('dialog-open', Boolean(blocking));
+    if (state.showResetModal) document.getElementById('btnCancelReset').focus();
+    else if (state.completionStage === 'message') document.getElementById('btnCompletionHome').focus();
+    else if (state.showFeedbackModal) document.getElementById('btnCloseEvalModal').focus();
+    if (state.completionStage === 'fireworks') startFireworks();
 
     function formatTimer(sec) {
       var s = Math.floor(sec || 0);
@@ -714,7 +572,7 @@
       }
     }
     // 2. Vaka detayında Mikro Moleküller modu açıksa:
-    else if (state.activeCase && state.viewMode === 'micro' && !state.showFeedbackModal && !state.showVideoModal) {
+    else if (state.activeCase && state.viewMode === 'micro' && !state.showFeedbackModal && !state.showVideoModal && !state.showResetModal && !state.completionStage) {
       var molEl = document.getElementById('molecularStage');
       if (molEl && window.ThreeMolecularSimulator) {
         window.ThreeMolecularSimulator.init(molEl, state.activeCase, {
@@ -808,6 +666,9 @@
       } else if (rec && rec.status === 'incomplete') {
         dotClass = 'dot-partial';
         dotStatusText = 'Eksik Bilgi ⚠️';
+      } else if (rec && rec.status === 'review') {
+        dotClass = 'dot-partial';
+        dotStatusText = 'İnceleme gerekli';
       } else if (rec && rec.status === 'incorrect') {
         dotClass = 'dot-wrong';
         dotStatusText = 'Düzeltilmeli ✕';
@@ -869,6 +730,8 @@
         h += '    <span class="compact-status-badge status-incomplete">';
         h += '      ⚠️ Eksik Bilgi';
         h += '    </span>';
+      } else if (rec && rec.status === 'review') {
+        h += '    <span class="nb-status-pill nb-status-partial">⚠ İnceleme gerekli</span>';
       } else if (rec && rec.status === 'incorrect') {
         h += '    <span class="compact-status-badge status-incorrect">';
         h += '      ✕ Düzeltilmeli';
@@ -969,6 +832,12 @@
     // SOL SÜTUN (Sol Panel: Başlık, Video ve Medya Kontrolleri)
     h += '<div class="detail-left-pane">';
 
+    // Heading (Madde 4: Kompakt Başlık ile videoyu belirgin şekilde yukarı alma)
+    h += '<div class="detail-title-section-compact">';
+    h += '  <h1 class="detail-heading-compact">' + c.title + '</h1>';
+    h += '  <p class="detail-summary-compact">' + c.shortDesc + '</p>';
+    h += '</div>';
+
     // Breadcrumb Row (Madde 4: Vaka # üst butonlarla aynı hizada)
     h += '<div class="detail-nav-row">';
     h += '  <div class="nav-left-group">';
@@ -981,28 +850,25 @@
     h += '  </div>';
     h += '</div>';
 
-    // Heading (Madde 4: Kompakt Başlık ile videoyu belirgin şekilde yukarı alma)
-    h += '<div class="detail-title-section-compact">';
-    h += '  <h1 class="detail-heading-compact">' + c.title + '</h1>';
-    h += '  <p class="detail-summary-compact">' + c.shortDesc + '</p>';
-    h += '</div>';
-
-    // Çift-Bakış (Dual-View) Seçici Barı
-    h += '<div class="dual-view-toggle-bar">';
-    h += '  <button type="button" class="btn-dual-toggle' + (state.viewMode === 'macro' ? ' active-macro' : '') + '" id="btnDualMacro">';
-    h += '    <span class="dual-icon">📹</span>';
-    h += '    <span class="dual-label">Makro Olay (Video)</span>';
-    h += '  </button>';
-    h += '  <button type="button" class="btn-dual-toggle' + (state.viewMode === 'micro' ? ' active-micro' : '') + '" id="btnDualMicro">';
-    h += '    <span class="dual-icon">⚛</span>';
-    h += '    <span class="dual-label">Mikro Moleküller</span>';
-    h += '    <span class="dual-pulse">3D</span>';
-    h += '  </button>';
-    h += '</div>';
+    // Her iki görünümde sahnenin altındaki ortak seçim barı.
+    var viewToggleHtml = '';
+    viewToggleHtml += '<div class="dual-view-toggle-bar">';
+    viewToggleHtml += '  <button type="button" class="btn-dual-toggle' + (state.viewMode === 'macro' ? ' active-macro' : '') + '" id="btnDualMacro">';
+    viewToggleHtml += '    <span class="dual-icon">📹</span>';
+    viewToggleHtml += '    <span class="dual-label">Makro Olay (Video)</span>';
+    viewToggleHtml += '  </button>';
+    viewToggleHtml += '  <button type="button" class="btn-dual-toggle' + (state.viewMode === 'micro' ? ' active-micro' : '') + '" id="btnDualMicro">';
+    viewToggleHtml += '    <span class="dual-icon">⚛</span>';
+    viewToggleHtml += '    <span class="dual-label">Mikro Moleküller</span>';
+    viewToggleHtml += '    <span class="dual-pulse">3D</span>';
+    viewToggleHtml += '  </button>';
+    viewToggleHtml += '</div>';
 
     // Sahne Alanı (Makro Video veya Mikro Moleküler Canvas)
     if (state.viewMode === 'micro') {
       h += '<div id="molecularStage" class="molecular-stage"></div>';
+
+      h += viewToggleHtml;
 
       // 3D Moleküler Simülasyon Video Kontrolleri (Laboratuvar Videosu ile Birebir Eşzamanlı)
       var cDur = (c.id === 9 ? 6 : 8);
@@ -1035,6 +901,8 @@
       h += '  </div>';
       h += '</div>';
 
+      h += viewToggleHtml;
+
       // Video Controls
       h += '<div class="video-controls-row">';
       h += '  <button class="btn-media-action btn-primary-action" id="btnPlayVideo"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg> Başlat</button>';
@@ -1047,8 +915,7 @@
 
     // SAĞ SÜTUN (Sağ Panel: Gözlem Metin Alanı, Karar Butonları, Kontrol Et Butonu)
     var curType = state.selectedType || null;
-    var paneThemeClass = curType === 'physical' ? ' selected-physical' : (curType === 'chemical' ? ' selected-chemical' : '');
-    h += '<div class="detail-right-pane' + paneThemeClass + '">';
+    h += '<div class="detail-right-pane">';
 
     // Form Alanı
     h += '<div class="interactive-form-grid">';
@@ -1062,81 +929,53 @@
       : '';
 
     var rec = state.records[c.id];
-    var ev = rec ? rec.evaluation : null;
-    var obsBorderClass = '';
-    var reaBorderClass = '';
-    var obsBadgeHtml = '';
-    var reaBadgeHtml = '';
+    var ev = rec && rec.observation === curObs && rec.reasoning === curRea && rec.decisionType === curType ? rec.evaluation : null;
+    var obsUI = fieldPresentation(ev && (ev.obsStatus || (ev.hasObs ? 'correct' : (curObs ? 'incomplete' : 'empty'))));
+    var typeUI = fieldPresentation(ev && (!curType ? 'empty' : (ev.isTypeCorrect ? 'correct' : 'incorrect')));
+    var reaUI = fieldPresentation(ev && (ev.reaStatus || (ev.isContradiction ? 'contradiction' :
+      (!curRea ? 'empty' : (ev.hasRea ? 'correct' : 'incomplete')))));
 
-    if (ev) {
-      var oStatus = ev.obsStatus || (ev.hasObs ? 'correct' : (curObs ? 'incomplete' : 'empty'));
-      if (oStatus === 'correct') {
-        obsBorderClass = ' input-eval-success';
-        obsBadgeHtml = '<span class="field-eval-badge badge-eval-success">✓ Doğru</span>';
-      } else if (oStatus === 'incomplete') {
-        obsBorderClass = ' input-eval-warning';
-        obsBadgeHtml = '<span class="field-eval-badge badge-eval-warning">⚠️ Eksik</span>';
-      } else {
-        obsBorderClass = ' input-eval-danger';
-        obsBadgeHtml = '<span class="field-eval-badge badge-eval-danger">✕ Hatalı / Boş</span>';
-      }
-
-      var rStatus = ev.reaStatus || (ev.isContradiction ? 'contradiction' : (!ev.isTypeCorrect ? 'incorrect' : (!curRea ? 'empty' : (ev.hasRea ? 'correct' : 'incomplete'))));
-      if (rStatus === 'correct') {
-        reaBorderClass = ' input-eval-success';
-        reaBadgeHtml = '<span class="field-eval-badge badge-eval-success">✓ Doğru</span>';
-      } else if (rStatus === 'incomplete') {
-        reaBorderClass = ' input-eval-warning';
-        reaBadgeHtml = '<span class="field-eval-badge badge-eval-warning">⚠️ Eksik</span>';
-      } else {
-        reaBorderClass = ' input-eval-danger';
-        reaBadgeHtml = '<span class="field-eval-badge badge-eval-danger">✕ ' + (rStatus === 'contradiction' ? 'Çelişkili' : 'Hatalı') + '</span>';
-      }
-    }
-
-    h += '  <div class="form-box">';
+    var saveFailed = !recordStore.persistence().drafts || !recordStore.persistence().records;
+    h += '  <p class="draft-save-status save-status-error" id="draftSaveStatus" role="alert"' + (saveFailed ? '' : ' hidden') + '>' + (saveFailed ? escapeHtml(draftStatusText()) : '') + '</p>';
+    h += '  <section class="form-box answer-card observation-card' + obsUI.card + '" aria-labelledby="obsHeading">';
     h += '    <div class="form-box-header">';
     h += '      <span class="step-num-pill">1</span>';
-    h += '      <div>';
-    h += '        <h3 class="form-box-title">Gözlemini Yaz' + obsBadgeHtml + '</h3>';
-    h += '        <p class="form-box-desc">Olayda doğrudan gözlemlediğin somut değişimleri kendi cümlelerinle yaz.</p>';
+    h += '      <div class="form-heading-copy">';
+    h += '        <h3 class="form-box-title" id="obsHeading">Gözlemim</h3>';
+    h += '        <p class="form-box-desc">Gözlemini yaz: Olayda gördüğün somut değişimleri belirt.</p>';
     h += '      </div>';
+    h += obsUI.badge;
     h += '    </div>';
-    h += '    <textarea id="obsInput" class="form-textarea' + obsBorderClass + '" rows="4" maxlength="500" placeholder="Gözlemlerini buraya yaz... (Örn: Olayı izlerken videoda doğrudan gözlemlediğin tüm değişiklikleri açıkla...)">' + curObs + '</textarea>';
+    h += '    <textarea id="obsInput" aria-labelledby="obsHeading" class="form-textarea' + obsUI.border + '" rows="3" maxlength="500" placeholder="Olayda gördüğün değişimleri kendi cümlelerinle yaz...">' + escapeHtml(curObs) + '</textarea>';
     h += '    <div class="char-counter" id="obsCharCounter">' + curObs.length + ' / 500 karakter</div>';
-    h += '  </div>';
+    h += '  </section>';
 
     // 2. Kararını Ver (Öneri G: Fiziksel vs Kimyasal Yönlendirici Kartlar, Öneri D: Karakter Sayacı)
-    h += '  <div class="form-box">';
+    h += '  <section class="form-box answer-card decision-card' + typeUI.card + '" aria-labelledby="typeHeading">';
     h += '    <div class="form-box-header">';
     h += '      <span class="step-num-pill">2</span>';
-    h += '      <div>';
-    h += '        <h3 class="form-box-title">Kararını Ver' + reaBadgeHtml + '</h3>';
-    h += '        <p class="form-box-desc">Bu değişim fiziksel mi yoksa kimyasal mı? Kararını seçip gerekçeni yaz.</p>';
+    h += '      <div class="form-heading-copy">';
+    h += '        <h3 class="form-box-title" id="typeHeading">Kararım</h3>';
+    h += '        <p class="form-box-desc">Kararını ver: Fiziksel mi, kimyasal mı?</p>';
     h += '      </div>';
+    h += typeUI.badge;
     h += '    </div>';
     
     var phyEvalClass = '';
-    var phyTag = '';
     var chmEvalClass = '';
-    var chmTag = '';
 
     if (ev && curType) {
       if (curType === 'physical') {
         if (ev.isTypeCorrect) {
           phyEvalClass = ' btn-eval-correct';
-          phyTag = '<span class="btn-eval-pill pill-correct">✓ Doğru Karar</span>';
         } else {
           phyEvalClass = ' btn-eval-wrong';
-          phyTag = '<span class="btn-eval-pill pill-wrong">✕ Hatalı Karar</span>';
         }
       } else if (curType === 'chemical') {
         if (ev.isTypeCorrect) {
           chmEvalClass = ' btn-eval-correct';
-          chmTag = '<span class="btn-eval-pill pill-correct">✓ Doğru Karar</span>';
         } else {
           chmEvalClass = ' btn-eval-wrong';
-          chmTag = '<span class="btn-eval-pill pill-wrong">✕ Hatalı Karar</span>';
         }
       }
     }
@@ -1144,7 +983,6 @@
     h += '    <div>';
     h += '      <div class="type-buttons-row">';
     h += '        <button type="button" class="type-card-mock tcm-physical btn-type-phy' + (curType === 'physical' ? ' active-phy' : '') + phyEvalClass + '" id="btnPickPhysical">';
-    h += '          ' + phyTag;
     h += '          <div class="tcm-watermark">PHY</div>';
     h += '          <div class="phy-phase-layer" aria-hidden="true">';
     h += '            <span class="phase-wave"></span>';
@@ -1163,7 +1001,6 @@
     h += '          <div class="tcm-desc">Maddenin kimliği değişmez</div>';
     h += '        </button>';
     h += '        <button type="button" class="type-card-mock tcm-chemical btn-type-chm' + (curType === 'chemical' ? ' active-chm' : '') + chmEvalClass + '" id="btnPickChemical">';
-    h += '          ' + chmTag;
     h += '          <div class="tcm-watermark">CHM</div>';
     h += '          <div class="chm-bubble-layer" aria-hidden="true">';
     h += '            <span class="chm-bubble cb-1"></span>';
@@ -1183,10 +1020,22 @@
     h += '          <div class="tcm-desc">Yeni özellikte madde oluşur</div>';
     h += '        </button>';
     h += '      </div>';
-    h += '      <textarea id="reaInput" class="form-textarea' + reaBorderClass + '" rows="3" maxlength="500" placeholder="Kararının gerekçesini buraya yaz... (Örn: Maddenin iç yapısında ve kimliğinde bir değişiklik olup olmadığını belirterek açıkla...)">' + curRea + '</textarea>';
-    h += '      <div class="char-counter" id="reaCharCounter">' + curRea.length + ' / 500 karakter</div>';
     h += '    </div>';
-    h += '  </div>';
+    h += '  </section>';
+
+    // 3. Gerekçem: Karardan bağımsız kart ve değerlendirme.
+    h += '  <section class="form-box answer-card reasoning-card' + reaUI.card + '" aria-labelledby="reaHeading">';
+    h += '    <div class="form-box-header">';
+    h += '      <span class="step-num-pill">3</span>';
+    h += '      <div class="form-heading-copy">';
+    h += '        <h3 class="form-box-title" id="reaHeading">Gerekçem</h3>';
+    h += '        <p class="form-box-desc">Gerekçeni yaz: Maddenin kimliği korundu mu, yeni madde oluştu mu?</p>';
+    h += '      </div>';
+    h += reaUI.badge;
+    h += '    </div>';
+    h += '    <textarea id="reaInput" aria-labelledby="reaHeading" class="form-textarea' + reaUI.border + '" rows="3" maxlength="500" placeholder="Kararını bilimsel bir nedenle açıkla...">' + escapeHtml(curRea) + '</textarea>';
+    h += '    <div class="char-counter" id="reaCharCounter">' + curRea.length + ' / 500 karakter</div>';
+    h += '  </section>';
 
     h += '</div>';
 
@@ -1244,24 +1093,23 @@
   function renderFeedbackModal(c, rec) {
     if (!rec || !rec.evaluation) return '';
     var ev = rec.evaluation;
-    var statusClass = ev.status === 'correct' ? 'feedback-correct' : (ev.status === 'incomplete' ? 'feedback-incomplete' : 'feedback-incorrect');
+    var hints = window.AnswerFeedback.messages(c, ev, rec.observation, rec.decisionType, rec.reasoning);
+    var statusClass = ev.status === 'correct' ? 'feedback-correct' : ((ev.status === 'incomplete' || ev.status === 'review') ? 'feedback-incomplete' : 'feedback-incorrect');
     var isTypeCorrect = rec.decisionType === c.correctType;
     var obsText = (rec.observation || '').trim();
     var reaText = (rec.reasoning || '').trim();
-    var hasGoodObs = ev.hasObs !== undefined ? ev.hasObs : (obsText.length >= 4);
-    var hasGoodRea = ev.hasRea !== undefined ? ev.hasRea : (reaText.length >= 4 && !ev.isShallowOrTrap);
 
     var iconSvg = ev.status === 'correct'
       ? '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>'
-      : (ev.status === 'incomplete'
+      : ((ev.status === 'incomplete' || ev.status === 'review')
         ? '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
         : '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>');
 
-    var badgeText = ev.status === 'correct' ? 'TAM BAŞARILI TEŞHİS' : (ev.status === 'incomplete' ? 'EKSİK GÖZLEM / GEREKÇE' : 'HATALI TEŞHİS');
+    var badgeText = ev.status === 'correct' ? 'TAM BAŞARILI TEŞHİS' : (ev.status === 'review' ? 'İNCELEME GEREKLİ' : (ev.status === 'incomplete' ? 'EKSİK YANIT' : 'HATALI TEŞHİS'));
 
     var h = '';
     h += '<div class="modal-backdrop eval-modal-backdrop" id="evalModalBackdrop">';
-    h += '  <div class="modal-window modal-window-wide eval-modal-card ' + statusClass + '">';
+    h += '  <div class="modal-window modal-window-wide eval-modal-card ' + statusClass + '" role="dialog" aria-modal="true" aria-labelledby="evalModalTitle" tabindex="-1">';
     
     // Header
     h += '    <div class="eval-modal-header">';
@@ -1269,11 +1117,11 @@
     h += '        <div class="eval-status-icon">' + iconSvg + '</div>';
     h += '        <div>';
     h += '          <div class="eval-status-badge">' + badgeText + ' • VAKA #' + c.id + '</div>';
-    h += '          <h2 class="eval-title">' + c.title + '</h2>';
+    h += '          <h2 class="eval-title" id="evalModalTitle">' + c.title + '</h2>';
     h += '        </div>';
     h += '      </div>';
     h += '      <div style="display:flex; align-items:center; gap:0.65rem;">';
-    h += '        <span class="eval-score-chip">Puan: %' + ev.score + '</span>';
+    h += '        <span class="eval-score-chip">' + escapeHtml(ev.status === 'review' ? 'Değerlendirme bekliyor' : 'Puan: ' + scoreLabel(ev.score)) + '</span>';
     h += '        <button class="btn-icon" id="btnCloseEvalModal" title="Kapat">✕</button>';
     h += '      </div>';
     h += '    </div>';
@@ -1281,85 +1129,50 @@
     // Body (Tek, Odaklanmış ve Belirgin Tespit Kartları Listesi - 3D Sekmesi Kaldırıldı)
     h += '    <div class="eval-modal-body">';
 
-    // Tespit 1: Değişim Türü
+    // Tespit 1: Gözlemim
+    var obsStatus = ev.obsStatus || (obsText.length >= 4 && ev.hasObs ? 'correct' : (obsText.length > 0 ? 'incomplete' : 'empty'));
+    var obsRowClass = obsStatus === 'correct' ? 'verdict-row-success' : ((obsStatus === 'incomplete' || obsStatus === 'review') ? 'verdict-row-warning' : 'verdict-row-danger');
+    var obsIcon = obsStatus === 'correct' ? '✓' : ((obsStatus === 'incomplete' || obsStatus === 'review') ? '⚠️' : '✕');
+    var obsTag = '';
+    var obsDesc = hints.obsMessage;
+    obsTag = fieldPresentation(obsStatus).badge;
+    h += '      <div class="verdict-banner-row ' + obsRowClass + '">';
+    h += '        <div class="verdict-row-icon">' + obsIcon + '</div>';
+    h += '        <div class="verdict-row-info">';
+    h += '          <div class="verdict-row-title"><span>1. Gözlemim</span> ' + obsTag + '</div>';
+    h += '          <div class="verdict-answer"><strong>Yazdığın:</strong> ' + escapeHtml(obsText || 'Boş bırakıldı.') + '</div>';
+    h += '          <div class="verdict-row-text"><strong>Dönüt:</strong> ' + escapeHtml(obsDesc) + '</div>';
+    h += '        </div>';
+    h += '      </div>';
+
+    // Tespit 2: Kararım
     var typeTitleClass = isTypeCorrect ? 'verdict-row-success' : 'verdict-row-danger';
     var typeIcon = isTypeCorrect ? '✓' : '✕';
-    var typeTag = isTypeCorrect
-      ? '<span class="verdict-tag tag-success">✓ DOĞRU</span>'
-      : '<span class="verdict-tag tag-danger">✕ HATALI</span>';
+    var typeTag = fieldPresentation(!rec.decisionType ? 'empty' : (isTypeCorrect ? 'correct' : 'incorrect')).badge;
     var selName = rec.decisionType === 'chemical' ? 'Kimyasal Değişim' : (rec.decisionType === 'physical' ? 'Fiziksel Değişim' : 'Belirtilmedi');
-    var corName = c.correctType === 'chemical' ? 'Kimyasal Değişim' : 'Fiziksel Değişim';
 
     h += '      <div class="verdict-banner-row ' + typeTitleClass + '">';
     h += '        <div class="verdict-row-icon">' + typeIcon + '</div>';
     h += '        <div class="verdict-row-info">';
-    h += '          <div class="verdict-row-title"><span>1. DEĞİŞİM TÜRÜ TESPİTİ</span> ' + typeTag + '</div>';
-    if (isTypeCorrect) {
-      h += '          <div class="verdict-row-text">Bu olay bir <strong style="color:var(--md-sys-color-primary);">' + corName + '</strong> örneğidir. Kararın tam isabetli!</div>';
-    } else {
-      h += '          <div class="verdict-row-text">Senin Kararın: <strong style="text-decoration:line-through; opacity:0.85;">' + selName + '</strong> ➔ Doğru Tespit: <strong style="color:var(--md-sys-color-primary);">' + corName + '</strong>.</div>';
-    }
-    h += '        </div>';
-    h += '      </div>';
-
-    // Tespit 2: Gözlem Kaydı
-    var obsStatus = ev.obsStatus || (obsText.length >= 4 && ev.hasObs ? 'correct' : (obsText.length > 0 ? 'incomplete' : 'empty'));
-    var obsRowClass = obsStatus === 'correct' ? 'verdict-row-success' : (obsStatus === 'incomplete' ? 'verdict-row-warning' : 'verdict-row-danger');
-    var obsIcon = obsStatus === 'correct' ? '✓' : (obsStatus === 'incomplete' ? '⚠️' : '✕');
-    var obsTag = '';
-    var obsDesc = '';
-
-    if (obsStatus === 'empty') {
-      obsTag = '<span class="verdict-tag tag-danger">Gözlem Raporu Yazılmadı</span>';
-      obsDesc = 'Gözlem kutusu boş bırakıldı. Lütfen deneyde gözlemlediğin somut değişimleri kendi cümlelerinle not et.';
-    } else if (obsStatus === 'incomplete') {
-      obsTag = '<span class="verdict-tag tag-warning">⚠️ Eksik Gözlem</span>';
-      obsDesc = 'Olayda fark ettiğin somut değişimleri (renk, duman, gaz kabarcığı, çökelti, sıcaklık veya hâl değişimi) daha detaylı yazmalısın.';
-    } else if (obsStatus === 'incorrect') {
-      obsTag = '<span class="verdict-tag tag-danger">✕ Hatalı Gözlem</span>';
-      obsDesc = 'Yazdığın gözlem olayın somut gerçekleriyle uyuşmuyor veya çelişkili ifadeler içeriyor.';
-    } else {
-      obsTag = '<span class="verdict-tag tag-success">✓ Doğru Gözlem</span>';
-      obsDesc = 'Olaydaki belirgin somut değişimleri ve kanıtları başarıyla gözlemledin.';
-    }
-
-    h += '      <div class="verdict-banner-row ' + obsRowClass + '">';
-    h += '        <div class="verdict-row-icon">' + obsIcon + '</div>';
-    h += '        <div class="verdict-row-info">';
-    h += '          <div class="verdict-row-title"><span>2. GÖZLEM RAPORU</span> ' + obsTag + '</div>';
-    h += '          <div class="verdict-row-text">' + obsDesc + '</div>';
+    h += '          <div class="verdict-row-title"><span>2. Kararım</span> ' + typeTag + '</div>';
+    h += '          <div class="verdict-answer"><strong>Seçtiğin:</strong> ' + selName + '</div>';
+    h += '          <div class="verdict-row-text"><strong>Dönüt:</strong> ' + escapeHtml(hints.typeMessage) + '</div>';
     h += '        </div>';
     h += '      </div>';
 
     // Tespit 3: Bilimsel Gerekçe & Mantık
     var reaStatus = ev.reaStatus || (ev.isContradiction ? 'contradiction' : (!isTypeCorrect ? 'incorrect' : (!reaText ? 'empty' : (ev.hasRea ? 'correct' : 'incomplete'))));
-    var reaRowClass = reaStatus === 'correct' ? 'verdict-row-success' : (reaStatus === 'incomplete' ? 'verdict-row-warning' : 'verdict-row-danger');
-    var reaIcon = reaStatus === 'correct' ? '✓' : (reaStatus === 'incomplete' ? '⚠️' : '✕');
+    var reaRowClass = reaStatus === 'correct' ? 'verdict-row-success' : ((reaStatus === 'incomplete' || reaStatus === 'review') ? 'verdict-row-warning' : 'verdict-row-danger');
+    var reaIcon = reaStatus === 'correct' ? '✓' : ((reaStatus === 'incomplete' || reaStatus === 'review') ? '⚠️' : '✕');
     var reaTag = '';
-    var reaDesc = '';
-
-    if (reaStatus === 'empty') {
-      reaTag = '<span class="verdict-tag tag-danger">Bilimsel Gerekçe Yazılmadı</span>';
-      reaDesc = 'Bilimsel gerekçe kutusu boş bırakıldı. Kararının nedenini ve maddenin iç yapısındaki durumu belirtmelisin.';
-    } else if (reaStatus === 'contradiction') {
-      reaTag = '<span class="verdict-tag tag-danger">✕ Çelişkili Gerekçe</span>';
-      reaDesc = 'Seçtiğin buton ile yazdığın açıklama çelişiyor. Lütfen buton seçiminle gerekçeni uyumlu hale getir.';
-    } else if (reaStatus === 'incomplete') {
-      reaTag = '<span class="verdict-tag tag-warning">⚠️ Eksik Gerekçe</span>';
-      reaDesc = 'Kararın doğru ancak gerekçen yetersiz. Maddenin kimliğinin değişip değişmediğini veya yeni madde oluşumunu belirtmelisin.';
-    } else if (reaStatus === 'incorrect') {
-      reaTag = '<span class="verdict-tag tag-danger">✕ Hatalı Gerekçe</span>';
-      reaDesc = 'Temel değişim türü hatalı belirlendiği için bu gerekçe bilimsel olarak geçerli sayılmaz.';
-    } else {
-      reaTag = '<span class="verdict-tag tag-success">✓ Geçerli Gerekçe</span>';
-      reaDesc = 'Maddenin iç yapısındaki kimliği ve bilimsel nedeni tam olarak gerekçelendirdin.';
-    }
-
+    var reaDesc = hints.reaMessage;
+    reaTag = fieldPresentation(reaStatus).badge;
     h += '      <div class="verdict-banner-row ' + reaRowClass + '">';
     h += '        <div class="verdict-row-icon">' + reaIcon + '</div>';
     h += '        <div class="verdict-row-info">';
-    h += '          <div class="verdict-row-title"><span>3. BİLİMSEL GEREKÇE</span> ' + reaTag + '</div>';
-    h += '          <div class="verdict-row-text">' + reaDesc + '</div>';
+    h += '          <div class="verdict-row-title"><span>3. Gerekçem</span> ' + reaTag + '</div>';
+    h += '          <div class="verdict-answer"><strong>Yazdığın:</strong> ' + escapeHtml(reaText || 'Boş bırakıldı.') + '</div>';
+    h += '          <div class="verdict-row-text"><strong>Dönüt:</strong> ' + escapeHtml(reaDesc) + '</div>';
     h += '        </div>';
     h += '      </div>';
 
@@ -1367,13 +1180,18 @@
     h += '      <div class="eval-feedback-card">';
     h += '        <div class="eval-feedback-title-row">';
     h += '          <span class="eval-icon-dot"></span>';
-    h += '          <span class="eval-feedback-heading">🔬 Öğretmen Değerlendirmesi</span>';
+    h += '          <span class="eval-feedback-heading">🔬 Değerlendirme Dönütü</span>';
     h += '        </div>';
-    h += '        <p class="eval-feedback-desc">' + ev.message + '</p>';
+    h += '        <p class="eval-feedback-desc">' + escapeHtml(ev.status === 'correct' ? ev.message : 'Dönütlere göre ilgili yanıtı düzenle ve yeniden kontrol et. Önceki denemelerin defterde korunur.') + '</p>';
     h += '      </div>';
+
+    if (ev.needsReview) {
+      h += '<div class="eval-clarification"><strong>Açıklamanı netleştir:</strong> ' + escapeHtml(reviewSummary(ev, c, rec)) + '<p>Cevabımı Düzenle ile ilgili kutuya açıklamanı ekle ve yeniden kontrol et. Toplam puanın bu açıklamadan sonra hesaplanır.</p></div>';
+    }
 
     // Hızlı Bağlantı Butonları
     h += '      <div class="eval-quick-links-row">';
+    h += '        <button type="button" class="eval-oval-pill" id="btnModalGoHome"><span class="oval-pill-icon" aria-hidden="true">⌂</span><span>Ana Ekrana Dön</span></button>';
     h += '        <button type="button" class="eval-oval-pill" id="btnModalGoNotebook">';
     h += '          <div class="oval-pill-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>';
     h += '          <span>Dijital Deney Defteri</span>';
@@ -1390,7 +1208,7 @@
     h += '    <div class="eval-modal-footer">';
     if (ev.status === 'correct') {
       h += '      <button class="eval-oval-btn btn-secondary-oval" id="btnCloseEvalModalReview">Notları İncele</button>';
-      h += '      <button class="eval-oval-btn btn-primary-oval" id="btnEvalNextCase">Sonraki Olay →</button>';
+      h += '      <button class="eval-oval-btn btn-primary-oval" id="btnEvalNextCase">' + (state.completionPending ? 'Tamamla ve Kutla' : 'Sonraki Olay →') + '</button>';
     } else {
       h += '      <button class="eval-oval-btn btn-primary-oval" id="btnCloseEvalModalEdit">Cevabımı Düzenle</button>';
     }
@@ -1425,10 +1243,12 @@
       h += '<div class="notebook-case-card" data-notebook-case-id="' + c.id + '" role="button" tabindex="0" title="Vaka #' + c.id + ' kaydını aç ve incele">';
       h += '  <div class="notebook-card-top-row">';
       h += '    <div class="notebook-card-case-id">VAKA #' + c.id + ': ' + c.title + (isSolved ? ' <span class="nb-type-tag">(' + (c.correctType === 'chemical' ? 'Kimyasal' : 'Fiziksel') + ')</span>' : '') + '</div>';
-      if (isSolved) {
+      if (rec && rec.status === 'correct') {
         h += '    <span class="nb-status-pill nb-status-solved">✓ Çözüldü (%' + rec.score + ')</span>';
       } else if (rec && rec.status === 'incomplete') {
         h += '    <span class="nb-status-pill nb-status-partial">⚠️ Eksik</span>';
+      } else if (rec && rec.status === 'review') {
+        h += '    <span class="nb-status-pill nb-status-partial">⚠ İnceleme gerekli</span>';
       } else if (rec && rec.status === 'incorrect') {
         h += '    <span class="nb-status-pill nb-status-wrong">✕ Hatalı</span>';
       } else {
@@ -1438,9 +1258,19 @@
 
       if (rec) {
         h += '  <div class="notebook-card-entry-compact">';
-        h += '    <div class="nb-entry-line"><strong style="color:var(--md-sys-color-primary);">Gözlem:</strong> ' + (rec.observation || '—') + '</div>';
-        h += '    <div class="nb-entry-line"><strong style="color:var(--md-sys-color-tertiary);">Karar:</strong> ' + (rec.decisionType === 'chemical' ? '🧪 Kimyasal Değişim' : '🧊 Fiziksel Değişim') + (rec.reasoning ? ' — ' + rec.reasoning : '') + '</div>';
+        h += '    <div class="nb-entry-line"><strong style="color:var(--md-sys-color-primary);">Gözlem:</strong> ' + escapeHtml(rec.observation || '—') + '</div>';
+        h += '    <div class="nb-entry-line"><strong style="color:var(--md-sys-color-tertiary);">Karar:</strong> ' + decisionLabel(rec.decisionType) + (rec.reasoning ? ' — ' + escapeHtml(rec.reasoning) : '') + '</div>';
         h += '  </div>';
+        h += '  <div class="record-summary">En iyi puan: ' + scoreLabel(rec.bestScore) + ' · Deneme: ' + rec.attempts.length + (rec.historyKnown ? '' : ' (önceki geçmiş bilinmiyor)') + (rec.isSolved && rec.status !== 'correct' ? ' · Önceki başarı korundu ✓' : '') + '</div>';
+        h += '<details class="record-history"><summary>Deneme geçmişini göster</summary>';
+        rec.attempts.forEach(function (attempt, index) {
+          h += '<div class="record-history-entry"><strong>Deneme ' + (index + 1) + ': ' + statusLabel(attempt.status) + ' (' + scoreLabel(attempt.score) + ')</strong>';
+          h += '<div>Karar: ' + decisionLabel(attempt.decisionType) + ' · İpucu: ' + (attempt.hintCount === null ? 'Bilinmiyor' : attempt.hintCount) + '</div>';
+          h += '<div>Gözlem: ' + escapeHtml(attempt.observation || '—') + '</div><div>Gerekçe: ' + escapeHtml(attempt.reasoning || '—') + '</div>';
+          if (attempt.evaluation && attempt.evaluation.needsReview) h += '<div><strong>Açıklama bekleyen alan:</strong> ' + escapeHtml(reviewSummary(attempt.evaluation, c, attempt)) + '</div>';
+          h += '<div>Ölçüt sürümü: ' + escapeHtml(attempt.evaluation && attempt.evaluation.criteriaVersion || 'Önceki sürüm') + '</div></div>';
+        });
+        h += '</details>';
       } else {
         h += '  <div class="notebook-card-empty-compact">Bu olay henüz incelenmedi. İncelemek için tıkla ↗</div>';
       }
@@ -1493,7 +1323,7 @@
     h += '      <div class="report-table-wrap">';
     h += '        <table class="report-table">';
     h += '          <thead>';
-    h += '            <tr><th>#</th><th>Olay Adı</th><th>Doğru Tür</th><th>Öğrenci Kararı</th><th>Durum</th><th style="text-align:right;">Puan</th></tr>';
+    h += '            <tr><th>#</th><th>Olay Adı</th><th>Doğru Tür</th><th>Son Karar</th><th>Son Deneme</th><th style="text-align:right;">Son Puan</th><th>En İyi</th><th>Deneme</th></tr>';
     h += '          </thead>';
     h += '          <tbody>';
     state.cases.forEach(function (c) {
@@ -1503,9 +1333,11 @@
       h += '          <td style="font-family:\'Roboto Mono\', monospace; font-weight:700;">#' + c.id + '</td>';
       h += '          <td><button type="button" class="report-case-link" data-report-case-id="' + c.id + '" title="Vaka #' + c.id + ' kaydını aç ve incele"><span>' + c.title + '</span><span class="report-link-icon">↗</span></button></td>';
       h += '          <td>' + (isSolved ? (c.correctType === 'chemical' ? '🧪 Kimyasal' : '🧊 Fiziksel') : '<span style="color:var(--md-sys-color-outline); font-style:italic;">🔒 Keşfedilmedi</span>') + '</td>';
-      h += '          <td>' + (rec ? (rec.decisionType === 'chemical' ? '🧪 Kimyasal' : '🧊 Fiziksel') : '—') + '</td>';
-      h += '          <td>' + (isSolved ? '<span style="color:var(--md-sys-color-success); font-weight:700;">✓ Doğru</span>' : (rec ? '<span style="color:var(--md-sys-color-warning); font-weight:700;">⚠️ Eksik</span>' : '<span style="color:var(--md-sys-color-outline);">—</span>')) + '</td>';
-      h += '          <td style="text-align:right; font-family:\'Roboto Mono\', monospace; font-weight:700;">' + (rec ? '%' + rec.score : '0') + '</td>';
+      h += '          <td>' + (rec ? decisionLabel(rec.decisionType) : '—') + '</td>';
+      h += '          <td>' + (rec ? statusLabel(rec.status) + (rec.evaluation && rec.evaluation.needsReview ? '<br><small>' + escapeHtml(reviewSummary(rec.evaluation, c, rec)) + '</small>' : '') + (rec.isSolved && rec.status !== 'correct' ? '<br><small>Önceki başarı korundu</small>' : '') : '—') + '</td>';
+      h += '          <td style="text-align:right;">' + (rec ? scoreLabel(rec.score) : '—') + '</td>';
+      h += '          <td>' + (rec ? scoreLabel(rec.bestScore) : '—') + '</td>';
+      h += '          <td>' + (rec ? rec.attempts.length + (rec.historyKnown ? '' : '+ geçmiş bilinmiyor') : '—') + '</td>';
       h += '        </tr>';
     });
     h += '          </tbody>';
@@ -1534,17 +1366,11 @@
     state.activeCase = target;
 
     var rec = state.records[target.id];
-    if (rec) {
-      // Açılan olaylar eğer daha önceden yapılmış ise (doğru, eksik veya hatalı) içeriğindeki bilgiler silinmesin, olduğu gibi yüklensin
-      state.draftObservations[target.id] = rec.observation !== undefined ? rec.observation : '';
-      state.draftReasonings[target.id] = rec.reasoning !== undefined ? rec.reasoning : '';
-      state.selectedType = rec.decisionType !== undefined ? rec.decisionType : null;
-    } else {
-      // Henüz incelenmemiş yeni bir vaka ise boş başlasın
-      if (state.draftObservations[target.id] === undefined) state.draftObservations[target.id] = '';
-      if (state.draftReasonings[target.id] === undefined) state.draftReasonings[target.id] = '';
-      state.selectedType = null;
-    }
+    var draft = recordStore.drafts[target.id];
+    var initial = draft || rec;
+    state.draftObservations[target.id] = initial ? initial.observation : '';
+    state.draftReasonings[target.id] = initial ? initial.reasoning : '';
+    state.selectedType = initial ? initial.decisionType : null;
 
     render();
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1554,11 +1380,13 @@
     // Brand / Home
     var btnHome = document.getElementById('btnGoHome');
     if (btnHome) {
+      btnHome.onkeydown = function (event) {
+        if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); btnHome.onclick(); }
+      };
       btnHome.onclick = function () {
         if (state.soundEnabled) window.SoundManager.playClick();
-        state.activeCase = null;
-        if (window.ThreeMolecularSimulator) window.ThreeMolecularSimulator.stop();
-        render();
+        if (state.showFeedbackModal) dismissFeedback('home');
+        else goHome();
       };
     }
 
@@ -1751,11 +1579,24 @@
     var btnReset = document.getElementById('btnResetData');
     if (btnReset) {
       btnReset.onclick = function () {
-        if (confirm('Tüm vaka ilerlemesini ve notlarınızı sıfırlamak istediğinize emin misiniz?')) {
-          clearAllData();
-        }
+        saveCurrentDraft();
+        state.resetError = '';
+        state.showResetModal = true;
+        render();
       };
     }
+
+    var cancelReset = document.getElementById('btnCancelReset');
+    if (cancelReset) cancelReset.onclick = closeReset;
+    var confirmReset = document.getElementById('btnConfirmReset');
+    if (confirmReset) confirmReset.onclick = clearAllData;
+    var resetBackdrop = document.getElementById('resetBackdrop');
+    if (resetBackdrop) resetBackdrop.onclick = function (e) { if (e.target === resetBackdrop) closeReset(); };
+    ['btnCompletionHome', 'btnCloseCompletion'].forEach(function (id) {
+      var button = document.getElementById(id); if (button) button.onclick = closeCompletion;
+    });
+    var completionBackdrop = document.getElementById('completionBackdrop');
+    if (completionBackdrop) completionBackdrop.onclick = function (e) { if (e.target === completionBackdrop) closeCompletion(); };
 
     // Grid Case Cards (Olay Kartı Tıklamaları - Önceden Çözülmüş veya Yapılmış Bilgiler Korunur)
     var compactCards = document.querySelectorAll('.case-card-compact, .case-card');
@@ -1784,7 +1625,8 @@
     // Dijital Deney Defteri Kartları (Önceden Kaydedilen Bilgiler Korunarak Açılır)
     var notebookCards = document.querySelectorAll('.notebook-case-card[data-notebook-case-id]');
     notebookCards.forEach(function (card) {
-      card.onclick = function () {
+      card.onclick = function (event) {
+        if (event && event.target.closest('.record-history')) return;
         var cid = parseInt(card.getAttribute('data-notebook-case-id'), 10);
         var target = state.cases.find(function (x) { return x.id === cid; });
         if (target) {
@@ -1996,7 +1838,7 @@
     if (obsInputElem) {
       obsInputElem.oninput = function () {
         var len = obsInputElem.value.length;
-        if (state.activeCase) state.draftObservations[state.activeCase.id] = obsInputElem.value;
+        saveCurrentDraft();
         if (obsCounter) {
           obsCounter.textContent = len + ' / 500 karakter';
           if (len > 450) {
@@ -2012,7 +1854,7 @@
     if (reaInputElem) {
       reaInputElem.oninput = function () {
         var len = reaInputElem.value.length;
-        if (state.activeCase) state.draftReasonings[state.activeCase.id] = reaInputElem.value;
+        saveCurrentDraft();
         if (reaCounter) {
           reaCounter.textContent = len + ' / 500 karakter';
           if (len > 450) {
@@ -2030,6 +1872,7 @@
       btnPickPhy.onclick = function () {
         if (state.soundEnabled) window.SoundManager.playClick();
         state.selectedType = 'physical';
+        saveCurrentDraft();
 
         // Mevcut yazılan metinleri kaydet
         var obsEl = document.getElementById('obsInput');
@@ -2042,13 +1885,6 @@
         var btnPickChm = document.getElementById('btnPickChemical');
         if (btnPickChm) btnPickChm.classList.remove('active-chm', 'chm-clicked');
 
-        // Öneri G: Sağ panele fiziksel ambiyans teması uygula
-        var rightPane = document.querySelector('.detail-right-pane');
-        if (rightPane) {
-          rightPane.classList.add('selected-physical');
-          rightPane.classList.remove('selected-chemical');
-        }
-
         setTimeout(function () {
           btnPickPhy.classList.remove('phy-clicked');
         }, 600);
@@ -2060,6 +1896,7 @@
       btnPickChm.onclick = function () {
         if (state.soundEnabled) window.SoundManager.playClick();
         state.selectedType = 'chemical';
+        saveCurrentDraft();
 
         // Mevcut yazılan metinleri kaydet
         var obsEl = document.getElementById('obsInput');
@@ -2071,13 +1908,6 @@
         btnPickChm.classList.add('active-chm', 'chm-clicked');
         var btnPickPhy = document.getElementById('btnPickPhysical');
         if (btnPickPhy) btnPickPhy.classList.remove('active-phy', 'phy-clicked');
-
-        // Öneri G: Sağ panele kimyasal ambiyans teması uygula
-        var rightPane = document.querySelector('.detail-right-pane');
-        if (rightPane) {
-          rightPane.classList.add('selected-chemical');
-          rightPane.classList.remove('selected-physical');
-        }
 
         setTimeout(function () {
           btnPickChm.classList.remove('chm-clicked');
@@ -2108,19 +1938,21 @@
           reasoning: rea,
           score: ev.score,
           evaluation: ev,
-          solvedAt: new Date().toISOString()
+          submittedAt: new Date().toISOString(),
+          hintCount: 0 // Ayrı bir ipucu isteme düğmesi yok; kontrol dönütleri bu sayacı artırmaz.
         };
 
         saveRecord(rec);
+        saveCurrentDraft();
 
         // Ekran üzerinde açılan belirgin bilgi kartı gösterimi (Madde 3)
+        state.completionPending = ev.status === 'correct' && allCasesSolved() && !state.completionCelebrated;
         state.showFeedbackModal = true;
 
         if (state.soundEnabled) {
           if (ev.status === 'correct') {
             window.SoundManager.playSuccess();
-            launchConfetti();
-          } else if (ev.status === 'incomplete') {
+          } else if (ev.status === 'incomplete' || ev.status === 'review') {
             window.SoundManager.playIncomplete();
           } else {
             window.SoundManager.playIncorrect();
@@ -2131,90 +1963,63 @@
       };
     }
 
-    // Madde 8: Bilgi Kartı İçindeki Oval Köşeli Dikdörtgen Bağlantılar
-    var btnGoNb = document.getElementById('btnModalGoNotebook');
-    if (btnGoNb) {
-      btnGoNb.onclick = function () {
-        if (state.soundEnabled) window.SoundManager.playClick();
-        state.showFeedbackModal = false;
-        state.showNotebook = true;
-        if (window.ThreeMolecularSimulator) window.ThreeMolecularSimulator.stop();
-        render();
-      };
-    }
-
-    var btnGoRep = document.getElementById('btnModalGoReport');
-    if (btnGoRep) {
-      btnGoRep.onclick = function () {
-        if (state.soundEnabled) window.SoundManager.playClick();
-        state.showFeedbackModal = false;
-        state.showReport = true;
-        if (window.ThreeMolecularSimulator) window.ThreeMolecularSimulator.stop();
-        render();
-      };
-    }
-
-    // Close Evaluation Modal
-    var btnCloseEval = document.getElementById('btnCloseEvalModal');
-    if (btnCloseEval) {
-      btnCloseEval.onclick = function () {
-        state.showFeedbackModal = false;
-        if (window.ThreeMolecularSimulator) window.ThreeMolecularSimulator.stop();
-        render();
-      };
-    }
-    var btnCloseEvalRev = document.getElementById('btnCloseEvalModalReview');
-    if (btnCloseEvalRev) {
-      btnCloseEvalRev.onclick = function () {
-        state.showFeedbackModal = false;
-        if (window.ThreeMolecularSimulator) window.ThreeMolecularSimulator.stop();
-        render();
-      };
-    }
-    var btnCloseEvalEdit = document.getElementById('btnCloseEvalModalEdit');
-    if (btnCloseEvalEdit) {
-      btnCloseEvalEdit.onclick = function () {
-        state.showFeedbackModal = false;
-        if (window.ThreeMolecularSimulator) window.ThreeMolecularSimulator.stop();
-        render();
-        var obsElem = document.getElementById('obsInput');
-        if (obsElem) obsElem.focus();
-      };
-    }
+    // Bütün kapatma ve gezinme düğmeleri ortak çıkış yolundan geçer.
+    var exits = { btnModalGoHome: 'home', btnModalGoNotebook: 'notebook', btnModalGoReport: 'report',
+      btnCloseEvalModal: 'close', btnCloseEvalModalReview: 'close', btnCloseEvalModalEdit: 'edit', btnEvalNextCase: 'next' };
+    Object.keys(exits).forEach(function (id) {
+      var button = document.getElementById(id);
+      if (button) button.onclick = function () { dismissFeedback(exits[id]); };
+    });
     var evalBackdrop = document.getElementById('evalModalBackdrop');
-    if (evalBackdrop) {
-      evalBackdrop.onclick = function (e) {
-        if (e.target === evalBackdrop) {
-          state.showFeedbackModal = false;
-          if (window.ThreeMolecularSimulator) window.ThreeMolecularSimulator.stop();
-          render();
-        }
-      };
-    }
+    if (evalBackdrop) evalBackdrop.onclick = function (e) { if (e.target === evalBackdrop) dismissFeedback('close'); };
 
-    // Next Case from Evaluation Modal
-    var btnEvalNext = document.getElementById('btnEvalNextCase');
-    if (btnEvalNext) {
-      btnEvalNext.onclick = function () {
-        if (state.soundEnabled) window.SoundManager.playClick();
-        state.showFeedbackModal = false;
-        if (window.ThreeMolecularSimulator) window.ThreeMolecularSimulator.stop();
-        var nextId = (state.activeCase.id % state.cases.length) + 1;
-        var nextItem = state.cases.find(function (x) { return x.id === nextId; });
-        if (nextItem) {
-          openCase(nextItem);
-        }
-      };
-    }
   }
+
+  function closeReset() {
+    state.showResetModal = false; state.resetError = ''; render();
+    var button = document.getElementById('btnResetData'); if (button) button.focus();
+  }
+  function closeCompletion() {
+    stopCelebration(); state.completionStage = null; goHome();
+    var button = document.getElementById('btnOpenNotebook'); if (button) button.focus();
+  }
+
+  window.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') {
+      if (state.showResetModal) closeReset();
+      else if (state.completionStage === 'message') closeCompletion();
+      else if (state.showFeedbackModal) dismissFeedback('close');
+      else return;
+      event.preventDefault();
+    }
+    if (event.key === 'Tab') {
+      var dialogs = document.querySelectorAll('[aria-modal="true"]');
+      var dialog = dialogs[dialogs.length - 1];
+      if (!dialog) return;
+      var buttons = Array.from(dialog.querySelectorAll('button, input, textarea, a[href], [tabindex="0"]')).filter(function (el) { return !el.disabled && el.getClientRects().length; });
+      if (!buttons.length) return;
+      var first = buttons[0], last = buttons[buttons.length - 1];
+      if (event.shiftKey && document.activeElement === first) { last.focus(); event.preventDefault(); }
+      else if (!event.shiftKey && document.activeElement === last) { first.focus(); event.preventDefault(); }
+    }
+  });
+
+  window.addEventListener('pagehide', function () {
+    stopCelebration();
+    saveCurrentDraft();
+    if (window.ThreeMolecularSimulator) window.ThreeMolecularSimulator.stop();
+  });
+  window.addEventListener('pageshow', function (event) { if (event.persisted) render(); });
 
   // Başlat
   window.addEventListener('DOMContentLoaded', function () {
+    updateViewport();
     applyTheme(state.theme);
     render();
   });
 
   window.addEventListener('resize', function () {
+    updateViewport();
     if (window.ThreeMolecularSimulator) {
       window.ThreeMolecularSimulator.resize();
     }
@@ -2222,10 +2027,24 @@
 
   window.addEventListener('orientationchange', function () {
     setTimeout(function () {
+      updateViewport();
       if (window.ThreeMolecularSimulator) {
         window.ThreeMolecularSimulator.resize();
       }
     }, 200);
   });
+
+  function updateViewport() {
+    var style = document.documentElement.style;
+    if (!style || typeof style.setProperty !== 'function') return;
+    var viewport = window.visualViewport;
+    style.setProperty('--app-height', (viewport ? viewport.height : window.innerHeight) + 'px');
+    style.setProperty('--app-top', (viewport ? viewport.offsetTop : 0) + 'px');
+    if (window.ThreeMolecularSimulator) window.ThreeMolecularSimulator.resize();
+  }
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', updateViewport);
+    window.visualViewport.addEventListener('scroll', updateViewport);
+  }
 
 })();

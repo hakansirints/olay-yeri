@@ -1,4 +1,4 @@
-// 12 Vaka Verisi - Olay Yeri İnceleme, Pedagojik Dönüt ve Çift-Bakış Moleküler Veritabanı
+// Kabul edilebilir örnekler ve dönütler: cevap.docx; model verileri ayrı tutulur.
 window.CASES_DATA = [
   {
     "id": 1,
@@ -497,9 +497,9 @@ window.CASES_DATA = [
       "reaksiyon"
     ],
     "feedbacks": {
-      "correct": "Doğru. Betonun 'donması', suyun donması gibi basit bir hâl değişimi değildir. Çimento bileşenleri suyla tepkimeye girerek yeni yapılar oluşturur ve beton sertleşir. Bu nedenle kimyasal değişimdir.",
-      "incomplete": "Betonun sertleştiğini doğru gözlemledin; ancak yalnızca 'katılaştı' demek karar vermek için yeterli değildir. Sertleşmenin kimyasal tepkimeler sonucunda gerçekleştiğini de belirt.",
-      "incorrect": "Buradaki 'donma' sözcüğü yanıltıcı olabilir. Beton su gibi yalnızca sıvıdan katıya geçmez; çimento ile su arasında kimyasal tepkimeler gerçekleşir. Bu nedenle kimyasal değişimdir."
+      "correct": "Doğru. Betonun ‘donması’, suyun donması gibi basit bir hâl değişimi değildir. Çimento bileşenleri suyla tepkimeye girerek yeni yapılar oluşturur ve beton sertleşir. Bu nedenle kimyasal değişimdir.",
+      "incomplete": "Betonun sertleştiğini doğru gözlemledin; ancak yalnızca ‘katılaştı’ demek karar vermek için yeterli değildir. Sertleşmenin kimyasal tepkimeler sonucunda gerçekleştiğini de belirt.",
+      "incorrect": "Buradaki ‘donma’ sözcüğü yanıltıcı olabilir. Beton su gibi yalnızca sıvıdan katıya geçmez; çimento ile su arasında kimyasal tepkimeler gerçekleşir. Bu nedenle kimyasal değişimdir."
     },
     "molecularNote": "Çimentodaki kalsiyum silikatlar suyla temas ettiğinde hidratasyon reaksiyonu başlar; kalsiyum silikat hidrat (C-S-H) iğnemsi kristalleri oluşarak kilitlenir.",
     "acceptedObservations": [
@@ -789,7 +789,7 @@ window.CASES_DATA = [
     ],
     "feedbacks": {
       "correct": "Doğru. Şeker suda çözünürken kimyasal kimliğini korur; yeni bir madde oluşmaz. Bu nedenle olay fiziksel değişim olarak değerlendirilir.",
-      "incomplete": "Şekerin gözden kaybolduğunu doğru gözlemledin; ancak 'yok oldu' ifadesi doğru değildir. Şeker suda çözünmüştür. Kararını bu bilgiyle gerekçelendir.",
+      "incomplete": "Şekerin gözden kaybolduğunu doğru gözlemledin; ancak ‘yok oldu’ ifadesi doğru değildir. Şeker suda çözünmüştür. Kararını bu bilgiyle gerekçelendir.",
       "incorrect": "Şekerin görünmemesi onun kimyasal olarak yok olduğu anlamına gelmez. Şeker tanecikleri su içinde dağılır ve kimyasal kimliklerini korur. Bu nedenle fiziksel değişimdir."
     },
     "molecularNote": "Sükroz (C₁₂H₂₂O₁₁) molekülleri arasındaki kristal bağlar su molekülleriyle çevrilir ve su içinde ayrışmadan homojen dağılır.",
