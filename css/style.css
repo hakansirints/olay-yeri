@@ -4,11 +4,12 @@
    LIGHT & DARK TEMALARI + MOBİL YATAY (LANDSCAPE) MODU
    ======================================================== */
 
-/* --- DARK TEMA (ÖNERİ 1: SİBER CSI KİMYA LAB - DERİN OBSİDİYEN #0b0f17 & BELİRGİN BENZEN / MOLEKÜL KAFESİ) --- */
+/* --- SICAK KEŞİF: PETROL YEŞİLİ, AMBER IŞIK VE MAT DOKU --- */
 :root,
 [data-theme="dark"] {
-  --md-sys-color-surface: #0b0f17;
-  --md-sys-color-surface-dim: #070a10;
+  color-scheme: dark;
+  --md-sys-color-surface: #102222;
+  --md-sys-color-surface-dim: #10191d;
   --md-sys-color-surface-bright: #1f2937;
   --md-sys-color-surface-container-lowest: #05080e;
   --md-sys-color-surface-container-low: rgba(17, 24, 39, 0.78);
@@ -55,14 +56,15 @@
   --md-sys-color-error-container: rgba(248, 113, 113, 0.2);
   --md-sys-color-on-error-container: #fecaca;
 
-  /* Orijinal Öneri 1: Siber CSI Kimya Laboratuvarı Arkaplanı (Hafif Altıgen Kafes & Derin Obsidiyen) */
-  --app-bg-gradient: radial-gradient(circle at 15% 15%, rgba(56, 189, 248, 0.12) 0%, transparent 40%),
-                     radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.10) 0%, transparent 45%),
-                     repeating-linear-gradient(60deg, rgba(56, 189, 248, 0.035) 0, rgba(56, 189, 248, 0.035) 1px, transparent 0, transparent 35px),
-                     repeating-linear-gradient(-60deg, rgba(56, 189, 248, 0.035) 0, rgba(56, 189, 248, 0.035) 1px, transparent 0, transparent 35px),
-                     linear-gradient(to bottom, #0b0f17, #070a10);
-  --app-bg-size: auto;
-  --app-bg-repeat: repeat;
+  /* Doku ve kontur çizgileri yerleşime katılmaz; içerik yüzeyleri sakin kalır. */
+  --app-bg-gradient: url("backgrounds/warm-grain.svg"),
+                     url("backgrounds/warm-contours-dark.svg"),
+                     radial-gradient(ellipse at 0% 8%, rgba(190, 117, 38, 0.32) 0%, transparent 43%),
+                     radial-gradient(ellipse at 100% 100%, rgba(190, 117, 38, 0.30) 0%, transparent 45%),
+                     radial-gradient(ellipse at 45% 35%, rgba(26, 75, 65, 0.24) 0%, transparent 65%),
+                     linear-gradient(145deg, #102222 0%, #10191d 55%, #141b20 100%);
+  --app-bg-size: 180px 180px, 100% 100%, auto, auto, auto, auto;
+  --app-bg-repeat: repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
   --header-bg: rgba(11, 15, 23, 0.86);
   --tape-dark: #0b0f17;
   --text-title: #ffffff;
@@ -78,46 +80,47 @@
   --md-shape-corner-extra-large: 24px;
   --md-shape-corner-full: 9999px;
 
-  /* M3 Elevations (Cyber Glow Tonal) */
+  /* M3 Elevations: yumuşak gölgeler */
   --md-elevation-1: 0 1px 3px 1px rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
-  --md-elevation-2: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 6px rgba(56, 189, 248, 0.1);
-  --md-elevation-3: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 12px rgba(56, 189, 248, 0.16);
-  --md-elevation-4: 0 16px 36px 4px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.22);
+  --md-elevation-2: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --md-elevation-3: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --md-elevation-4: 0 16px 36px 4px rgba(0, 0, 0, 0.6);
 }
 
-/* --- LIGHT TEMA (ÖNERİ 1 LIGHT: MODERN SİBER ADLİ KİMYA TEMİZ ODA LAB #f4f6fa & AYDINLIK MOLEKÜL KAFESİ) --- */
+/* --- SICAK KEŞİF LIGHT: KREM, AÇIK ADAÇAYI VE YUMUŞAK AMBER --- */
 [data-theme="light"] {
-  --md-sys-color-surface: #f4f6fa;
-  --md-sys-color-surface-dim: #e2e8f0;
-  --md-sys-color-surface-bright: #ffffff;
-  --md-sys-color-surface-container-lowest: #ffffff;
-  --md-sys-color-surface-container-low: #ffffff;
-  --md-sys-color-surface-container: #ffffff;
-  --md-sys-color-surface-container-high: #f8fafc;
-  --md-sys-color-surface-container-highest: #f1f5f9;
+  color-scheme: light;
+  --md-sys-color-surface: #f6f3eb;
+  --md-sys-color-surface-dim: #e4eeea;
+  --md-sys-color-surface-bright: #fffefa;
+  --md-sys-color-surface-container-lowest: #fffefa;
+  --md-sys-color-surface-container-low: #fffefa;
+  --md-sys-color-surface-container: #fffefa;
+  --md-sys-color-surface-container-high: #f1f6f3;
+  --md-sys-color-surface-container-highest: #e8f0ed;
 
-  --md-sys-color-on-surface: #0f172a;
-  --md-sys-color-on-surface-variant: #475569;
-  --md-sys-color-outline: rgba(14, 165, 233, 0.38);
-  --md-sys-color-outline-variant: #e2e8f0;
+  --md-sys-color-on-surface: #183435;
+  --md-sys-color-on-surface-variant: #4b6266;
+  --md-sys-color-outline: rgba(8, 123, 137, 0.38);
+  --md-sys-color-outline-variant: #d8e5df;
 
-  /* Primary Accent: Deep Modern Lab Cyan / Cobalt */
-  --md-sys-color-primary: #0284c7;
+  /* Petrol mavisi vurgular açık yüzeylerde okunur kalır. */
+  --md-sys-color-primary: #087b89;
   --md-sys-color-on-primary: #ffffff;
-  --md-sys-color-primary-container: #e0f2fe;
-  --md-sys-color-on-primary-container: #0369a1;
+  --md-sys-color-primary-container: #e0f1ef;
+  --md-sys-color-on-primary-container: #12616c;
 
-  /* Secondary: Soft Slate Cyan */
-  --md-sys-color-secondary: #0d9488;
+  /* Adaçayı ve petrol yeşili */
+  --md-sys-color-secondary: #247568;
   --md-sys-color-on-secondary: #ffffff;
-  --md-sys-color-secondary-container: #ccfbf1;
-  --md-sys-color-on-secondary-container: #115e59;
+  --md-sys-color-secondary-container: #e0eee7;
+  --md-sys-color-on-secondary-container: #245c50;
 
   /* Tertiary: Deep Amber Alert */
-  --md-sys-color-tertiary: #b45309;
+  --md-sys-color-tertiary: #8c590e;
   --md-sys-color-on-tertiary: #ffffff;
-  --md-sys-color-tertiary-container: #fef3c7;
-  --md-sys-color-on-tertiary-container: #78350f;
+  --md-sys-color-tertiary-container: #f6e8cb;
+  --md-sys-color-on-tertiary-container: #754b13;
 
   /* Semantic Feedback Tones: Kimya Yeşili */
   --md-sys-color-success: #059669;
@@ -135,21 +138,21 @@
   --md-sys-color-error-container: #fee2e2;
   --md-sys-color-on-error-container: #991b1b;
 
-  /* Orijinal Aydınlık Mod: Milimetrik Temiz Oda Lab Arkaplanı */
-  --app-bg-gradient: radial-gradient(circle at 15% 15%, rgba(14, 165, 233, 0.08) 0%, transparent 40%),
-                     radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.06) 0%, transparent 45%),
-                     linear-gradient(rgba(2, 132, 199, 0.04) 1px, transparent 1px),
-                     linear-gradient(90deg, rgba(2, 132, 199, 0.04) 1px, transparent 1px),
-                     linear-gradient(to bottom, #f4f6fa, #edf2f9);
-  --app-bg-size: auto, auto, 28px 28px, 28px 28px, auto;
-  --app-bg-repeat: no-repeat, no-repeat, repeat, repeat, no-repeat;
-  --header-bg: rgba(255, 255, 255, 0.92);
-  --tape-dark: #e2e8f0;
-  --text-title: #0f172a;
-  --feedback-text: #0f172a;
-  --feedback-box-bg: rgba(255, 255, 255, 0.85);
-  --overlay-bg: rgba(244, 246, 250, 0.90);
-  --video-overlay: rgba(15, 23, 42, 0.72);
+  --app-bg-gradient: url("backgrounds/warm-grain.svg"),
+                     url("backgrounds/warm-contours-light.svg"),
+                     radial-gradient(ellipse at 0% 8%, rgba(236, 205, 150, 0.48) 0%, transparent 43%),
+                     radial-gradient(ellipse at 100% 100%, rgba(236, 205, 150, 0.46) 0%, transparent 45%),
+                     radial-gradient(ellipse at 45% 35%, rgba(200, 226, 215, 0.50) 0%, transparent 65%),
+                     linear-gradient(145deg, #f6f3eb 0%, #edf3ee 55%, #f6f3eb 100%);
+  --app-bg-size: 180px 180px, 100% 100%, auto, auto, auto, auto;
+  --app-bg-repeat: repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+  --header-bg: rgba(255, 254, 250, 0.94);
+  --tape-dark: #183435;
+  --text-title: #183435;
+  --feedback-text: #183435;
+  --feedback-box-bg: rgba(255, 254, 250, 0.90);
+  --overlay-bg: rgba(246, 243, 235, 0.92);
+  --video-overlay: rgba(24, 52, 53, 0.72);
 
   /* M3 Light Elevations */
   --md-elevation-1: 0 1px 3px 0 rgba(15, 23, 42, 0.08), 0 1px 2px 0 rgba(15, 23, 42, 0.04);
@@ -440,6 +443,9 @@ body {
   position: relative;
   overflow: hidden;
 }
+[data-theme="light"] .hero-banner {
+  background: var(--md-sys-color-surface-container);
+}
 @media (min-width: 768px) {
   .hero-banner {
     flex-direction: row;
@@ -603,9 +609,9 @@ body {
 }
 
 [data-theme="light"] .case-card-compact:hover {
-  background: #f8fafc;
-  border-color: #0284c7;
-  box-shadow: 0 10px 26px rgba(2, 132, 199, 0.16);
+  background: var(--md-sys-color-surface-container-high);
+  border-color: var(--md-sys-color-primary);
+  box-shadow: 0 10px 26px rgba(8, 123, 137, 0.16);
 }
 
 .case-card-compact:active {
@@ -3524,7 +3530,7 @@ body {
 .case-dots-label {
   font-size: 0.66rem;
   font-weight: 700;
-  color: var(--md-sys-color-outline);
+  color: var(--md-sys-color-on-surface-variant);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   margin-bottom: 0.3rem;
@@ -3573,7 +3579,7 @@ body {
 }
 .case-dot.dot-empty {
   background: rgba(148, 163, 184, 0.08);
-  color: var(--md-sys-color-outline);
+  color: var(--md-sys-color-on-surface-variant);
   border-color: rgba(148, 163, 184, 0.22);
 }
 
@@ -3746,6 +3752,28 @@ body {
 .ach-badge-4 { background: rgba(248, 113, 113, 0.1); border-color: rgba(248, 113, 113, 0.35); color: #fca5a5; }
 .ach-badge-5 { background: rgba(192, 132, 252, 0.1); border-color: rgba(192, 132, 252, 0.35); color: #d8b4fe; }
 .ach-badge-6 { background: rgba(148, 163, 184, 0.1); border-color: rgba(148, 163, 184, 0.35); color: #cbd5e1; }
+
+/* Açık modda rozet adları, kilitliyken de okunabilir kalır. */
+[data-theme="light"] .ach-badge-1 { color: #8c590e; }
+[data-theme="light"] .ach-badge-2 { color: #12616c; }
+[data-theme="light"] .ach-badge-3 { color: #245c50; }
+[data-theme="light"] .ach-badge-4 { color: #9c403b; }
+[data-theme="light"] .ach-badge-5 { color: #695080; }
+[data-theme="light"] .ach-badge-6 { color: #4b6266; }
+[data-theme="light"] .ach-badge.locked {
+  background: var(--md-sys-color-surface-container-high);
+  border-color: var(--md-sys-color-outline-variant);
+  color: var(--md-sys-color-on-surface-variant);
+  opacity: 1;
+  filter: none;
+}
+[data-theme="light"] .ach-badge.locked .ach-icon {
+  opacity: 0.65;
+  filter: grayscale(0.7);
+}
+[data-theme="light"] .case-dot.dot-solved { color: var(--md-sys-color-on-success-container); }
+[data-theme="light"] .case-dot.dot-partial { color: var(--md-sys-color-on-warning-container); }
+[data-theme="light"] .case-dot.dot-wrong { color: var(--md-sys-color-on-error-container); }
 
 /* ─── ÖNERİ D: Gözlem Formu ve Karakter Sayacı ─── */
 .char-counter {
