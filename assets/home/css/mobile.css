@@ -1,0 +1,63 @@
+/* Homepage-only rules from C:/Users/hakan/Documents/Codex/olay-yeri. */
+@media screen and (orientation: landscape) and (max-width: 1100px), screen and (orientation: landscape) and (max-height: 540px) {
+html, body{height: 100%; min-height: 0px; width: 100%; margin: 0px; overflow: hidden; overscroll-behavior: none;}
+#app{height: var(--app-height, 100dvh); width: 100%; min-width: 0px; display: flex; flex-direction: column; overflow: hidden; padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); box-sizing: border-box;}
+.crime-tape{height: 3px; flex: 0 0 3px;}
+.app-header{position: static; flex: 0 0 44px; min-height: 44px; padding: 0px; z-index: 20;}
+.header-inner{height: 44px; padding: 0px 8px; gap: 8px; max-width: none; min-width: 0px;}
+.brand-container{min-width: 0px; flex: 1 1 0%; gap: 6px;}
+.brand-logo-icon{width: 28px; height: 28px; flex-shrink: 0; border-radius: 8px;}
+.brand-logo-icon svg{width: 18px; height: 18px;}
+.brand-title{font-size: 13px; line-height: 1.25; white-space: nowrap;}
+.brand-motto, .rank-badge-box{display: none;}
+.header-actions{gap: 4px; flex-shrink: 0;}
+.header-actions .btn-icon, .header-actions .btn-guide-header, .header-actions .btn-notebook, .header-actions .btn-report{min-width: 40px; width: 40px; height: 40px; padding: 8px; border-radius: 12px; justify-content: center;}
+.header-actions svg{width: 18px; height: 18px;}
+.header-actions button > span{display: none;}
+.main-content{width: 100%; max-width: none; margin: 0px; padding: 6px 8px; flex: 1 1 0%; min-height: 0px; overflow: hidden auto; box-sizing: border-box;}
+.hero-banner{padding: 8px 10px; margin: 0px 0px 6px; gap: 8px; flex-direction: row; align-items: center;}
+.hero-title{font-size: 17px; margin: 0px 0px 3px;}
+.hero-desc{font-size: 12px; line-height: 1.35; margin: 0px;}
+.hero-pill, .btn-hero-guide-pill{display: none;}
+.prop-a-card{padding: 6px 8px; min-width: 0px;}
+.progress-ring-row{gap: 6px;}
+.ring-wrap, .ring-wrap svg{width: 44px; height: 44px;}
+.ring-num{font-size: 16px;}
+.ring-label{font-size: 8px;}
+.rank-title-big{font-size: 12px;}
+.rank-sub, .case-dots-label, .case-dot-grid{display: none;}
+.achievements-banner{padding: 6px 8px; margin: 0px 0px 6px;}
+.achievements-header{margin-bottom: 4px;}
+.achievements-header > div:last-child{display: none;}
+.achievements-title{font-size: 12px;}
+.achievements-count-badge{font-size: 10px;}
+.badge-showcase{grid-template-columns: repeat(6, minmax(0px, 1fr)); gap: 4px;}
+.ach-badge{min-width: 0px; padding: 4px; gap: 2px; border-radius: 10px;}
+.ach-icon{font-size: 18px;}
+.ach-name{font-size: 10px; white-space: normal; line-height: 1.2;}
+.cases-compact-grid{grid-template-columns: repeat(4, minmax(0px, 1fr)); gap: 6px; margin: 0px;}
+.case-card-compact{min-width: 0px; min-height: 52px; padding: 6px; gap: 4px;}
+.compact-left-group, .compact-info-col{min-width: 0px; gap: 4px;}
+.compact-icon-box{display: none;}
+.compact-case-num{font-size: 11px;}
+.compact-title{font-size: 12px; white-space: normal; line-height: 1.2;}
+.compact-subdesc{display: none;}
+.compact-status-badge{font-size: 9px; padding: 2px 4px;}
+}
+@media screen and (orientation: landscape) and (max-width: 740px) {
+.brand-title{max-width: 210px; overflow: hidden; text-overflow: ellipsis;}
+.header-actions{gap: 2px;}
+.header-actions .btn-icon, .header-actions .btn-guide-header, .header-actions .btn-notebook, .header-actions .btn-report{width: 36px; min-width: 36px; height: 40px; padding: 7px;}
+.compact-right-group{display: none;}
+.case-card-compact{min-height: 56px;}
+.hero-desc{max-width: 290px;}
+}
+@media screen and (orientation: landscape) and (max-height: 350px) {
+.hero-banner{padding: 6px 8px;}
+}
+@media screen and (orientation: landscape) and (max-width: 560px) {
+.header-actions #btnOpenGuide, .header-actions #btnOpenNotebook, .header-actions #btnOpenReport{display: none;}
+.brand-title{max-width: 150px;}
+.cases-compact-grid{grid-template-columns: repeat(2, minmax(0px, 1fr));}
+.hero-banner{flex-direction: column; align-items: stretch;}
+}

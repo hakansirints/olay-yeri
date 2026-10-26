@@ -1,0 +1,8 @@
+/* Only rusting and global preferences are functional in this version. */
+.case-card-compact[aria-disabled="true"]{cursor:not-allowed}
+.case-card-compact[aria-disabled="true"] .compact-status-badge{opacity:.7}
+.case-card-compact[aria-disabled="true"]:hover{background:var(--md-sys-color-surface-container-low);border-color:var(--md-sys-color-outline-variant);box-shadow:var(--md-elevation-1);transform:none}
+.case-card-compact[aria-disabled="true"]:hover .compact-icon-box,.case-card-compact[aria-disabled="true"]:hover svg{animation:none;transform:none;filter:none}
+.case-dot[aria-disabled="true"]{cursor:default}
+.header-actions button:disabled,.btn-hero-guide-pill:disabled{cursor:not-allowed;opacity:.55;transform:none}
+.case-card-compact:focus-visible,.case-dot:focus-visible{outline:3px solid var(--md-sys-color-primary);outline-offset:3px}
