@@ -66,3 +66,27 @@
 /* Icon buttons keep equal dimensions even when earlier mobile minimums apply. */
 .header-actions .btn-icon{--home-circle:36px;width:var(--home-circle)!important;height:var(--home-circle)!important;min-width:var(--home-circle)!important;min-height:var(--home-circle)!important;max-width:var(--home-circle)!important;max-height:var(--home-circle)!important;flex:0 0 var(--home-circle)!important;border-radius:50%!important;padding:0!important;aspect-ratio:1}
 @media(max-width:1100px) and (orientation:landscape){.header-actions .btn-icon{--home-circle:28px}}
+/* Header-style hero card, matching brand-title size and status icons. */
+[data-theme] .hero-banner{background:var(--sg-home-glass);border:1px solid var(--sg-home-edge);border-radius:28px;backdrop-filter:blur(14px) saturate(135%)!important;-webkit-backdrop-filter:blur(14px) saturate(135%)!important;box-shadow:inset 0 1px 0 #ffffff60,var(--sg-home-shadow);min-height:0;padding:13px 24px;gap:26px;margin-bottom:12px}
+.hero-title{font-size:21px;letter-spacing:-.6px;margin-bottom:4px}
+.hero-desc{font-size:13px}
+.case-dot.dot-progress{background:color-mix(in srgb,#f59e0b 20%,var(--sg-home-card));border-color:#f59e0b88;color:#d97706;font-weight:700}
+[data-theme="dark"] .case-dot.dot-progress{color:#fbbf24}
+.compact-status-badge{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:650;padding:3px 9px 3px 6px;border-radius:99px;border:1px solid transparent}
+.compact-status-badge>svg{width:13px;height:13px;flex:0 0 13px}
+.compact-status-badge[data-status="completed"]{background:#DDF5DC;border-color:#197A3338;color:#145c26}
+.compact-status-badge[data-status="in-progress"]{background:#FDF1CF;border-color:#BA5B0138;color:#8c4400}
+.compact-status-badge[data-status="not-started"]{background:color-mix(in srgb,var(--md-sys-color-primary) 10%,var(--sg-home-card));border-color:color-mix(in srgb,var(--md-sys-color-primary) 22%,transparent);color:var(--sg-home-muted)}
+[data-theme="dark"] .compact-status-badge[data-status="completed"]{background:rgba(25,122,51,.24);border-color:rgba(74,222,128,.35);color:#86efac}
+[data-theme="dark"] .compact-status-badge[data-status="in-progress"]{background:rgba(186,91,1,.25);border-color:rgba(251,191,36,.35);color:#fde047}
+.case-card-compact[data-status="completed"][aria-disabled="false"] .case-card-bottom>svg{background:#DDF5DC;border-color:#197A3345;color:#197A33}
+.case-card-compact[data-status="in-progress"][aria-disabled="false"] .case-card-bottom>svg{background:#FDF1CF;border-color:#BA5B0145;color:#BA5B01}
+.case-card-compact[data-status="not-started"][aria-disabled="false"] .case-card-bottom>svg{background:color-mix(in srgb,var(--md-sys-color-primary) 14%,var(--sg-home-card));border-color:color-mix(in srgb,var(--md-sys-color-primary) 26%,transparent);color:var(--md-sys-color-primary)}
+[data-theme="dark"] .case-card-compact[data-status="completed"][aria-disabled="false"] .case-card-bottom>svg{background:rgba(25,122,51,.28);border-color:rgba(74,222,128,.4);color:#4ade80}
+[data-theme="dark"] .case-card-compact[data-status="in-progress"][aria-disabled="false"] .case-card-bottom>svg{background:rgba(186,91,1,.28);border-color:rgba(251,191,36,.4);color:#fbbf24}
+@supports not (backdrop-filter:blur(1px)){[data-theme] .hero-banner{background:var(--sg-home-card)}}
+@media(prefers-reduced-transparency:reduce){[data-theme] .hero-banner{background:var(--sg-home-card);backdrop-filter:none!important;-webkit-backdrop-filter:none!important}}
+@media(min-width:1101px) and (max-height:850px){[data-theme] .hero-banner{min-height:0;padding:10px 20px;margin-bottom:10px}.hero-title{font-size:21px}}
+@media(max-width:1100px){.hero-title{font-size:15px}}
+@media(max-width:960px) and (orientation:landscape){[data-theme] .hero-banner{min-height:0;padding:7px 12px;border-radius:18px;gap:14px;margin-bottom:6px;backdrop-filter:blur(8px)!important;-webkit-backdrop-filter:blur(8px)!important}.hero-title{font-size:12px}.compact-status-badge{font-size:8px;padding:2px 6px 2px 4px;gap:3px}.compact-status-badge>svg{width:10px;height:10px;flex:0 0 10px}}
+@media(orientation:portrait) and (max-width:700px){[data-theme] .hero-banner{min-height:0;padding:12px 14px;border-radius:20px;gap:12px}.hero-title{font-size:12px}}
