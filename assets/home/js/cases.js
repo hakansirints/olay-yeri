@@ -93,7 +93,7 @@ window.HOME_CASES = [
   {
     "id": 11,
     "title": "Şekerin Suda Çözünmesi",
-    "shortDesc": "Suya eklenen şeker parçalanıyor; çözünmeyi tanecik düzeyinde incele.",
+    "shortDesc": "Şeker kristalleri küçülüyor ve çözünerek suda dağılıyor.",
     "iconSvg": "<svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z\"/></svg>",
     "thumbnail": "case-11-sekerin-suda-cozunmesi.jpg",
     "route": "sekerin-suda-cozunmesi",
