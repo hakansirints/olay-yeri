@@ -1,0 +1,65 @@
+/* The overlay uses the existing edge space; it never adds a layout gutter. */
+.mebi-capsule-scroller {
+  scrollbar-width: none !important;
+  scrollbar-gutter: auto !important;
+}
+.mebi-capsule-scroller::-webkit-scrollbar,
+body #app .mebi-capsule-scroller::-webkit-scrollbar { width: 0 !important; height: 0 !important; }
+
+.mebi-capsule-scrollbars {
+  --capsule-glass: rgba(255,255,255,.72);
+  --capsule-border: rgba(116,96,164,.34);
+  --capsule-grip: rgba(111,80,172,.58);
+  --capsule-shadow: rgba(63,47,98,.17);
+  position: fixed; inset: 0; z-index: 2147483000;
+  pointer-events: none;
+}
+[data-theme="dark"] .mebi-capsule-scrollbars {
+  --capsule-glass: rgba(36,42,65,.78);
+  --capsule-border: rgba(193,173,249,.48);
+  --capsule-grip: rgba(207,190,255,.8);
+  --capsule-shadow: rgba(0,0,0,.25);
+}
+.mebi-capsule-scrollbars .capsule-rail {
+  position: absolute; width: 14px; pointer-events: auto;
+  touch-action: none; user-select: none; -webkit-user-select: none;
+}
+.mebi-capsule-scrollbars .capsule-rail[hidden] { display: none !important; }
+.mebi-capsule-scrollbars .capsule-thumb {
+  position: absolute; top: 0; left: 0; width: 14px;
+  min-width: 0; min-height: 0; padding: 0; margin: 0;
+  border: 0; border-radius: 9px; background: transparent;
+  box-shadow: none; touch-action: none; cursor: grab;
+  appearance: none; -webkit-appearance: none;
+}
+.mebi-capsule-scrollbars .capsule-thumb::before {
+  content: ''; position: absolute; top: 0; bottom: 0; left: 50%;
+  width: 7px; transform: translateX(-50%); box-sizing: border-box;
+  border: 1px solid var(--capsule-border); border-radius: 99px;
+  background: var(--capsule-glass); box-shadow: 0 1px 6px var(--capsule-shadow);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  transition: border-color .15s, box-shadow .15s;
+}
+.mebi-capsule-scrollbars .capsule-thumb::after {
+  content: ''; position: absolute; top: 50%; left: 50%;
+  width: 3px; height: min(17px,50%); border-radius: 99px;
+  transform: translate(-50%,-50%); background: var(--capsule-grip);
+}
+.mebi-capsule-scrollbars .capsule-thumb:focus-visible {
+  outline: 2px solid var(--capsule-grip); outline-offset: 1px;
+}
+.mebi-capsule-scrollbars .capsule-rail:is(:hover,:focus-within,[data-dragging]) .capsule-thumb::before {
+  border-color: var(--capsule-grip); box-shadow: 0 1px 8px var(--capsule-shadow);
+}
+.mebi-capsule-scrollbars .capsule-rail[data-dragging] .capsule-thumb { cursor: grabbing; }
+.mebi-capsule-scrollbars .capsule-rail[data-axis="x"] { height: 14px; width: auto; }
+.mebi-capsule-scrollbars .capsule-rail[data-axis="x"] .capsule-thumb { height: 14px; width: auto; }
+.mebi-capsule-scrollbars .capsule-rail[data-axis="x"] .capsule-thumb::before {
+  left: 0; right: 0; top: 50%; bottom: auto;
+  width: auto; height: 7px; transform: translateY(-50%);
+}
+.mebi-capsule-scrollbars .capsule-rail[data-axis="x"] .capsule-thumb::after { width: min(17px,50%); height: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  .mebi-capsule-scrollbars .capsule-thumb::before { transition: none; }
+}
+@media print { .mebi-capsule-scrollbars { display: none; } }

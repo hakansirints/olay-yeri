@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="tr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <script>
+    (() => {
+      const requested = new URLSearchParams(window.location.search).get('theme');
+      if (requested === 'light' || requested === 'dark') {
+        document.documentElement.setAttribute('data-theme', requested);
+        return;
+      }
+      try {
+        const saved = localStorage.getItem('kimyasal_olay_yeri_theme_v1') || localStorage.getItem('koy-theme');
+        if (saved === 'light' || saved === 'dark') document.documentElement.setAttribute('data-theme', saved);
+      } catch { /* The document carries its default theme when storage is unavailable. */ }
+    })();
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
+  <title>Kimyasal Olay Yeri Uzmanı | Gözlemle • Kanıtları Topla • Karar Ver</title>
+  <link rel="stylesheet" href="../fonts/fonts.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/mobile.css">
+  <link rel="stylesheet" href="css/availability.css">
+  <link rel="stylesheet" href="css/liquid-home.css">
+  <link rel="stylesheet" href="css/selective-glass.css">
+  <link rel="stylesheet" href="../vendor/capsule-scrollbars.css">
+</head>
+<body>
+  <div id="app"></div>
+  <script src="js/cases.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="../vendor/lucide.min.js"></script>
+  <script src="js/app.js"></script>
+  <script src="../vendor/capsule-scrollbars.js"></script>
+</body>
+</html>
