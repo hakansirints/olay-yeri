@@ -175,3 +175,16 @@
  .case-selection .compact-title,.compact-title{font-size:13px;line-height:1.25}
  .case-selection .compact-subdesc,.compact-subdesc{display:block;font-size:11px;line-height:1.35}
 }
+
+/* Header buttons match the event page header (21 Nov 2026): 40 px click area, 20 px icons, an 8 px gap; the round
+   icon buttons are 40 px circles and the labelled ones ("Rehber", "Dijital Deney Defteri") are 40 px pills with 14 px
+   semibold text, like "Ana sayfa" on the event page. Where the labels are hidden (≤ 1100 px) they are 40 px circles.
+   The portrait phone dropdown keeps its own list layout (its rules above are more specific). */
+.header-actions{gap:8px}
+.header-actions .btn-icon,
+.header-actions .home-menu-toggle{--home-circle:40px}
+@media(max-width:1100px) and (orientation:landscape){.header-actions .btn-icon{--home-circle:40px}}
+.header-actions :is(.btn-icon,.home-secondary) svg{width:20px;height:20px}
+.header-actions .home-secondary{box-sizing:border-box;height:40px;min-height:40px;padding:0 12px;border-radius:20px;gap:8px;font-size:14px;font-weight:600;line-height:1}
+@media(max-width:1100px){.header-actions>.home-menu-tools>.home-secondary,.header-actions>.home-secondary{width:40px;min-width:40px;padding:0;justify-content:center;border-radius:50%}}
+@media(max-width:960px) and (orientation:landscape){.header-inner{height:56px}.main-content.main-case-grid{height:calc(var(--app-height,100dvh) - 66px)}}
