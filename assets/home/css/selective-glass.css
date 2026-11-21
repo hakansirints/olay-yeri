@@ -187,4 +187,7 @@
 .header-actions :is(.btn-icon,.home-secondary) svg{width:20px;height:20px}
 .header-actions .home-secondary{box-sizing:border-box;height:40px;min-height:40px;padding:0 12px;border-radius:20px;gap:8px;font-size:14px;font-weight:600;line-height:1}
 @media(max-width:1100px){.header-actions>.home-menu-tools>.home-secondary,.header-actions>.home-secondary{width:40px;min-width:40px;padding:0;justify-content:center;border-radius:50%}}
+/* Landscape phones: mobile.css pins .app-header to a 44 px flex row, so the bar itself must grow with the 56 px row
+   or the 40 px buttons stick out below the glass bar (fixed 21 Nov 2026). */
+@media(orientation:landscape) and (max-width:1100px),(orientation:landscape) and (max-height:540px){.app-header{flex:0 0 auto;min-height:0;height:auto}}
 @media(max-width:960px) and (orientation:landscape){.header-inner{height:56px}.main-content.main-case-grid{height:calc(var(--app-height,100dvh) - 66px)}}
