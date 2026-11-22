@@ -3,7 +3,8 @@
   'use strict';
   if (!window.ResizeObserver || !window.MutationObserver) return;
   var entries = new Map(), portals = new Map(), pending = new Set(), frame = 0, sequence = 0, root;
-  var skip = 'html,body,svg,svg *,canvas,script,style,link,option,.mebi-stepper-track,.welcome-tabs-track';
+  // .home-dots-active: the homepage card list shows its own event dots instead (home/js/event-dots.js).
+  var skip = 'html,body,svg,svg *,canvas,script,style,link,option,.mebi-stepper-track,.welcome-tabs-track,.home-dots-active';
   var resize = new window.ResizeObserver(function() { schedule(); });
 
   function schedule(node) {
@@ -129,7 +130,7 @@
     root.style.visibility = 'hidden';
     portals.forEach(function(layer) { layer.style.visibility='hidden'; });
     entries.forEach(function(entry) {
-      if (!entry.el.isConnected) detach(entry);
+      if (!entry.el.isConnected || entry.el.matches(skip)) detach(entry);
       else { observeChildren(entry); position(entry); }
     });
     root.style.visibility = '';

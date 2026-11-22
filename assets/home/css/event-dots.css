@@ -1,0 +1,81 @@
+/* Event dots beside the homepage card list (js/event-dots.js); same look as the experiment page's section dots. */
+.main-case-grid.home-dots-active { scrollbar-width: none !important; }
+.main-case-grid.home-dots-active::-webkit-scrollbar { width: 0 !important; height: 0 !important; }
+
+.home-event-dots {
+  --dots-accent: #005f96;
+  --dots-ink: #0b3a57;
+  --dots-glass: rgba(255,255,255,.88);
+  --dots-edge: rgba(0,95,150,.28);
+  --dots-halo: rgba(255,255,255,.75);
+  --dots-shadow: rgba(18,48,59,.22);
+  --dots-done: #15803d;
+  --dots-done-ink: #fff;
+  --dots-progress: #c2410c;
+  --home-dot-row: 26px;
+  position: fixed; z-index: 40; transform: translateY(-50%);
+  display: flex; flex-direction: column; align-items: flex-end;
+  padding: 4px;
+  opacity: .4; transition: opacity .4s ease;
+  pointer-events: none;
+  font-family: inherit; -webkit-font-smoothing: antialiased;
+}
+.home-event-dots[hidden] { display: none; }
+[data-theme="dark"] .home-event-dots {
+  --dots-accent: #7dd3fc;
+  --dots-ink: #e3f4ff;
+  --dots-glass: rgba(14,34,51,.88);
+  --dots-edge: rgba(125,211,252,.38);
+  --dots-halo: rgba(0,0,0,.3);
+  --dots-shadow: rgba(0,0,0,.4);
+  --dots-done: #86efac;
+  --dots-done-ink: #0b1a2b;
+  --dots-progress: #fdba74;
+}
+.home-event-dots[data-state="scroll"], .home-event-dots[data-state="open"] { opacity: 1; }
+
+.home-event-dot {
+  display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+  height: var(--home-dot-row); min-width: 28px; padding: 0 4px; margin: 0; border: 0; border-radius: 14px;
+  background: none; color: var(--dots-ink); cursor: pointer; pointer-events: auto;
+  font: inherit; -webkit-tap-highlight-color: transparent;
+}
+.home-event-dot-mark {
+  flex: none; display: grid; place-items: center;
+  width: 10px; height: 10px; border-radius: 5px;
+  box-shadow: inset 0 0 0 2px var(--dots-ink), 0 0 0 2px var(--dots-halo); opacity: .7;
+  transition: height .25s, opacity .25s;
+}
+/* In progress: half filled. Completed: filled with a tick. */
+.home-event-dot[data-status="in-progress"] .home-event-dot-mark {
+  background: linear-gradient(to top, var(--dots-progress) 50%, transparent 50%);
+  box-shadow: inset 0 0 0 2px var(--dots-progress), 0 0 0 2px var(--dots-halo); opacity: 1;
+}
+.home-event-dot[data-status="completed"] .home-event-dot-mark {
+  background: var(--dots-done); box-shadow: 0 0 0 2px var(--dots-halo); opacity: 1;
+}
+.home-event-dot[data-status="completed"] .home-event-dot-mark::after {
+  content: ""; width: 5px; height: 3px; margin-top: -1px;
+  border: solid var(--dots-done-ink); border-width: 0 0 2px 2px; transform: rotate(-45deg);
+}
+.home-event-dot[data-disabled] .home-event-dot-mark { opacity: .35; }
+.home-event-dot[aria-current] .home-event-dot-mark { width: 12px; height: min(22px, calc(var(--home-dot-row) - 2px)); border-radius: 6px; opacity: 1; }
+.home-event-dot[aria-current][data-status="not-started"] .home-event-dot-mark { box-shadow: inset 0 0 0 2px var(--dots-accent), 0 0 0 2px var(--dots-halo); }
+
+.home-event-dot-name {
+  white-space: nowrap; font-size: 12.5px; font-weight: 600; line-height: 1;
+  padding: 4px 10px; border: 1px solid var(--dots-edge); border-radius: 999px;
+  background: var(--dots-glass); color: var(--dots-ink); box-shadow: 0 4px 12px var(--dots-shadow);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  opacity: 0; transform: translateX(6px); transition: opacity .25s, transform .25s; pointer-events: none;
+}
+.home-event-dot[aria-current] .home-event-dot-name { color: var(--dots-accent); border-color: var(--dots-accent); }
+/* While scrolling only the current event is named; on touch, hover or focus every event is named. */
+.home-event-dots[data-state="scroll"] .home-event-dot[aria-current] .home-event-dot-name,
+.home-event-dots[data-state="open"] .home-event-dot-name { opacity: 1; transform: none; }
+.home-event-dot:focus-visible { outline: 2px solid var(--dots-accent); outline-offset: 1px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .home-event-dots, .home-event-dots * { transition: none !important; }
+}
+@media print { .home-event-dots { display: none; } }
